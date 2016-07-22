@@ -1,0 +1,11 @@
+#!/usr/bin/zsh
+
+DOT_FILES_ROOT="$HOME/.dot"
+DOT_FILES_INIT="$DOT_FILES_ROOT/load.zsh"
+
+DOT_FILES_VERBOSE=2
+
+DOT_FILES_INCS_AVAILABLE="$DOT_FILES_ROOT/includes-available"
+DOT_FILES_INCS_ENABLED="$DOT_FILES_ROOT/includes-enabled"
+
+# EOF
