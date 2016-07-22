@@ -73,7 +73,7 @@ function _selfVersion()
 #
 
 if [[ ! ${_DOT_ZSH_OUTPUT_VERBOSITY+x} ]]; then
-  _DOT_ZSH_OUTPUT_VERBOSITY=10;
+  _DOT_ZSH_OUTPUT_VERBOSITY=0;
 fi
 
 
@@ -121,7 +121,11 @@ done
 _writeLog 1 "--> Performing final var clean-up pass before completion ..."
 
 unset _DOT_ZSH_OUTPUT_VERBOSITY
+unset _DOT_ZSH_OUTPUT_BUFFER
 unset _DOT_ZSH_NAME
+unset -f _indent
+unset -f _writeIncludeLog
+unset -f _writeWarning
 unset -f _writeLog
 unset -f _selfVersion
 
