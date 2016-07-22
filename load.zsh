@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -11,101 +11,119 @@
 
 
 #
-# Paths of this script
+# Define vars for script name, script dir path, and complete script file path.
 #
-_DOTZSH_LOADER_PATHNAME="$HOME/.dot"
-_DOTZSH_LOADER_FILENAME="`basename ${(%):-%x}`"
-_DOTZSH_LOADER_FILEPATH="$_DOTZSH_LOADER_PATHNAME/$_DOTZSH_LOADER_FILENAME"
-_DOTZSH_CONFIG_FILEPATHS=("$_DOTZSH_LOADER_PATHNAME/conf.zsh")
 
-
-#
-# Configure debug mode
-#
-if [[ ${_DOTZSH_DEBUG+x} ]]; then set -x; fi
+_DOT_ZSH_NAME=${(%):-%x}
+_DOT_ZSH_BASE=$(basename ${_DOT_ZSH_NAME})
+_DOT_ZSH_PATH=${HOME}/.dot-zsh
+_DOT_ZSH_CONFS_EN_PATH=${_DOT_ZSH_PATH}/confs-enabled
 
 
 #
-# Configure verbosity
+# Define simple logger function.
 #
-if [[ ! ${_DOTZSH_VERBOSITY+x} ]]; then _DOTZSH_VERBOSITY=0; fi
 
+function _writeLog()
+{
+  typeset -g buffer
+  local level="$1"; shift; local context="$USER/dot-zsh"; local message="$1"; shift
 
-#
-# The echo function sucks; this is better.
-#
-function zprintf() {
-  local -i verbosity
-  local context
-  local message
+  (( _DOT_ZSH_OUTPUT_VERBOSITY < level )) && return 0
+  buffer+=("$(printf '[%s:%s]  '${message} ${context} $(date +%s) "$@")")
 
-  verbosity=$1
-  context=$2
-  message=$3
-
-  shift ; shift ; shift
-
-  (( _DOTZSH_VERBOSITY < verbosity )) && return 0
-
-  printf "[$(date +%s):%02d:%s] ${message}\n" ${verbosity} ${context} "$@"
+  if [[ "${_DOT_ZSH_OUTPUT_BUFFER:=0}" -eq 0 ]]; then
+    for line in "${buffer[@]}"; do [[ "${line}" ]] && echo "$line"; done
+    buffer=()
+  fi
 }
+
+
+#
+# Define script version resolver function.
+#
+
+function _selfVersion()
+{
+  export version
+  local -a strategies=("--exact-match" "--always")
+
+  if [[ ${version:-x} == "x" ]]; then
+    for s in "${strategies[@]}"; do
+      version="$(cd ${_DOT_ZSH_PATH} && git describe --tag ${s} HEAD 2> /dev/null)"
+      [[ ${#version} -gt 4 ]] && break
+    done
+  fi
+
+  echo "${version}"
+}
+
+
+#
+# Set print mode to log to buffer until config is loaded.
+#
+
+#if [[ ! ${_DOT_ZSH_OUTPUT_BUFFER+x} ]]; then
+#  _DOT_ZSH_OUTPUT_BUFFER=-1
+#fi
+
+
+#
+# Assign verbosity if variable is unset.
+#
+
+if [[ ! ${_DOT_ZSH_OUTPUT_VERBOSITY+x} ]]; then
+  _DOT_ZSH_OUTPUT_VERBOSITY=10;
+fi
 
 
 #
 # Let the user know we've begun and provide some environment context
 #
-zprintf 2 "$_DOTZSH_LOADER_FILEPATH" 'Initializing "src-run/dot-zsh" ...'
-zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' LOADER  : %s' "$_DOTZSH_LOADER_FILENAME"
-zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' SHELL   : zsh'
-zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' VERSION : %s' "$ZSH_VERSION"
+
+_writeLog 2 '--> Resolved runtime configuration ...'
+_writeLog 2 '    --> SRC_VERS = "git@%s"' "$(_selfVersion)"
+_writeLog 2 '    --> SRC_ROOT = "%s"' "${_DOT_ZSH_NAME}"
+_writeLog 2 '    --> SEC_VERS = "%s"' "${ZSH_VERSION}"
+_writeLog 2 '    --> SEC_PATH = "%s"' "${SHELL}"
 
 
 #
-# Source configuration files.
+# Load our configuration files.
 #
-zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Loading configuration file(s) ..."
 
-for configFilePath in "${_DOTZSH_CONFIG_FILEPATHS[@]}"
-do
-  if [[ ! -f "$configFilePath" ]]
-  then
-    zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Aboring due to failed config include: $configFilePath"
-    exit -1
-  fi
+_writeLog 1 "--> Loading configuration file(s) from ${_DOT_ZSH_CONFS_EN_PATH} ..."
 
-  zprintf 1 "$_DOTZSH_LOADER_FILEPATH" " - $configFilePath"
-  source $configFilePath
+for inc in ${_DOT_ZSH_CONFS_EN_PATH}/??-???-*.(sh|z|zsh); do
+  [[ ! -f "${inc}" ]] && _writeLog 1 "    --> Failed to source $(basename ${inc})" && continue
+
+  _writeLog 1 "    --> Sourcing file $(basename ${inc})" && source "${inc}"
 done
 
 
 #
 # Source all enabled includes by int-prefix order.
 #
-zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Loading enabled include(s) ..."
 
-for includeFilePath in $DOT_FILES_INCS_ENABLED/???-*.zsh
-do
-  if [[ ! -f "$includeFilePath" ]]
-  then
-    zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Continuing despite failed include: $includeFilePath"
-    continue
-  fi
+_writeLog 1 "--> Loading enabled include files(s) from ${_DOT_ZSH_INCS_EN_PATH} ..."
 
-  zprintf 1 "$_DOTZSH_LOADER_FILEPATH" " - $includeFilePath"
-  source "$includeFilePath"
+for inc in ${_DOT_ZSH_INCS_EN_PATH}/??-???-*.(sh|z|zsh); do
+  [[ ! -f "${inc}" ]] && _writeLog 1 "    --> Failed to source $(basename ${inc})" && continue
+
+  _writeLog 1 "    --> Sourcing file $(basename ${inc})" && source "${inc}"
 done
 
-unset includeFilePath
-
 
 #
-# cleanup
+# Final cleanup.
 #
-zprintf 2 "$_DOTZSH_LOADER_FILEPATH" "Cleaning up temporary funcs/vars ..."
 
-unset _DOTZSH_LOADER_PATHNAME
-unset _DOTZSH_LOADER_FILENAME
-unset _DOTZSH_LOADER_FILEPATH
-unset _DOTZSH_CONFIG_FILEPATHS
+_writeLog 1 "--> Performing final var clean-up pass before completion ..."
+
+unset _DOT_ZSH_OUTPUT_VERBOSITY
+unset _DOT_ZSH_NAME
+unset -f _writeLog
+unset -f _selfVersion
+
 
 # EOF

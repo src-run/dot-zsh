@@ -11,51 +11,21 @@
 
 
 #
-# Temporary function to write error and exit.
-#
-function _writeErrorAndExit()
-{
-  local msg="$1"
-  local ret="${2:=-1}"
-
-  >&2 echo -en " [ Error ]\n $msg ...\n"
-  >&2 echo -en " Exiting dot-zsh configuration."
-
-  exit $ret;
-}
-
-#
-# Ensure run in compatible shell type.
+# Enable shell-debugging if $_DOT_ZSH_DEBUG is defined and non-zero.
 #
 
-if [[ "${SHELL}" -ne /bin/zsh ]] && [[ "${SHELL}" -ne /usr/bin/zsh ]]; then
-  _writeErrorAndExit "Unsupported shell found. This script can only be run from ZSH."
+if [[ ${_DOT_ZSH_DEBUG+x} ]] && [[ ${_DOT_ZSH_DEBUG} -ne 0 ]]; then
+  set -x;
 fi
 
 
 #
-# Ensure shell version can be determined.
+# Assign default verbose-level if $_DOT_ZSH_OUTPUT_VERBOSITY is not yet defined.
 #
 
-if [[ ! ${ZSH_VERSION+x} ]]; then
-  _writeErrorAndExit "The required global variable ZSH_VERSION is not undefined"
+if [[ ! ${_DOT_ZSH_OUTPUT_VERBOSITY+x} ]]; then
+  _DOT_ZSH_OUTPUT_VERBOSITY=0
 fi
-
-
-#
-# Ensure zsh version 5.x.x
-#
-
-if [[ ${ZSH_VERSION[0,1]} -ne 5 ]]; then
-  _writeErrorAndExit "Unsupported shell version found. This script can only be run from ZSH ~5"
-fi
-
-
-#
-# Cleanup after ourselves...
-#
-
-unset _writeErrorAndExit
 
 
 # EOF

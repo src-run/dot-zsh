@@ -11,10 +11,14 @@
 
 
 #
-# Include Travis shell helpers.
+# Include phpenv shell helpers.
 #
 
-for inc in "${HOME}/.travis/travis.sh"; do
+_writeIncludeLog 2 'Evaluating $(phpenv init -)'
+
+eval "$(phpenv init -)"
+
+for inc in "${HOME}/.phpenv/completions/rbenv.zsh"; do
   if [[ ! -f "${inc}" ]]; then
   	_writeWarning "Sourcing file failure ${inc}"
   else

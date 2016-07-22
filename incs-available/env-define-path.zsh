@@ -11,15 +11,13 @@
 
 
 #
-# Include Travis shell helpers.
+# Amend PATH.
 #
 
-for inc in "${HOME}/.travis/travis.sh"; do
-  if [[ ! -f "${inc}" ]]; then
-  	_writeWarning "Sourcing file failure ${inc}"
-  else
-    source "${inc}" && _writeIncludeLog 2 "Sourcing file ${inc}"
-  fi
+for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/.phpenv/bin"; do
+  PATH="${p}:${PATH}" && _writeIncludeLog 2 "Path addition ${p}"
 done
+
+export PATH
 
 # EOF

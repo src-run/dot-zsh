@@ -11,12 +11,11 @@
 
 
 #
-# Set default verbosity if variable is not yet defined.
+# Amend PATH.
 #
 
-if [[ ! ${_DOTZSH_VERBOSITY+x} ]]; then
-  _DOTZSH_VERBOSITY=0
-fi
-
+for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin"; do
+  PATH="${p}:${PATH}" && _writeIncludeLog 2 "Added to PATH ${p}"
+done
 
 # EOF

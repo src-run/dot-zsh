@@ -1,3 +1,3 @@
 # dot-zsh
 
-My dot file management and implementation repo.
+My dot file management scripts and implementation.

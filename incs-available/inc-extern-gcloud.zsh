@@ -11,10 +11,10 @@
 
 
 #
-# Include Travis shell helpers.
+# Include Google Cloud SDK shell helpers.
 #
 
-for inc in "${HOME}/.travis/travis.sh"; do
+for inc in "${HOME}/Downloads/google-cloud-sdk/path.zsh.inc" "${HOME}/Downloads/google-cloud-sdk/completion.zsh.inc"; do
   if [[ ! -f "${inc}" ]]; then
   	_writeWarning "Sourcing file failure ${inc}"
   else

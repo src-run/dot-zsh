@@ -14,24 +14,24 @@
 # Root dir path and loader filepath.
 #
 
-_DOTZSH_ROOT_PATHNAME="$HOME/.dot-zsh"
-_DOTZSH_LOAD_FILEPATH="$_DOTZSH_ROOT_PATHNAME/load.zsh"
+_DOT_ZSH_ROOT_PATH="${HOME}/.dot-zsh"
+_DOT_ZSH_LOAD_FILE="$_DOT_ZSH_ROOT_PATH/load.zsh"
 
 
 #
 # Dir path of available/enabled configuration paths.
 #
 
-_DOTZSH_CONFS_AV_PATHNAME="$_DOTZSH_ROOT_PATHNAME/confs-available"
-_DOTZSH_CONFS_EN_PATHNAME="$_DOTZSH_ROOT_PATHNAME/confs-enabled"
+_DOT_ZSH_CONFS_AV_PATH="$_DOT_ZSH_ROOT_PATH/confs-available"
+_DOT_ZSH_CONFS_EN_PATH="$_DOT_ZSH_ROOT_PATH/confs-enabled"
 
 
 #
 # Dir path of avail/enable include paths.
 #
 
-_DOTZSH_INCLUDES_AV_PATHNAME="$_DOTZSH_ROOT_PATHNAME/incs-available"
-_DOTZSH_INCLUDES_EN_PATHNAME="$_DOTZSH_ROOT_PATHNAME/incs-enabled"
+_DOT_ZSH_INCS_AV_PATH="$_DOT_ZSH_ROOT_PATH/incs-available"
+_DOT_ZSH_INCS_EN_PATH="$_DOT_ZSH_ROOT_PATH/incs-enabled"
 
 
 # EOF
