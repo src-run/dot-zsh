@@ -1,10 +1,18 @@
 #!/usr/bin/zsh
 
+#
+# This file is part of the `src-run/dot-zsh` project.
+#
+# (c) Rob Frawley 2nd <rmf@src.run>
+#
+# For the full copyright and license information, view the LICENSE.md
+# file distributed with this source code.
+#
+
 
 #
 # Paths of this script
 #
-
 _DOTZSH_LOADER_PATHNAME="$HOME/.dot"
 _DOTZSH_LOADER_FILENAME="`basename ${(%):-%x}`"
 _DOTZSH_LOADER_FILEPATH="$_DOTZSH_LOADER_PATHNAME/$_DOTZSH_LOADER_FILENAME"
@@ -14,21 +22,18 @@ _DOTZSH_CONFIG_FILEPATHS=("$_DOTZSH_LOADER_PATHNAME/conf.zsh")
 #
 # Configure debug mode
 #
-
 if [[ ${_DOTZSH_DEBUG+x} ]]; then set -x; fi
 
 
 #
 # Configure verbosity
 #
-
 if [[ ! ${_DOTZSH_VERBOSITY+x} ]]; then _DOTZSH_VERBOSITY=0; fi
 
 
 #
 # The echo function sucks; this is better.
 #
-
 function zprintf() {
   local -i verbosity
   local context
@@ -47,9 +52,8 @@ function zprintf() {
 
 
 #
-# Init
+# Let the user know we've begun and provide some environment context
 #
-
 zprintf 2 "$_DOTZSH_LOADER_FILEPATH" 'Initializing "src-run/dot-zsh" ...'
 zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' LOADER  : %s' "$_DOTZSH_LOADER_FILENAME"
 zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' SHELL   : zsh'
@@ -59,7 +63,6 @@ zprintf 2 "$_DOTZSH_LOADER_FILEPATH" ' VERSION : %s' "$ZSH_VERSION"
 #
 # Source configuration files.
 #
-
 zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Loading configuration file(s) ..."
 
 for configFilePath in "${_DOTZSH_CONFIG_FILEPATHS[@]}"
@@ -78,7 +81,6 @@ done
 #
 # Source all enabled includes by int-prefix order.
 #
-
 zprintf 1 "$_DOTZSH_LOADER_FILEPATH" "Loading enabled include(s) ..."
 
 for includeFilePath in $DOT_FILES_INCS_ENABLED/???-*.zsh
@@ -99,7 +101,6 @@ unset includeFilePath
 #
 # cleanup
 #
-
 zprintf 2 "$_DOTZSH_LOADER_FILEPATH" "Cleaning up temporary funcs/vars ..."
 
 unset _DOTZSH_LOADER_PATHNAME
