@@ -14,22 +14,21 @@
 # Define out alias list and optional options
 #
 
-typeset -A _DOT_ZSH_ALIAS_LIST
-typeset -A _DOT_ZSH_ALIAS_OPTS
+typeset -A D_ZSH_ALIAS_LIST
+typeset -A D_ZSH_ALIAS_OPTS
 
-_DOT_ZSH_ALIAS_LIST[obes]="172.16.0.210"
-_DOT_ZSH_ALIAS_LIST[sr]="src.run"
-_DOT_ZSH_ALIAS_LIST[rmf-001]="104.154.65.106"
-_DOT_ZSH_ALIAS_LIST[obes-remote]="108.2.193.83"
-_DOT_ZSH_ALIAS_OPTS[obes-remote]="-p 49716"
+D_ZSH_ALIAS_LIST[obes]="172.16.0.210"
+D_ZSH_ALIAS_LIST[sr]="src.run"
+D_ZSH_ALIAS_LIST[rmf-001]="104.154.65.106"
+D_ZSH_ALIAS_LIST[obes-remote]="108.2.193.83"
+D_ZSH_ALIAS_OPTS[obes-remote]="-p 49716"
 
 
 #
 # Define function to setup and assign the aliases via the configured variables
 #
 
-function _DOT_ZSH_setup_aliases()
-{
+function _dotZshAliasSSH() {
   local host
   local name
   local name_full
@@ -37,14 +36,14 @@ function _DOT_ZSH_setup_aliases()
   local cmd
   local template="\\n #\\n # [ SSH Alias Configuration Resolver ]\\n #\\n # - NAME: "%s"\\n # - USER: "%s"\\n # - HOST: "%s"\\n # - OPTS: "%s"\\n #\\n # Establishing connection...\\n #\\n\\n ---\\n"
 
-  for k in "${(@k)_DOT_ZSH_ALIAS_LIST}"; do
+  for k in "${(@k)D_ZSH_ALIAS_LIST}"; do
     name="${k}"
-    host="${_DOT_ZSH_ALIAS_LIST[$k]}"
+    host="${D_ZSH_ALIAS_LIST[$k]}"
     cmd="${USER}@${host}"
     opt=""
 
-    if [[ "${_DOT_ZSH_ALIAS_OPTS[$name]}" != "" ]]; then
-        opt="${_DOT_ZSH_ALIAS_OPTS[$name]}"
+    if [[ "${D_ZSH_ALIAS_OPTS[$name]}" != "" ]]; then
+        opt="${D_ZSH_ALIAS_OPTS[$name]}"
     fi
 
     if [[ "$opt" == "" ]]; then
@@ -63,7 +62,7 @@ function _DOT_ZSH_setup_aliases()
         name_full="${pre}${name}"
         
         alias $name_full="clear ; sleep .33 ; echo '$(printf $template "${name}" "$USER" "${host}" "${opt_str}")' ; echo '' ; ssh $opt$cmd"
-        _writeIncludeLog 3 "Defined alias ${name_full}=\"ssh ${opt}${cmd}\""
+        _incLog 2 3 "Alias defined '${name_full}=\"ssh ${opt}${cmd}\"'"
       fi
     done
   done
@@ -74,15 +73,7 @@ function _DOT_ZSH_setup_aliases()
 # Do it!
 #
 
-_DOT_ZSH_setup_aliases
+_dotZshAliasSSH
 
-
-#
-# Clean up our left-over vars
-#
-
-unset _DOT_ZSH_setup_aliases
-unset _DOT_ZSH_ALIAS_LIST
-unset _DOT_ZSH_ALIAS_OPTS
 
 # EOF

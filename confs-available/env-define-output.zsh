@@ -14,8 +14,8 @@
 # Set default verbosity if variable is not yet defined.
 #
 
-if [[ ! ${_DOT_ZSH_OUTPUT_VERBOSITY+x} ]]; then
-  _DOT_ZSH_OUTPUT_VERBOSITY=0
+if [[ ! ${D_ZSH_OUTPUT_VERBOSITY+x} ]]; then
+  D_ZSH_OUTPUT_VERBOSITY=0
 fi
 
 
@@ -23,8 +23,8 @@ fi
 # Disable buffering and start outputing now that we have our config.
 #
 
-if [[ ${_DOT_ZSH_OUTPUT_BUFFER+x} ]] && [[ ${_DOT_ZSH_OUTPUT_BUFFER} -eq -1 ]]; then
-  unset _DOT_ZSH_OUTPUT_BUFFER
+if [[ ${D_ZSH_OUTPUT_BUFFER+x} ]] && [[ ${D_ZSH_OUTPUT_BUFFER} -eq -1 ]]; then
+  unset D_ZSH_OUTPUT_BUFFER
 fi
 
 

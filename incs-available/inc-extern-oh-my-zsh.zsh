@@ -11,11 +11,9 @@
 
 
 #
-# Amend PATH.
+# Define out alias list and optional options
 #
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin"; do
-  PATH="${p}:${PATH}" && _incLog 2 2 "Added to PATH ${p}"
-done
+DEFAULT_USER=$USER
 
 # EOF

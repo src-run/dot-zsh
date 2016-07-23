@@ -10,12 +10,7 @@
 #
 
 
-#
-# Amend PATH.
-#
+SSH_KEY_PATH="~/.ssh/id_rsa"
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin"; do
-  PATH="${p}:${PATH}" && _incLog 2 2 "Added to PATH ${p}"
-done
 
 # EOF

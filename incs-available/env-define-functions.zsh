@@ -14,8 +14,7 @@
 # String padding routine.
 #
 
-function _indent()
-{
+function _indent() {
   local depth="${1:-2}" ; local padding
 
   for i in `seq 1 ${depth}`; do padding="    ${padding}"; done
@@ -27,11 +26,10 @@ function _indent()
 # Define simple logger for include files.
 #
 
-function _writeIncludeLog()
-{
-  local l="$1" ; local m="$2" ; shift ; shift
+function _incLog() {
+  local i="$1" ; shift ; local l="$1" ; shift ; local m="$1" ; shift
 
-  _writeLog "${l}" "$(_indent 2)--> ${m}" "$@"
+  _topLog "${l}" "$(_indent ${i})--> ${m}" "$@"
 }
 
 
@@ -39,8 +37,7 @@ function _writeIncludeLog()
 # Define simple log warning.
 #
 
-function _writeWarning()
-{
+function _warning() {
   local m="$1"; shift ; local w="$(printf ${m} "$@")"
 
   >&2 echo -en "\n!!\n!! WARNING\n!!"

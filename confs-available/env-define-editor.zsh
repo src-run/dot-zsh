@@ -11,11 +11,14 @@
 
 
 #
-# Amend PATH.
+# Set our default editor depending on connection type.
 #
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin"; do
-  PATH="${p}:${PATH}" && _incLog 2 2 "Added to PATH ${p}"
-done
+if [[ -n $SSH_CONNECTION ]]; then
+  EDITOR='vi'
+else
+  EDITOR='subl'
+fi
+
 
 # EOF

@@ -15,9 +15,7 @@
 #
 
 for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/.phpenv/bin"; do
-  PATH="${p}:${PATH}" && _writeIncludeLog 2 "Path addition ${p}"
+  PATH="${p}:${PATH}" && _incLog 2 2 "Prefixed 'PATH' with ${p}"
 done
-
-export PATH
 
 # EOF

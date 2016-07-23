@@ -11,20 +11,20 @@
 
 
 #
-# Enable shell-debugging if $_DOT_ZSH_DEBUG is defined and non-zero.
+# Enable shell-debugging if $D_ZSH_DEBUG is defined and non-zero.
 #
 
-if [[ ${_DOT_ZSH_DEBUG+x} ]] && [[ ${_DOT_ZSH_DEBUG} -ne 0 ]]; then
+if [[ ${D_ZSH_DEBUG+x} ]] && [[ ${D_ZSH_DEBUG} -ne 0 ]]; then
   set -x;
 fi
 
 
 #
-# Assign default verbose-level if $_DOT_ZSH_OUTPUT_VERBOSITY is not yet defined.
+# Assign default verbose-level if $D_ZSH_OUTPUT_VERBOSITY is not yet defined.
 #
 
-if [[ ! ${_DOT_ZSH_OUTPUT_VERBOSITY+x} ]]; then
-  _DOT_ZSH_OUTPUT_VERBOSITY=0
+if [[ ! ${D_ZSH_OUTPUT_VERBOSITY+x} ]]; then
+  D_ZSH_OUTPUT_VERBOSITY=0
 fi
 
 

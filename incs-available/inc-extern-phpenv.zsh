@@ -14,15 +14,15 @@
 # Include phpenv shell helpers.
 #
 
-_writeIncludeLog 2 'Evaluating $(phpenv init -)'
+_incLog 2 2 "Evaluating 'phpenv init -'"
 
 eval "$(phpenv init -)"
 
 for inc in "${HOME}/.phpenv/completions/rbenv.zsh"; do
   if [[ ! -f "${inc}" ]]; then
-  	_writeWarning "Sourcing file failure ${inc}"
+  	_warning "Sourcing file failure ${inc}"
   else
-    source "${inc}" && _writeIncludeLog 2 "Sourcing file ${inc}"
+    source "${inc}" && _incLog 2 2 "Sourcing file ${inc}"
   fi
 done
 

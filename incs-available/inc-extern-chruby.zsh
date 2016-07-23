@@ -16,9 +16,9 @@
 
 for inc in "/usr/local/share/chruby/chruby.sh" "/usr/local/share/chruby/auto.sh"; do
   if [[ ! -f "${inc}" ]]; then
-  	_writeWarning "Sourcing file failure ${inc}"
+  	_warning "Sourcing file failure ${inc}"
   else
-    source "${inc}" && _writeIncludeLog 2 "Sourcing file ${inc}"
+    source "${inc}" && _incLog 2 2 "Sourcing file ${inc}"
   fi
 done
 
