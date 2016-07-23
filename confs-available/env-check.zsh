@@ -24,7 +24,7 @@ fi
 #
 
 if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-  D_ZSH_STIO_VLEV=0
+  D_ZSH_STIO_VLEV=-5
 fi
 
 

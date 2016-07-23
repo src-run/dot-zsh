@@ -10,7 +10,18 @@
 #
 
 
-D_ZSH_LOGS_PATH="./log.out"
+#
+# Set log file path.
+#
+
+D_ZSH_LOGS_PATH="$HOME/.dot-zsh.log"
+
+
+#
+# Remove prior log file and start fresh if over 1000 lines.
+#
+
+[[ -f "${D_ZSH_LOGS_PATH}" ]] && [[ "$(wc -l "${D_ZSH_LOGS_PATH}" | cut -d' ' -f1)" -gt 1000 ]] && rm "${D_ZSH_LOGS_PATH}"
 
 
 #
@@ -18,7 +29,7 @@ D_ZSH_LOGS_PATH="./log.out"
 #
 
 if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-  D_ZSH_STIO_VLEV=0
+  D_ZSH_STIO_VLEV=-5
 fi
 
 
@@ -26,7 +37,7 @@ fi
 # Disable buffering and start outputing now that we have our config.
 #
 
-if [[ ${D_ZSH_STIO_BUFF+x} ]] && [[ ${D_ZSH_STIO_BUFF} -eq -1 ]]; then
+if [[ ${D_ZSH_STIO_BUFF} -eq -1 ]]; then
   unset D_ZSH_STIO_BUFF
 fi
 

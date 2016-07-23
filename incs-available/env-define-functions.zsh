@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 #
-# This file is part of the `src-run/dot-zsh` project.
+# This file is part of the `sr`-run/dot-zsh` project.
 #
 # (c) Rob Frawley 2nd <rmf@src.run>
 #
@@ -38,17 +38,18 @@ function _incLog() {
 #
 
 function _warning() {
-  typeset -g buffer_sout
-  typeset -g buffer_flog
+  typeset -g b_warn_sout
 
+  local d=$(date +%s)
+  local c="!!WARNING!!"
+  local l=2
   local m="$1" ; shift
   local w="$(printf ${m} "$@")"
 
-  buffer_flog+=("${w}")
-  buffer_sout+=("${w}")
+  b_warn_sout+=("${w}")
 
   if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
-    for line in "${buffer_sout[@]}"; do
+    for line in "${b_warn_sout[@]}"; do
       if [[ ! ${line} ]]; then
       	continue;
       fi
@@ -58,20 +59,10 @@ function _warning() {
       >&2 echo -en "!!\n\n"
     done
 
-    buffer_sout=()
+    b_warn_sout=()
   fi
-
-  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]] && [[ ${D_ZSH_LOGS_PATH:-x} ]] && [[ "${#buffer_flog}" -gt 0 ]]; then
-    for line in "${buffer_flog[@]}"; do
-      if [[ ! ${line} ]]; then
-      	continue;
-      fi
-
-      _wrtLog "[!!WARNING!!:$(date +%s)] $(_indent 2)> ${line}$(_indent 4)# <-- [!!WARNING!!:$(date +%s)]"
-    done
-
-    buffer_flog=()
-  fi
+  
+  _wrtLog "${d}" "${l}" "${c}" "$(_indent ${l})--> ${m}"
 }
 
 # EOF

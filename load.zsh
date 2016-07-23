@@ -31,18 +31,23 @@ D_ZSH_CFG_ENABL_PATH=${D_ZSH_PATH}/confs-enabled
 #
 
 function _wrtLog() {
-  local buffer="${1}" ; local m ; local p
+  typeset -g b_flog
 
-  if [[ ! ${D_ZSH_LOGS_PATH:-x} ]]; then
-    return
+  local d="${1}" ; shift
+  local l="${1}" ; shift
+  local c="${1}" ; shift
+  local m="${1}" ; shift
+  local p="$(printf '[%s:%s]' ${c} ${d})"
+
+  b_flog+=("${p}  $(printf ${m} "$@")")
+
+  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]] && [[ ${D_ZSH_LOGS_PATH:-x} ]] && [[ "${#b_flog}" -gt 0 ]]; then
+    for b in "${b_flog[@]}"; do
+      echo "${b}" | tee -a "${D_ZSH_LOGS_PATH}" &> /dev/null
+    done
+
+    b_flog=()
   fi
-
-  for b in "${buffer[@]}"; do
-    m=$(echo ${b} | cut -d'>' -f2 | sed 's/[\.][\.][\.][\.][\.]*/=/g')
-    p=$(echo ${b} | grep -o -P '^\[[^\]]+\]\s+' | sed 's/  / /g' )
-
-    echo ${p:0:-1}${m} >> ${D_ZSH_LOGS_PATH}
-  done
 }
 
 
@@ -51,27 +56,27 @@ function _wrtLog() {
 #
 
 function _topLog() {
-  typeset -g buffer_sout
-  typeset -g buffer_flog
+  typeset -g b_top_sout
 
-  local level="$1"   ; shift
-  local message="$1" ; shift
-  local tmp=$(printf '[%s:%s]  '${message} $USER/dot-zsh $(date +%s) "$@")
+  local d=$(date +%s)
+  local c="$USER/dot-zsh"
+  local l="${1}" ; shift
+  local m="$(echo ${1} | sed 's/[ ]*$//g')" ; shift
 
-  buffer_flog+=("${tmp}")
-  (( D_ZSH_STIO_VLEV < level )) || buffer_sout+=("${tmp}")
-
-  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
-    for line in "${buffer_sout[@]}"; do [[ "${line}" ]] && echo "$line"; done
-    buffer_sout=()
+  if [[ ! "${m}" ]]; then
+    return
   fi
 
-  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]] && [[ ${D_ZSH_LOGS_PATH:-x} ]]; then
-    if [[ "${#buffer_flog}" -gt 0 ]]; then
-      _wrtLog "${buffer_flog}"
-    fi
+  _wrtLog "${d}" "${l}" "${c}" "${m}" "$@"
 
-    buffer_flog=()
+  (( D_ZSH_STIO_VLEV < l )) || b_top_sout+=("$(printf '[%s:%s]  '${m} ${c} ${d} "$@")")
+
+  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
+    for line in "${b_top_sout[@]}"; do
+      [[ "${line}" ]] && echo "$line"
+    done
+    
+    b_top_sout=()
   fi
 }
 
@@ -178,9 +183,9 @@ function _sysZshPath() {
 # Set print mode to log to buffer until config is loaded.
 #
 
-#if [[ ! ${D_ZSH_STIO_BUFF+x} ]]; then
-#  D_ZSH_STIO_BUFF=-1
-#fi
+if [[ ! ${D_ZSH_STIO_BUFF+x} ]]; then
+  D_ZSH_STIO_BUFF=-1
+fi
 
 
 #
@@ -188,7 +193,7 @@ function _sysZshPath() {
 #
 
 if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-  D_ZSH_STIO_VLEV=10;
+  D_ZSH_STIO_VLEV=-5;
 fi
 
 
@@ -237,8 +242,8 @@ done
 
 _topLog 1 "--> Performing final cleanup pass ..."
 
-D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_REPO D_ZSH_STIO_VLEV D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT)
-D_ZSH_UNSET_FS=(_indent _topLog _incLog _warning _dotZshWhos _dotZshRepo _dotZshHash _dotZshLoad _dotZshRepoByRemote _dotZshRepoByPath _dotZshAliasSSH)
+D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_REPO D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT)
+D_ZSH_UNSET_FS=(_dotZshWhos _dotZshRepo _dotZshHash _dotZshLoad _dotZshRepoByRemote _dotZshRepoByPath _dotZshAliasSSH _indent _topLog _incLog _warning)
 
 _incLog 1 4 "Unsetting global variables defined by this script ..."
 for v in ${D_ZSH_UNSET_VS[@]}; do _incLog 2 4 "Variable unset '${v}'"; done
@@ -248,5 +253,4 @@ for f in ${D_ZSH_UNSET_FS[@]}; do _incLog 2 4 "Function unset '${f}'"; done
 for v in ${D_ZSH_UNSET_VS[@]}; do eval "unset ${v}"; done
 for f in ${D_ZSH_UNSET_FS[@]}; do eval "unset -f ${f}"; done
 
-
-# EOF
+[[ ${D_ZSH_STIO_VLEV:--5} == -5 ]] && echo ' OKAY: `src-run/dot-zsh` loaded'
