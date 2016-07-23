@@ -20,11 +20,11 @@ fi
 
 
 #
-# Assign default verbose-level if $D_ZSH_OUTPUT_VERBOSITY is not yet defined.
+# Assign default verbose-level if $D_ZSH_STIO_VLEV is not yet defined.
 #
 
-if [[ ! ${D_ZSH_OUTPUT_VERBOSITY+x} ]]; then
-  D_ZSH_OUTPUT_VERBOSITY=0
+if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
+  D_ZSH_STIO_VLEV=0
 fi
 
 

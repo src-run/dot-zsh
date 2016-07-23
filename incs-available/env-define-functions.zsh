@@ -38,11 +38,40 @@ function _incLog() {
 #
 
 function _warning() {
-  local m="$1"; shift ; local w="$(printf ${m} "$@")"
+  typeset -g buffer_sout
+  typeset -g buffer_flog
 
-  >&2 echo -en "\n!!\n!! WARNING\n!!"
-  >&2 echo " Message: \"${w}\""
-  >&2 echo -en "!!\n\n"
+  local m="$1" ; shift
+  local w="$(printf ${m} "$@")"
+
+  buffer_flog+=("${w}")
+  buffer_sout+=("${w}")
+
+  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
+    for line in "${buffer_sout[@]}"; do
+      if [[ ! ${line} ]]; then
+      	continue;
+      fi
+
+      >&2 echo -en "\n!!\n!! WARNING\n!!"
+      >&2 echo " Message: \"${line}\""
+      >&2 echo -en "!!\n\n"
+    done
+
+    buffer_sout=()
+  fi
+
+  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]] && [[ ${D_ZSH_LOGS_PATH:-x} ]] && [[ "${#buffer_flog}" -gt 0 ]]; then
+    for line in "${buffer_flog[@]}"; do
+      if [[ ! ${line} ]]; then
+      	continue;
+      fi
+
+      _wrtLog "[!!WARNING!!:$(date +%s)] $(_indent 2)> ${line}$(_indent 4)# <-- [!!WARNING!!:$(date +%s)]"
+    done
+
+    buffer_flog=()
+  fi
 }
 
 # EOF

@@ -14,14 +14,14 @@
 # Define out alias list and optional options
 #
 
-typeset -A D_ZSH_ALIAS_LIST
-typeset -A D_ZSH_ALIAS_OPTS
+typeset -A D_ZSH_LIST_ALIAS
+typeset -A D_ZSH_OPTS_ALIAS
 
-D_ZSH_ALIAS_LIST[obes]="172.16.0.210"
-D_ZSH_ALIAS_LIST[sr]="src.run"
-D_ZSH_ALIAS_LIST[rmf-001]="104.154.65.106"
-D_ZSH_ALIAS_LIST[obes-remote]="108.2.193.83"
-D_ZSH_ALIAS_OPTS[obes-remote]="-p 49716"
+D_ZSH_LIST_ALIAS[obes]="172.16.0.210"
+D_ZSH_LIST_ALIAS[sr]="src.run"
+D_ZSH_LIST_ALIAS[rmf-001]="104.154.65.106"
+D_ZSH_LIST_ALIAS[obes-remote]="108.2.193.83"
+D_ZSH_OPTS_ALIAS[obes-remote]="-p 49716"
 
 
 #
@@ -36,14 +36,14 @@ function _dotZshAliasSSH() {
   local cmd
   local template="\\n #\\n # [ SSH Alias Configuration Resolver ]\\n #\\n # - NAME: "%s"\\n # - USER: "%s"\\n # - HOST: "%s"\\n # - OPTS: "%s"\\n #\\n # Establishing connection...\\n #\\n\\n ---\\n"
 
-  for k in "${(@k)D_ZSH_ALIAS_LIST}"; do
+  for k in "${(@k)D_ZSH_LIST_ALIAS}"; do
     name="${k}"
-    host="${D_ZSH_ALIAS_LIST[$k]}"
+    host="${D_ZSH_LIST_ALIAS[$k]}"
     cmd="${USER}@${host}"
     opt=""
 
-    if [[ "${D_ZSH_ALIAS_OPTS[$name]}" != "" ]]; then
-        opt="${D_ZSH_ALIAS_OPTS[$name]}"
+    if [[ "${D_ZSH_OPTS_ALIAS[$name]}" != "" ]]; then
+        opt="${D_ZSH_OPTS_ALIAS[$name]}"
     fi
 
     if [[ "$opt" == "" ]]; then

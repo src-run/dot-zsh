@@ -10,12 +10,15 @@
 #
 
 
+D_ZSH_LOGS_PATH="./log.out"
+
+
 #
 # Set default verbosity if variable is not yet defined.
 #
 
-if [[ ! ${D_ZSH_OUTPUT_VERBOSITY+x} ]]; then
-  D_ZSH_OUTPUT_VERBOSITY=0
+if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
+  D_ZSH_STIO_VLEV=0
 fi
 
 
@@ -23,8 +26,8 @@ fi
 # Disable buffering and start outputing now that we have our config.
 #
 
-if [[ ${D_ZSH_OUTPUT_BUFFER+x} ]] && [[ ${D_ZSH_OUTPUT_BUFFER} -eq -1 ]]; then
-  unset D_ZSH_OUTPUT_BUFFER
+if [[ ${D_ZSH_STIO_BUFF+x} ]] && [[ ${D_ZSH_STIO_BUFF} -eq -1 ]]; then
+  unset D_ZSH_STIO_BUFF
 fi
 
 

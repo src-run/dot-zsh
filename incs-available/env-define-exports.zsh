@@ -14,16 +14,16 @@
 # Define our list of variable to export.
 #
 
-typeset -a D_ZSH_EXPORTS
+typeset -a D_ZSH_LIST_EXPORT
 
-D_ZSH_EXPORTS=(ZSH PATH LANG EDITOR SSH_KEY_PATH)
+D_ZSH_LIST_EXPORT=(ZSH PATH LANG EDITOR SSH_KEY_PATH)
 
 
 #
 # Loop though exports array and export 'em.
 #
 
-for e in "${D_ZSH_EXPORTS[@]}"; do
+for e in "${D_ZSH_LIST_EXPORT[@]}"; do
   export "${e}" && _incLog 2 3 "Variable export '${e}'"
 done
 
