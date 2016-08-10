@@ -119,7 +119,7 @@ main()
   out_instructions
 }
 
-git clone git@github.com:src-run/dot-zsh.git $HOME/.dot-zsh
+git clone https://github.com/src-run/dot-zsh.git $HOME/.dot-zsh
 git submodule update --init
 source $HOME/.dot-zsh/bright/bright.bash
 
