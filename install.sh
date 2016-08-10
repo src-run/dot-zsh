@@ -115,7 +115,7 @@ main()
   out_instructions
   out_instructions " # Run the following to enable ZSH"
   out_instructions
-  out_instructions " chsh -s /bin/csh"
+  out_instructions " chsh -s /bin/zsh"
   out_instructions
 }
 
