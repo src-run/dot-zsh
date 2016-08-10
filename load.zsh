@@ -11,6 +11,21 @@
 
 
 #
+# Get the start time so we can profile performnce start to end.
+#
+
+D_ZSH_TIME_START=$(date +%s%N | cut -b1-13)
+
+
+#
+# Enable shell-debugging and/or profiler from generic env variables.
+#
+
+if [[ ${ZSH_DEBUG+x}   ]]; then; set -x;        fi
+if [[ ${ZSH_PROFILE+x} ]]; then; ZSH_PROFILE=1; fi
+
+
+#
 # Hard-code our LANG.
 #
 LANG=en_US.UTF-8
@@ -179,6 +194,118 @@ function _sysZshPath() {
 }
 
 
+function _profGetPrecTime()
+{
+  echo $(date +%s%N | cut -b1-13)
+}
+
+
+function _profClear()
+{
+  typeset -Ag _PROF
+  typeset -Ag _PROF_S
+  typeset -Ag _PROF_E
+  local name="${1:-main}"
+
+  if [[ ${_PROF[$name]} ]]; then
+    unset _PROF[$name]
+  fi
+
+  if [[ ${_PROF_S[$name]} ]]; then
+    unset _PROF_S[$name]
+  fi
+
+  if [[ ${_PROF_E[$name]} ]]; then
+    unset _PROF_E[$name]
+  fi
+}
+
+function _profStart()
+{
+  typeset -Ag _PROF
+  typeset -Ag _PROF_S
+  typeset -Ag _PROF_E
+  local name="${1:-main}"
+
+  if [[ ${_PROF[$name]} ]]; then
+    unset _PROF[$name]
+  fi
+
+  if [[ ${_PROF_E[$name]} ]]; then
+    unset _PROF_E[$name]
+  fi
+
+  _PROF_S[$name]=$(_profGetPrecTime)
+}
+
+function _profEnd()
+{
+  typeset -Ag _PROF_S
+  typeset -Ag _PROF_E
+  local name="${1:-main}"
+
+  if [[ ! ${_PROF_S[$name]} ]]; then
+    _profClear ${name}
+    return
+  fi
+
+  _PROF_E[$name]=$(_profGetPrecTime)
+}
+
+function _profDiff()
+{
+  typeset -Ag _PROF_S
+  typeset -Ag _PROF_E
+  typeset -Ag _PROF_D
+  local name="${1:-main}"
+  local s
+  local e
+
+  if [[ ${_PROF[$name]} ]]; then
+    echo ${_PROF[$name]}
+    return
+  fi
+
+  if [[ ! ${_PROF_S[$name]} ]] || [[ ! ${_PROF_E[$name]} ]]; then
+    _profClear ${name}
+    return
+  fi
+
+  s=${_PROF_S[$name]}
+  e=${_PROF_E[$name]}
+
+  ${_PROF_D[$name]}=$(bc <<< "scale=4; ( ${e} - ${s} ) / 1000")
+
+  echo ${_PROF_D[$name]}
+}
+
+#
+# Get seconds since this script started.
+#
+
+function _profilerDiff() {
+  local beg="${1}"
+  local now=$(date +%s%N | cut -b1-13)
+
+  echo $(bc <<< "scale=4;(${now}-${beg})/1000")
+}
+
+
+#
+# Define fancy complete message display function.
+#
+
+function _dotZshWriteFancyComplete() {
+  local columns=$(tput cols)
+  local retStat='[ ok ]'
+  local message="Loading ZSH configuration for %s@%s (took %s secs) ... "
+  
+  message="$(printf "${message}" "$USER" "$(hostname -s)" "$(_profilerDiff ${D_ZSH_TIME_START})")$(tput setaf 2) ${retStat}"
+
+  tput sgr0 && printf '%*s%s\n' $columns+5 "${message}" && tput sgr0
+}
+
+
 #
 # Set print mode to log to buffer until config is loaded.
 #
@@ -242,7 +369,7 @@ done
 
 _topLog 1 "--> Performing final cleanup pass ..."
 
-D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_REPO D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT)
+D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_REPO D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT D_ZSH_LIST_ALIAS_NAME D_ZSH_LIST_ALIAS_CMDS)
 D_ZSH_UNSET_FS=(_dotZshWhos _dotZshRepo _dotZshHash _dotZshLoad _dotZshRepoByRemote _dotZshRepoByPath _dotZshAliasSSH _indent _topLog _incLog _warning)
 
 _incLog 1 4 "Unsetting global variables defined by this script ..."
@@ -253,4 +380,6 @@ for f in ${D_ZSH_UNSET_FS[@]}; do _incLog 2 4 "Function unset '${f}'"; done
 for v in ${D_ZSH_UNSET_VS[@]}; do eval "unset ${v}"; done
 for f in ${D_ZSH_UNSET_FS[@]}; do eval "unset -f ${f}"; done
 
-[[ ${D_ZSH_STIO_VLEV:--5} == -5 ]] && echo ' OKAY: `src-run/dot-zsh` loaded'
+[[ ${D_ZSH_STIO_VLEV:--5} == -5 ]] && _dotZshWriteFancyComplete
+
+

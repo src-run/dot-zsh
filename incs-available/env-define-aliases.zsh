@@ -22,6 +22,8 @@ D_ZSH_LIST_ALIAS[sr]="src.run"
 D_ZSH_LIST_ALIAS[rmf-001]="104.154.65.106"
 D_ZSH_LIST_ALIAS[obes-remote]="108.2.193.83"
 D_ZSH_OPTS_ALIAS[obes-remote]="-p 49716"
+D_ZSH_LIST_ALIAS[srl-01]="srl-01.servers.src.run"
+D_ZSH_LIST_ALIAS[sp]="silverpapillon.clients.src.run"
 
 
 #
@@ -74,6 +76,28 @@ function _dotZshAliasSSH() {
 #
 
 _dotZshAliasSSH
+
+
+#
+# Simple aliases
+#
+
+unset D_ZSH_LIST_ALIAS
+typeset -A D_ZSH_LIST_ALIAS
+
+D_ZSH_LIST_ALIAS[ccat]='pygmentize -g'
+D_ZSH_LIST_ALIAS[vcat]='pygmentize -g -O style=colorful,linenos=1'
+D_ZSH_LIST_ALIAS[gpg]='gpg2'
+
+
+#
+# Apply simple aliases.
+#
+
+for n in "${(@k)D_ZSH_LIST_ALIAS}"; do
+  alias $n="${D_ZSH_LIST_ALIAS[$n]}"
+  _incLog 2 3 "Alias defined '${n}=\"${D_ZSH_LIST_ALIAS[$n]}\"'"
+done
 
 
 # EOF
