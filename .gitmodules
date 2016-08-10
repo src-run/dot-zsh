@@ -1,3 +1,6 @@
 [submodule "fonts"]
 	path = fonts
 	url = https://github.com/powerline/fonts.git
+[submodule "bright"]
+	path = bright
+	url = https://github.com/src-run/bright-library.git
