@@ -16,12 +16,14 @@
 
 typeset -A D_ZSH_LIST_ALIAS
 typeset -A D_ZSH_OPTS_ALIAS
+typeset -A D_ZSH_USER_ALIAS
 
-D_ZSH_LIST_ALIAS[obes]="172.16.0.210"
+D_ZSH_LIST_ALIAS[obes]="obes.src.run"
+D_ZSH_LIST_ALIAS[obes-local]="192.168.1.185"
+D_ZSH_LIST_ALIAS[twoface]="192.168.1.226"
+D_ZSH_USER_ALIAS[twoface]="rob"
 D_ZSH_LIST_ALIAS[sr]="src.run"
 D_ZSH_LIST_ALIAS[rmf-001]="104.154.65.106"
-D_ZSH_LIST_ALIAS[obes-remote]="108.2.193.83"
-D_ZSH_OPTS_ALIAS[obes-remote]="-p 49716"
 D_ZSH_LIST_ALIAS[srl-01]="srl-01.servers.src.run"
 D_ZSH_LIST_ALIAS[sp]="silverpapillon.clients.src.run"
 
@@ -41,11 +43,16 @@ function _dotZshAliasSSH() {
   for k in "${(@k)D_ZSH_LIST_ALIAS}"; do
     name="${k}"
     host="${D_ZSH_LIST_ALIAS[$k]}"
-    cmd="${USER}@${host}"
+    cmd="${host}"
     opt=""
+    usr="rmf"
 
     if [[ "${D_ZSH_OPTS_ALIAS[$name]}" != "" ]]; then
         opt="${D_ZSH_OPTS_ALIAS[$name]}"
+    fi
+
+    if [[ "${D_ZSH_USER_ALIAS[$name]}" != "" ]]; then
+        usr="${D_ZSH_USER_ALIAS[$name]}"
     fi
 
     if [[ "$opt" == "" ]]; then
@@ -62,9 +69,9 @@ function _dotZshAliasSSH() {
       which "${cmd}" > /dev/null
       if [[ "$?" -eq "1" ]]; then
         name_full="${pre}${name}"
-        
-        alias $name_full="clear ; sleep .33 ; echo '$(printf $template "${name}" "$USER" "${host}" "${opt_str}")' ; echo '' ; ssh $opt$cmd"
-        _incLog 2 3 "Alias defined '${name_full}=\"ssh ${opt}${cmd}\"'"
+
+        alias $name_full="clear ; sleep .33 ; echo '$(printf $template "${name}" "$usr" "${host}" "${opt_str}")' ; echo '' ; ssh -l${usr} $opt$cmd"
+        _incLog 2 3 "Alias defined '${name_full}=\"ssh -l${usr} ${opt}${cmd}\"'"
       fi
     done
   done

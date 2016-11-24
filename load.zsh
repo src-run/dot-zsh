@@ -90,7 +90,7 @@ function _topLog() {
     for line in "${b_top_sout[@]}"; do
       [[ "${line}" ]] && echo "$line"
     done
-    
+
     b_top_sout=()
   fi
 }
@@ -299,10 +299,10 @@ function _dotZshWriteFancyComplete() {
   local columns=$(tput cols)
   local retStat='[ ok ]'
   local message="Loading ZSH configuration for %s@%s (took %s secs) ... "
-  
+
   message="$(printf "${message}" "$USER" "$(hostname -s)" "$(_profilerDiff ${D_ZSH_TIME_START})")$(tput setaf 2) ${retStat}"
 
-  tput sgr0 && printf '%*s%s\n' $columns+5 "${message}" && tput sgr0
+  #tput sgr0 && printf '%*s%s\n' $columns+5 "${message}" && tput sgr0
 }
 
 

@@ -14,8 +14,10 @@
 # Amend PATH.
 #
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin"; do
-  PATH="${p}:${PATH}" && _incLog 2 2 "Added to PATH ${p}"
+for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/node_modules/.bin/"; do
+  if [[ -d "${p}" ]]; then
+    PATH="${p}:${PATH}"
+  fi
 done
 
 # EOF

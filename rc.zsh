@@ -51,7 +51,8 @@ HIST_STAMPS="yyyy-mm-dd"
 # Add wisely, as too many plugins slow down shell startup.
 #plugins=(git, git-extras, gitignore, gnu-utils, golang, grunt, gulp, bower, bundler, ruby, chruby, colored-man-pages, colorize, command-not-found, copyfile, codeclimate, composer, cp, ubuntu, kitchen, knife, npm, rake, redis-cli, rsync, screen, sublime, sudo, symfony2, vagrant, zsh-syntax-highlighting, history-substring-search)
 
-plugins=(git, gulp, bower, colored-man-pages, colorize, copyfile, composer, cp, ubuntu, npm, symfony2, history-substring-search, zsh-syntax-highlighting)
+plugins=(git, git-extras, gitignore, github, sudo, colored-man-pages, colorize, composer, bower, command-not-found, composer, docker, ruby, gem, chruby, gulp, grunt, node, npm, rake, rsync, screen, sublime, symfony, systemd)
+#, git-extras, gitignore, gulp, grunt, ruby, bundler, bower, web-search, colored-man-pages, colorize, copyfile, composer, cp, ubuntu, npm, symfony2, sudo, screen, command-not-found, history-substring-search, zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -61,3 +62,23 @@ export LANG=en_US.UTF-8
 stty -ixon
 
 export GPGKEY=CA2BA4E4
+
+
+# Automatically added by Platform.sh CLI installer
+export PATH="/home/rmf/.platformsh/bin:$PATH"
+. '/home/rmf/.platformsh/shell-config.rc' 2>/dev/null
+
+#eval "$(docker-machine env default)"
+
+#GPG_TTY=$(tty)
+#export GPG_TTY
+
+NPM_PACKAGES="${HOME}/.npm-packages"
+
+PATH="$NPM_PACKAGES/bin:$PATH"
+
+# Unset manpath so we can inherit from /etc/manpath via the `manpath` command
+unset MANPATH # delete if you already modified MANPATH elsewhere in your config
+export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
+
+export PATH="$HOME/Android/Sdk/platform-tools:$PATH"

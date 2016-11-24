@@ -14,7 +14,7 @@
 # Amend PATH.
 #
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/.phpenv/bin"; do
+for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/.phpenv/bin" "${HOME}/Android/Sdk/platform-tools"; do
   PATH="${p}:${PATH}" && _incLog 2 2 "Prefixed 'PATH' with ${p}"
 done
 

@@ -87,10 +87,17 @@ out_state_done()
 
 main()
 {
+	ZSH=~/.oh-my-zsh
+	umask g-w,o-w
+
 	local dot_zsh_path=$INST_PATH/.dot-zsh
   out_title "DOT-ZSH Installer"
   out_line
   out_line "Using path $dot_zsh_path"
+
+  out_state_start "Installing deps"
+  sudo apt install make bc
+  out_state_done $?
 
   out_state_start "Installing ZSH"
   sudo apt install zsh
@@ -100,11 +107,25 @@ main()
   out_state_done 0
 
   out_state_start "Installing Oh My ZSH"
-	sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git $ZSH &> /dev/null
   out_state_done $?
 
   out_state_start "Installing fonts"
-	$HOME/.dot-zsh/fonts/install.sh
+	$HOME/.dot-zsh/fonts/install.sh &> /dev/null
+  out_state_done $?
+
+  out_state_start "Installing fonts"
+  wget -O chruby-0.3.9.tar.gz https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz &> /dev/null
+  tar -xzvf chruby-0.3.9.tar.gz &> /dev/null
+  cd chruby-0.3.9/ &> /dev/null
+  sudo make install
+  out_state_done $?
+
+  cd ..
+
+  out_state_start "Installing phpenv"
+	git clone https://github.com/src-run/phpenv.git &> /dev/null
+	phpenv/bin/phpenv-install.sh
   out_state_done $?
 
   out_state_start "Creating RC file"
@@ -120,7 +141,7 @@ main()
 }
 
 git clone https://github.com/src-run/dot-zsh.git $HOME/.dot-zsh
-git submodule update --init
+cd $HOME/.dot-zsh && git submodule update --init
 source $HOME/.dot-zsh/bright/bright.bash
 
 main  

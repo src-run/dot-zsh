@@ -1,0 +1,15 @@
+-server
+-Xms2g
+-Xmx2g
+-Xss16m
+-XX:ReservedCodeCacheSize=256m
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=100
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-XX:+UseCodeCacheFlushing
+-XX:+UseConcMarkSweepGC
+-XX:MaxJavaStackTraceDepth=-1
+-Dawt.useSystemAAFontSettings=lcd
+-Dsun.java2d.opengl=True
