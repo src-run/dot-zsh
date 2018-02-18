@@ -60,25 +60,3 @@ export LANG=en_US.UTF-8
 
 [ -f $HOME/.dot-zsh/load.zsh ] && source $HOME/.dot-zsh/load.zsh
 stty -ixon
-
-export GPGKEY=CA2BA4E4
-
-
-# Automatically added by Platform.sh CLI installer
-export PATH="/home/rmf/.platformsh/bin:$PATH"
-. '/home/rmf/.platformsh/shell-config.rc' 2>/dev/null
-
-#eval "$(docker-machine env default)"
-
-#GPG_TTY=$(tty)
-#export GPG_TTY
-
-NPM_PACKAGES="${HOME}/.npm-packages"
-
-PATH="$NPM_PACKAGES/bin:$PATH"
-
-# Unset manpath so we can inherit from /etc/manpath via the `manpath` command
-unset MANPATH # delete if you already modified MANPATH elsewhere in your config
-export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
-
-export PATH="$HOME/Android/Sdk/platform-tools:$PATH"

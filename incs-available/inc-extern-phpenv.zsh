@@ -14,16 +14,29 @@
 # Include phpenv shell helpers.
 #
 
-_incLog 2 2 "Evaluating 'phpenv init -'"
+_incLog 2 2 "Initializing phpenv"
 
-eval "$(phpenv init -)"
+_PHPENV_ROOT="${HOME}/.phpenv"
+_PHPENV_BIN="${_PHPENV_ROOT}/bin"
+_PHPENV_COMPLETIONS="${_PHPENV_ROOT}/completions/rbenv.zsh"
 
-for inc in "${HOME}/.phpenv/completions/rbenv.zsh"; do
-  if [[ ! -f "${inc}" ]]; then
-  	_warning "Sourcing file failure ${inc}"
+if [[ ! -d "${_PHPENV_ROOT}" ]]; then
+    _warning "Root phpenv path not found: ${_PHPENV_ROOT}"
+else
+  if [[ ! -d "${_PHPENV_BIN}" ]]; then
+    _warning "Bin directory for phpenv not found: ${_PHPENV_BIN}"
   else
-    source "${inc}" && _incLog 2 2 "Sourcing file ${inc}"
+    _dotZshPathVariableAddition "${_PHPENV_BIN}"
   fi
-done
+
+
+  if [[ ! -f "${_PHPENV_COMPLETIONS}" ]]; then
+      _warning "Completions for phpenv not found: ${_PHPENV_COMPLETIONS}"
+  else
+    source "${_PHPENV_COMPLETIONS}" 2>/dev/null && _incLog 2 2 "Sourcing file ${_PHPENV_COMPLETIONS} (phpenv shell completions)"
+  fi
+
+  eval "$(phpenv init -)" && _incLog 2 2 "Initializing phpenv"
+fi
 
 # EOF

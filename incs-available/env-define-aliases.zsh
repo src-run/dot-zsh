@@ -18,14 +18,10 @@ typeset -A D_ZSH_LIST_ALIAS
 typeset -A D_ZSH_OPTS_ALIAS
 typeset -A D_ZSH_USER_ALIAS
 
-D_ZSH_LIST_ALIAS[obes]="obes.src.run"
+D_ZSH_LIST_ALIAS[obes]="obes.rmf.systems"
 D_ZSH_OPTS_ALIAS[obes]="-p 2222"
-D_ZSH_LIST_ALIAS[obes-local]="192.168.1.185"
-D_ZSH_LIST_ALIAS[twoface-local]="192.168.1.226"
-D_ZSH_LIST_ALIAS[twoface]="twoface.src.run"
+D_ZSH_LIST_ALIAS[twoface]="twoface.rmf.systems"
 D_ZSH_LIST_ALIAS[sr]="src.run"
-D_ZSH_LIST_ALIAS[rmf-001]="104.154.65.106"
-D_ZSH_LIST_ALIAS[srl-01]="srl-01.servers.src.run"
 D_ZSH_LIST_ALIAS[sp]="silverpapillon.clients.src.run"
 
 

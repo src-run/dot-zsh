@@ -65,4 +65,44 @@ function _warning() {
   _wrtLog "${d}" "${l}" "${c}" "$(_indent ${l})--> ${m}"
 }
 
+
+#
+# Add passed directory to environment PATH variable
+#
+
+function _dotZshPathVariableAddition() {
+  local p=$(zsh -c "echo ${1}")
+  local t="${2:-default}"
+
+  if [[ -d "${p}" ]] && [[ ":$PATH:" != *":${p}:"* ]]; then
+    PATH="${p}:${PATH}" && _incLog 2 2 "Prefixed 'PATH' with ${p} (${t})"
+  fi
+}
+
+
+#
+# Add temporary request for environment PATH addition
+#
+
+function _dotZshPathVariableAdditionRequest() {
+  local p="${1}"
+
+  if [[ ! -f "${D_ZSH_PATH_SCRIPTED_FILE}" ]]; then
+    touch "${D_ZSH_PATH_SCRIPTED_FILE}" &> /dev/null
+  fi
+
+  echo "${p}" >> "${D_ZSH_PATH_SCRIPTED_FILE}" &> /dev/null
+}
+
+
+#
+# Cleanup temporary environment PATH file
+#
+
+function _dotZshPathVariableAdditionRequestCleanup() {
+  if [[ -f "${D_ZSH_PATH_SCRIPTED_FILE}" ]]; then
+    rm "${D_ZSH_PATH_SCRIPTED_FILE}" &> /dev/null
+  fi
+}
+
 # EOF

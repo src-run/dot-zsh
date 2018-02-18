@@ -15,10 +15,10 @@
 #
 
 _incLog 2 2 'FPath addition ${D_ZSH_BASE}/resources/completions'
-#fpath=(${D_ZSH_BASE}/resources/completions ${fpath}) 
+fpath=(${D_ZSH_BASE}/resources/completions ${fpath})
 
 _incLog 2 2 "Evaluating 'autoload -U compinit && compinit'"
-#autoload -U compinit && compinit
+autoload -U compinit && compinit
 
 
 # EOF

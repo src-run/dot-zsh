@@ -9,15 +9,17 @@
 # file distributed with this source code.
 #
 
-D_ZSH_TRAVIS_SHELL_COMPLETION="${HOME}/.travis/travis.sh"
+D_ZSH_DOCKER_ENVIRONMENT="default"
 
 
 #
-# Source Travis shell completion script
+# Setup docker-machine (if installed)
 #
 
-if [[ -f "${D_ZSH_TRAVIS_SHELL_COMPLETION}" ]]; then
-  source "${D_ZSH_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+which docker-machine &> /dev/null
+
+if [[ $? -eq 0 ]]; then
+  eval "$(docker-machine env ${D_ZSH_DOCKER_ENVIRONMENT})"
 fi
 
 # EOF
