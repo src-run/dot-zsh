@@ -22,7 +22,7 @@ D_ZSH_LIST_ALIAS[obes]="obes.rmf.systems"
 D_ZSH_OPTS_ALIAS[obes]="-p 2222"
 D_ZSH_LIST_ALIAS[twoface]="twoface.rmf.systems"
 D_ZSH_LIST_ALIAS[sr]="src.run"
-D_ZSH_LIST_ALIAS[sp]="silverpapillon.clients.src.run"
+D_ZSH_LIST_ALIAS[sp]="silverpapillon.com"
 
 
 #
