@@ -14,11 +14,12 @@
 # Register our custom completions.
 #
 
-_incLog 2 2 'FPath addition ${D_ZSH_BASE}/resources/completions'
-fpath=(${D_ZSH_BASE}/resources/completions ${fpath})
+fpath=(${D_ZSH_BASE}/resources/completions ${fpath}) \
+	&& _actLog 'FPath addition ${D_ZSH_BASE}/resources/completions'
 
-_incLog 2 2 "Evaluating 'autoload -U compinit && compinit'"
-autoload -U compinit && compinit
+autoload -U compinit \
+	&& compinit \
+	&& _actLog "Evaluating 'autoload -U compinit && compinit'"
 
 
 # EOF

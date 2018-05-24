@@ -11,18 +11,6 @@
 
 
 #
-# String padding routine.
-#
-
-function _indent() {
-  local depth="${1:-2}" ; local padding
-
-  for i in `seq 1 ${depth}`; do padding="    ${padding}"; done
-  echo "${padding}"
-}
-
-
-#
 # Define simple logger for include files.
 #
 
@@ -30,6 +18,19 @@ function _incLog() {
   local i="$1" ; shift ; local l="$1" ; shift ; local m="$1" ; shift
 
   _topLog "${l}" "$(_indent ${i})--> ${m}" "$@"
+}
+
+
+#
+# Define simple logger for include files.
+#
+
+function _actLog() {
+  local m="${1}" ; shift ; local i="${1:-2}"
+
+  if [[ "${1}" != "" ]]; then shift; fi
+
+  _topLog 4 "$(_indent ${i})--- ${m}" "$@"
 }
 
 
@@ -51,7 +52,7 @@ function _warning() {
   if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
     for line in "${b_warn_sout[@]}"; do
       if [[ ! ${line} ]]; then
-      	continue;
+        continue;
       fi
 
       >&2 echo -en "\n!!\n!! WARNING\n!!"

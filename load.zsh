@@ -54,7 +54,7 @@ function _wrtLog() {
   local m="${1}" ; shift
   local p="$(printf '[%s:%s]' ${c} ${d})"
 
-  b_flog+=("${p}  $(printf ${m} "$@")")
+  b_flog+=("${p} $(printf ${m} "$@")")
 
   if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]] && [[ ${D_ZSH_LOGS_PATH:-x} ]] && [[ "${#b_flog}" -gt 0 ]]; then
     for b in "${b_flog[@]}"; do
@@ -84,7 +84,7 @@ function _topLog() {
 
   _wrtLog "${d}" "${l}" "${c}" "${m}" "$@"
 
-  (( D_ZSH_STIO_VLEV < l )) || b_top_sout+=("$(printf '[%s:%s]  '${m} ${c} ${d} "$@")")
+  (( D_ZSH_STIO_VLEV < l )) || b_top_sout+=("$(printf '[%s:%s] '${m} ${c} ${d} "$@")")
 
   if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
     for line in "${b_top_sout[@]}"; do
@@ -92,6 +92,44 @@ function _topLog() {
     done
 
     b_top_sout=()
+  fi
+}
+
+
+#
+# String padding routine.
+#
+
+function _indent() {
+  local depth="${1:-2}" ; local padding
+
+  for i in `seq 1 ${depth}`; do padding="    ${padding}"; done
+  echo "${padding}"
+}
+
+
+#
+# Define simple log notice.
+#
+
+function _dzsh_warning() {
+  typeset -g b_warn_sout
+
+  local d=$(date +%s)
+  local c="$USER/dot-zsh"
+  local m="!!! WARNING: $(echo ${1} | sed 's/[ ]*$//g')" ; shift
+  local l="${1:-2}"
+
+  _wrtLog "${d}" "${l}" "${c}" "$(_indent ${l})${m}" "$@"
+
+  b_warn_sout+=("$(printf '[%s:%s] '${m} ${c} ${d} "$@")")
+
+  if [[ "${D_ZSH_STIO_BUFF:=0}" -eq 0 ]]; then
+    for line in "${b_warn_sout[@]}"; do
+      [[ "${line}" ]] && >&2 echo "$line"
+    done
+
+    b_warn_sout=()
   fi
 }
 
@@ -110,9 +148,78 @@ function _dotZshRepoByPath() {
 #
 
 function _dotZshRepoByRemote() {
-  local remote="$(cd ${D_ZSH_PATH} && git remote get-url origin | cut -d':' -f2)"
+  local remote="$(cd ${D_ZSH_PATH} && git remote get-url origin | sed 's/https\?:\/\///')"
 
   echo "${remote:0:-4}"
+}
+
+
+#
+# Checks if git has pending changes (is dirty tree)
+#
+
+function _dotZshParseGitDirty() {
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null; [ $? -eq 1 ] && echo "*"
+}
+
+
+#
+# Gets the current git branch
+#
+
+function _dotZshParseGitBranch() {
+  export D_ZSH_SELF_GIT_BRANCH
+  local show_dirty="${1:-0}"
+  local desc_dirty="$(_dotZshParseGitDirty)"
+  local postfix=""
+
+  if [[ "${show_dirty}" == "1" ]]; then postfix="${desc_dirty}"; unset D_ZSH_SELF_GIT_BRANCH; fi
+  if [[ "${show_dirty}" == "0" ]] && [[ "$(echo "${D_ZSH_SELF_GIT_BRANCH}" | awk '{print substr($0,length,1)}')" == "*" ]]; then unset D_ZSH_SELF_GIT_BRANCH; fi
+
+  if [[ ${D_ZSH_SELF_GIT_BRANCH:-x} == "x" ]]; then
+    D_ZSH_SELF_GIT_BRANCH="$(cd ${D_ZSH_PATH} && git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1${postfix}/" 2> /dev/null)"
+  fi
+
+  echo "${D_ZSH_SELF_GIT_BRANCH}"
+}
+
+
+#
+# Get last commit hash prepended with @ (i.e. @8a323d0)
+#
+function _dotZshParseGitHash() {
+  export D_ZSH_SELF_COMMIT
+  local prepend="${1:-0}"
+  local prefix=""
+
+  if [[ "${prepend}" == "1" ]]; then prefix="@"; unset D_ZSH_SELF_COMMIT; fi
+  if [[ "${prepend}" == "0" ]] && [[ "${D_ZSH_SELF_COMMIT:0:1}" == "@" ]]; then unset D_ZSH_SELF_COMMIT; fi
+
+  if [[ ${D_ZSH_SELF_COMMIT:-x} == "x" ]]; then
+    D_ZSH_SELF_COMMIT="$(cd ${D_ZSH_PATH} && git rev-parse HEAD 2> /dev/null | sed "s/\(.*\)/${prefix}\1/" 2> /dev/null)"
+  fi
+  
+  echo "${D_ZSH_SELF_COMMIT}"
+}
+
+
+#
+# Get the tag name if we're on one
+#
+
+function _dotZshParseGitTag() {
+  local always="${1:-0}"
+  export D_ZSH_SELF_TAG
+
+  if [[ ${D_ZSH_SELF_TAG:-x} == "x" ]]; then
+    D_ZSH_SELF_TAG="$(cd ${D_ZSH_PATH} && git describe --exact-match ${s} HEAD 2> /dev/null)"
+  fi
+
+  if [[ ${D_ZSH_SELF_TAG:-x} == "x" ]] && [[ "${always}" ]]; then
+    D_ZSH_SELF_TAG="$(cd ${D_ZSH_PATH} && git describe --all ${s} HEAD 2> /dev/null)"
+  fi
+
+  echo "${D_ZSH_SELF_TAG}"
 }
 
 
@@ -135,24 +242,6 @@ function _dotZshRepo() {
 
 
 #
-# Define self version resolver function.
-#
-
-function _dotZshHash() {
-  export D_ZSH_SELF_HASH
-  local -a strategies=("--exact-match" "--always")
-
-  if [[ ${D_ZSH_SELF_HASH:-x} == "x" ]]; then
-    for s in "${strategies[@]}"; do
-      D_ZSH_SELF_HASH="$(cd ${D_ZSH_PATH} && git describe --tag ${s} HEAD 2> /dev/null)" && [[ ${#D_ZSH_SELF_HASH} -gt 4 ]] && break
-    done
-  fi
-
-  echo "${D_ZSH_SELF_HASH}"
-}
-
-
-#
 # Define self author resolver function.
 #
 
@@ -168,6 +257,60 @@ function _dotZshWhos() {
 
 
 #
+# Define self version resolver function.
+#
+
+function _dotZshTag() {
+  export D_ZSH_SELF_TAG
+  local -a strategies=("--exact-match" "--always")
+
+  if [[ ${D_ZSH_SELF_TAG:-x} == "x" ]]; then
+    D_ZSH_SELF_TAG="$(_dotZshParseGitTag)"
+  fi
+
+  echo "${D_ZSH_SELF_TAG}"
+}
+
+
+#
+# Define self version resolver function.
+#
+
+function _dotZshVers() {
+  export D_ZSH_SELF_VERS
+  local -a strategies=("--exact-match" "--always")
+
+  if [[ ${D_ZSH_SELF_VERS:-x} == "x" ]]; then
+    for s in "${strategies[@]}"; do
+      D_ZSH_SELF_VERS="$(cd ${D_ZSH_PATH} && git describe --tag ${s} HEAD 2> /dev/null)" && [[ ${#D_ZSH_SELF_VERS} -gt 4 ]] && break
+    done
+
+    if [[ "$(_dotZshParseGitDirty)" == "*" ]]; then
+      D_ZSH_SELF_VERS="${D_ZSH_SELF_VERS} (dirty)"
+    fi
+  fi
+
+  echo "${D_ZSH_SELF_VERS}"
+}
+
+
+#
+# Define self commit resolver function.
+#
+
+function _dotZshHash() {
+  export D_ZSH_SELF_HASH
+  local -a strategies=("--exact-match" "--always")
+
+  if [[ ${D_ZSH_SELF_HASH:-x} == "x" ]]; then
+    D_ZSH_SELF_HASH="$(_dotZshParseGitHash)"
+  fi
+
+  echo "${D_ZSH_SELF_HASH}"
+}
+
+
+#
 # Define zsh name resolver function.
 #
 
@@ -177,11 +320,11 @@ function _dotZshLoad() {
 
 
 #
-# Define zsh version resolver function.
+# Define shell path resolver function.
 #
 
-function _sysZshSVer() {
-  echo "${ZSH_VERSION}"
+function _dotZshParseShellPath() {
+  echo "${SHELL}"
 }
 
 
@@ -189,8 +332,37 @@ function _sysZshSVer() {
 # Define zsh path resolver function.
 #
 
-function _sysZshPath() {
-  echo "${SHELL}"
+function _dotZshParseZshPath() {
+  D_ZSH_ZSH_PATH="$(which zsh 2> /dev/null)"
+
+  if [[ ${#D_ZSH_ZSH_PATH} -lt 3 ]]; then
+    _dzsh_warning "Failed to determine installed ZSH binary path!"
+  fi
+
+  echo "${D_ZSH_ZSH_PATH}"
+}
+
+
+#
+# Define zsh version resolver function.
+#
+
+function _dotZshParseZshVers() {
+  D_ZSH_ZSH_VERSION="$(apt-cache show zsh 2> /dev/null | grep -E -o '^Version: .+' 2> /dev/null | grep -E -o '[0-9]+\.[0-9]+\.[0-9]+(-.+)?' 2> /dev/null)"
+
+  if [[ ${#D_ZSH_ZSH_VERSION} -lt 5 ]]; then
+    local zsh_path="$(_dotZshParseShellPath)"
+
+    if [[ ${#zsh_path} -gt 2 ]]; then
+      D_ZSH_ZSH_VERSION="$(${zsh_path} --version | grep -E -o '[0-9]+\.[0-9]+\.[0-9]+(\s\([^)]+\))?' 2> /dev/null)"
+    fi
+  fi
+
+  if [[ ${#D_ZSH_ZSH_VERSION} -lt 5 ]]; then
+    _dzsh_warning "Failed to determine installed ZSH binary version!"
+  fi
+
+  echo "${D_ZSH_ZSH_VERSION}"
 }
 
 
@@ -325,17 +497,39 @@ fi
 
 
 #
+# Assign verbosity using common variables
+#
+
+if [[ ${VERBOSE+x} ]]; then
+  D_ZSH_STIO_VLEV=2
+fi
+
+if [[ ${VERY_VERBOSE+x} ]]; then
+  D_ZSH_STIO_VLEV=4
+fi
+
+if [[ ${DEBUG+x} ]]; then
+  D_ZSH_STIO_VLEV=10
+fi
+
+
+#
 # Let the user know we've begun and provide some environment context
 #
 
-_topLog 3 '--> Resolved runtime configuration ...'
-_topLog 3 '    --> D_ZSH_SELF_NAME ....... %s' "$(_dotZshRepo)"
-_topLog 3 '    --> D_ZSH_SELF_VERSION .... %s' "$(_dotZshHash)"
-_topLog 3 '    --> D_ZSH_SELF_WHOS ....... %s' "$(_dotZshWhos)"
-_topLog 3 '    --> D_ZSH_SELF_LOADER ..... %s' "$(_dotZshLoad)"
-_topLog 3 '    --> ZSH_BINPATH ........... %s' "$(_sysZshPath)"
-_topLog 3 '    --> ZSH_VERSION ........... %s' "$(_sysZshSVer)"
+_topLog 3 '--> Initializing loader script ...'
+_topLog 3 '    --> PROJECT NAME ............ %s' "dot-zsh"
+_topLog 3 '    --> PRIMARY AUTHOR .......... %s' "$(_dotZshWhos)"
+_topLog 3 '    --> RELEASE VERSION ......... %s' "$(_dotZshVers)"
+_topLog 3 '    --> GIT REMOTE .............. %s' "$(_dotZshRepo)"
+_topLog 3 '    --> GIT REFERENCE ........... %s' "$(_dotZshTag)"
+_topLog 3 '    --> GIT COMMIT .............. %s' "$(_dotZshHash)"
 
+_topLog 3 '--> Resolved runtime configuration ...'
+_topLog 3 '    --> LOADER SCRIPT PATH ...... %s' "$(_dotZshLoad)"
+_topLog 3 '    --> PRIOR SHELL BIN PATH .... %s' "$(_dotZshParseShellPath)"
+_topLog 3 '    --> FOUND ZSH BIN PATH ...... %s' "$(_dotZshParseZshPath)"
+_topLog 3 '    --> FOUND ZSH VERSION ....... %s' "$(_dotZshParseZshVers)"
 
 #
 # Load our configuration files.
@@ -369,17 +563,15 @@ done
 
 _topLog 1 "--> Performing final cleanup pass ..."
 
-D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_REPO D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT D_ZSH_LIST_ALIAS_NAME D_ZSH_LIST_ALIAS_CMDS)
-D_ZSH_UNSET_FS=(_dotZshWhos _dotZshRepo _dotZshHash _dotZshLoad _dotZshRepoByRemote _dotZshRepoByPath _dotZshAliasSSH _indent _topLog _incLog _warning)
+D_ZSH_UNSET_VS=(D_ZSH_SELF_WHOS D_ZSH_SELF_HASH D_ZSH_SELF_VERS D_ZSH_SELF_REPO D_ZSH_STIO_BUFF D_ZSH_NAME D_ZSH_PATH D_ZSH_NAME D_ZSH_ROOT_PATH D_ZSH_LOAD_FILE D_ZSH_STIO_BUFF D_ZSH_INC_ENABL_PATH D_ZSH_INC_AVAIL_PATH D_ZSH_CFG_ENABL_PATH D_ZSH_CFG_AVAIL_PATH D_ZSH_BASE D_ZSH_STIO_BUFF D_ZSH_LIST_ALIAS D_ZSH_OPTS_ALIAS D_ZSH_LIST_EXPORT D_ZSH_LIST_ALIAS_NAME D_ZSH_LIST_ALIAS_CMDS)
+D_ZSH_UNSET_FS=(_dotZshWhos _dotZshRepo _dotZshHash _dotZshVers _dotZshLoad _dotZshRepoByRemote _dotZshRepoByPath _dotZshAliasSSH _indent _topLog _incLog _warning)
 
-_incLog 1 4 "Unsetting global variables defined by this script ..."
-for v in ${D_ZSH_UNSET_VS[@]}; do _incLog 2 4 "Variable unset '${v}'"; done
-_incLog 1 4 "Unsetting global functions defined by this script ..."
-for f in ${D_ZSH_UNSET_FS[@]}; do _incLog 2 4 "Function unset '${f}'"; done
+_actLog "Unsetting global variables defined by this script ..." 1
+for v in ${D_ZSH_UNSET_VS[@]}; do _actLog "Variable unset '${v}'"; done
+_actLog "Unsetting global functions defined by this script ..." 1
+for f in ${D_ZSH_UNSET_FS[@]}; do _actLog "Function unset '${f}'"; done
 
 for v in ${D_ZSH_UNSET_VS[@]}; do eval "unset ${v}"; done
 for f in ${D_ZSH_UNSET_FS[@]}; do eval "unset -f ${f}"; done
 
 [[ ${D_ZSH_STIO_VLEV:--5} == -5 ]] && _dotZshWriteFancyComplete
-
-

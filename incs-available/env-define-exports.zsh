@@ -11,20 +11,13 @@
 
 
 #
-# Define our list of variable to export.
-#
-
-typeset -a D_ZSH_LIST_EXPORT
-
-D_ZSH_LIST_EXPORT=(ZSH PATH LANG EDITOR SSH_KEY_PATH)
-
-
-#
 # Loop though exports array and export 'em.
 #
 
 for e in "${D_ZSH_LIST_EXPORT[@]}"; do
-  export "${e}" && _incLog 2 3 "Variable export '${e}'"
+  export "${e}" \
+  	&& _actLog "Variable export '${e}'" \
+  	|| _dzsh_warning "Failed to export '${e}' variable"
 done
 
 # EOF

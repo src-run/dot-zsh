@@ -21,22 +21,22 @@ _PHPENV_BIN="${_PHPENV_ROOT}/bin"
 _PHPENV_COMPLETIONS="${_PHPENV_ROOT}/completions/rbenv.zsh"
 
 if [[ ! -d "${_PHPENV_ROOT}" ]]; then
-    _warning "Root phpenv path not found: ${_PHPENV_ROOT}"
+    _dzsh_warning "Root phpenv path not found: ${_PHPENV_ROOT}"
 else
   if [[ ! -d "${_PHPENV_BIN}" ]]; then
-    _warning "Bin directory for phpenv not found: ${_PHPENV_BIN}"
+    _dzsh_warning "Bin directory for phpenv not found: ${_PHPENV_BIN}"
   else
     _dotZshPathVariableAddition "${_PHPENV_BIN}"
   fi
 
 
   if [[ ! -f "${_PHPENV_COMPLETIONS}" ]]; then
-      _warning "Completions for phpenv not found: ${_PHPENV_COMPLETIONS}"
+      _dzsh_warning "Completions for phpenv not found: ${_PHPENV_COMPLETIONS}"
   else
-    source "${_PHPENV_COMPLETIONS}" 2>/dev/null && _incLog 2 2 "Sourcing file ${_PHPENV_COMPLETIONS} (phpenv shell completions)"
+    source "${_PHPENV_COMPLETIONS}" 2>/dev/null && _incLog 2 2 "Sourcing file ${_PHPENV_COMPLETIONS}"
   fi
 
-  eval "$(phpenv init -)" && _incLog 2 2 "Initializing phpenv"
+  eval "$(phpenv init -)" && _actLog "Initializing phpenv"
 fi
 
 # EOF

@@ -67,8 +67,9 @@ function _dotZshAliasSSH() {
       if [[ "$?" -eq "1" ]]; then
         name_full="${pre}${name}"
 
-        alias $name_full="clear ; sleep .33 ; echo '$(printf $template "${name}" "$usr" "${host}" "${opt_str}")' ; echo '' ; ssh -l${usr} $opt$cmd"
-        _incLog 2 3 "Alias defined '${name_full}=\"ssh -l${usr} ${opt}${cmd}\"'"
+        alias $name_full="clear ; sleep .33 ; echo '$(printf $template "${name}" "$usr" "${host}" "${opt_str}")' ; echo '' ; ssh -l${usr} $opt$cmd" &> /dev/null \
+          && _actLog "Alias defined '${name_full}=\"ssh -l${usr} ${opt}${cmd}\"'" \
+          || _dzsh_warning "Failed to define alias '${name_full}=\"ssh -l${usr} ${opt}${cmd}\"'"
       fi
     done
   done
@@ -100,7 +101,7 @@ D_ZSH_LIST_ALIAS[gpg]='gpg2'
 
 for n in "${(@k)D_ZSH_LIST_ALIAS}"; do
   alias $n="${D_ZSH_LIST_ALIAS[$n]}"
-  _incLog 2 3 "Alias defined '${n}=\"${D_ZSH_LIST_ALIAS[$n]}\"'"
+  _actLog "Alias defined '${n}=\"${D_ZSH_LIST_ALIAS[$n]}\"'"
 done
 
 

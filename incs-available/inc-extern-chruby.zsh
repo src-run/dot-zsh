@@ -30,6 +30,6 @@ fi
 # Set Ruby 2.4.x as the default interpreter
 #
 
-which chruby &> /dev/null && chruby 2.4 || warning "Could not set chruby ruby version to 2.4"
+which chruby &> /dev/null && chruby 2.4 &> /dev/null || _dzsh_warning "Could not set chruby ruby version to 2.4"
 
 # EOF

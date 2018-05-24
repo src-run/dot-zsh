@@ -30,4 +30,18 @@ D_ZSH_PATH_ADDITIONS_FILE="${HOME}/.path-additions.list"
 D_ZSH_PATH_SCRIPTED_FILE="${HOME}/.path-additions-scripted.list"
 
 
+#
+# Define our list of variable to export.
+#
+
+typeset -a D_ZSH_LIST_EXPORT
+D_ZSH_LIST_EXPORT=(ZSH PATH LANG EDITOR SSH_KEY_PATH)
+
+#
+# Define android sdk path
+#
+
+D_ZSH_ANDROID_SDK_BIN_PATH="${HOME}/Android/Sdk/platform-tools"
+
+
 # EOF
