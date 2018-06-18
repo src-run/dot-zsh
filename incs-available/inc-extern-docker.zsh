@@ -9,8 +9,6 @@
 # file distributed with this source code.
 #
 
-D_ZSH_DOCKER_ENVIRONMENT="default"
-
 
 #
 # Setup docker-machine (if installed)
@@ -19,7 +17,7 @@ D_ZSH_DOCKER_ENVIRONMENT="default"
 which docker-machine &> /dev/null
 
 if [[ $? -eq 0 ]]; then
-  eval "$(docker-machine env ${D_ZSH_DOCKER_ENVIRONMENT})"
+    eval "$(docker-machine env ${D_ZSH_DOCKER_ENVIRONMENT})"
 fi
 
 # EOF

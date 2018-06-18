@@ -14,20 +14,16 @@
 # Assign default verbose-level if $D_ZSH_STIO_VLEV is not yet defined.
 #
 
-if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-  D_ZSH_STIO_VLEV=-5
-fi
+[[ ! ${D_ZSH_STIO_VLEV+x} ]] && \
+    D_ZSH_STIO_VLEV=-5
 
-if [[ ${VERBOSE+x} ]]; then
-  D_ZSH_STIO_VLEV=2
-fi
+[[ ${VERBOSE+x} ]] && \
+    D_ZSH_STIO_VLEV=2
 
-if [[ ${VERY_VERBOSE+x} ]]; then
-  D_ZSH_STIO_VLEV=4
-fi
+[[ ${VERY_VERBOSE+x} ]] && \
+    D_ZSH_STIO_VLEV=4
 
-if [[ ${DEBUG+x} ]]; then
-  D_ZSH_STIO_VLEV=10
-fi
+[[ ${DEBUG+x} ]] && \
+    D_ZSH_STIO_VLEV=10
 
 # EOF

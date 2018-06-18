@@ -14,7 +14,7 @@
 # Setup golang environment
 #
 
-export GOROOT="${HOME}/golang/1.9"
+export GOROOT
 _dotZshPathVariableAddition "${GOROOT}/bin"
 
 # EOF

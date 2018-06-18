@@ -9,20 +9,19 @@
 # file distributed with this source code.
 #
 
-D_ZSH_GCLOUD_PATH_FILE="/opt/google-cloud-sdk/path.zsh.inc"
-D_ZSH_GCLOUD_SHELL_COMPLETION="/opt/google-cloud-sdk/completion.zsh.inc"
-
 
 #
 # Source Google Cloud SDK path helper and completion scripts
 #
 
 if [[ -f "${D_ZSH_GCLOUD_PATH_FILE}" ]]; then
-  source "${D_ZSH_GCLOUD_PATH_FILE}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+    source "${D_ZSH_GCLOUD_PATH_FILE}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${inc}"
 fi
 
 if [[ -f "${D_ZSH_GCLOUD_SHELL_COMPLETION}" ]]; then
-  source "${D_ZSH_GCLOUD_SHELL_COMPLETION}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+    source "${D_ZSH_GCLOUD_SHELL_COMPLETION}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${inc}"
 fi
 
 # EOF

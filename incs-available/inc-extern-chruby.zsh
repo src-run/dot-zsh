@@ -9,20 +9,19 @@
 # file distributed with this source code.
 #
 
-D_ZSH_CHRUBY_ENVIRONMENT="/usr/local/share/chruby/chruby.sh"
-D_ZSH_CHRUBY_AUTO_SELECT="/usr/local/share/chruby/auto.sh"
-
 
 #
-# Source Chruby environment and auto-selector scripts
+# Source chruby environment and auto-selector scripts
 #
 
 if [[ -f "${D_ZSH_CHRUBY_ENVIRONMENT}" ]]; then
-  . "${D_ZSH_CHRUBY_ENVIRONMENT}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+    source "${D_ZSH_CHRUBY_ENVIRONMENT}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${inc}"
 fi
 
 if [[ -f "${D_ZSH_CHRUBY_AUTO_SELECT}" ]]; then
-  . "${D_ZSH_CHRUBY_AUTO_SELECT}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+    source "${D_ZSH_CHRUBY_AUTO_SELECT}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${inc}"
 fi
 
 
@@ -30,6 +29,8 @@ fi
 # Set Ruby 2.4.x as the default interpreter
 #
 
-which chruby &> /dev/null && chruby 2.4 &> /dev/null || _dzsh_warning "Could not set chruby ruby version to 2.4"
+which chruby &> /dev/null && \
+    chruby 2.4 &> /dev/null || \
+    _dzsh_warning "Could not set chruby ruby version to 2.4"
 
 # EOF

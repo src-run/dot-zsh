@@ -15,9 +15,9 @@
 #
 
 for e in "${D_ZSH_LIST_EXPORT[@]}"; do
-  export "${e}" \
-  	&& _actLog "Variable export '${e}'" \
-  	|| _dzsh_warning "Failed to export '${e}' variable"
+    export "${e}" &&
+        _actLog "Variable export '${e}'" ||
+        _dzsh_warning "Failed to export '${e}' variable"
 done
 
 # EOF

@@ -11,9 +11,7 @@
 
 
 #
-# Define out alias list and optional options
+# Add global composer binaries to PATH
 #
 
-DEFAULT_USER=$USER
-
-# EOF
+_dotZshPathVariableAddition "${D_ZSH_GLOBAL_COMPOSER_BIN}" scripted

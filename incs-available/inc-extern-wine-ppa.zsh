@@ -11,13 +11,9 @@
 
 
 #
-# Amend PATH.
+# Add wine paths when installed from official PPA
 #
 
-for p in "${HOME}/bin" "${HOME}/.composer/vendor/bin" "${HOME}/node_modules/.bin/"; do
-  if [[ -d "${p}" ]]; then
-    PATH="${p}:${PATH}"
-  fi
-done
-
-# EOF
+_dotZshPathVariableAddition "/opt/wine-stable/bin" scripted
+_dotZshPathVariableAddition "/opt/wine-devel/bin" scripted
+_dotZshPathVariableAddition "/opt/wine-staging/bin" scripted

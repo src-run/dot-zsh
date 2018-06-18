@@ -14,11 +14,13 @@
 # Add script requested directories from temporary-file to environment PATH variable (if exists)
 #
 
-
-if [[ ! -z ${D_ZSH_PATH_SCRIPTED_FILE} ]] && [[ -r "${D_ZSH_PATH_SCRIPTED_FILE}" ]]; then
-  while read p; do
-    _dotZshPathVariableAddition "${p}" custom
-  done <"${D_ZSH_PATH_SCRIPTED_FILE}"
+if \
+    [[ ! -z "${D_ZSH_PATH_SCRIPTED_FILE}" ]] && \
+    [[ -r "${D_ZSH_PATH_SCRIPTED_FILE}" ]]; \
+    then
+    while read p; do
+        _dotZshPathVariableAddition "${p}" custom
+    done <"${D_ZSH_PATH_SCRIPTED_FILE}"
 fi
 
 _dotZshPathVariableAdditionRequestCleanup

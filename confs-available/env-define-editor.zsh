@@ -14,10 +14,10 @@
 # Set our default editor depending on connection type.
 #
 
-if [[ -n $SSH_CONNECTION ]]; then
-  EDITOR='vi'
+if [[ -n ${SSH_CONNECTION} ]]; then
+    EDITOR='vi'
 else
-  EDITOR='subl'
+    EDITOR='subl'
 fi
 
 

@@ -9,8 +9,6 @@
 # file distributed with this source code.
 #
 
-D_ZSH_GNUPG_KEY="466839F8117362D877E438BE02B8697CE6AA381A"
-
 
 #
 # Export our default gnupg key and tty

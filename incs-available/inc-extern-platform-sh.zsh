@@ -9,9 +9,6 @@
 # file distributed with this source code.
 #
 
-D_ZSH_PLATFORM_SH_BIN="${HOME}/.platformsh/bin"
-D_ZSH_PLATFORM_SH_SHELL_CONFIG="${HOME}/.platformsh/shell-config.rc"
-
 
 #
 # Add platform.sh binaries to PATH
@@ -25,7 +22,8 @@ _dotZshPathVariableAddition "${D_ZSH_PLATFORM_SH_BIN}" scripted
 #
 
 if [[ -f "${D_ZSH_PLATFORM_SH_SHELL_CONFIG}" ]]; then
-  source "${D_ZSH_PLATFORM_SH_SHELL_CONFIG}" 2>/dev/null && _incLog 2 2 "Sourcing file ${inc}"
+    source "${D_ZSH_PLATFORM_SH_SHELL_CONFIG}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${inc}"
 fi
 
 # EOF

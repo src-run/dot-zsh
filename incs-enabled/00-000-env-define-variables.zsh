@@ -1,1 +1,1 @@
-../incs-available/env-define-variables.bash
+../incs-available/env-define-variables.zsh

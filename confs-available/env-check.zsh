@@ -15,7 +15,7 @@
 #
 
 if [[ ${D_ZSH_DEBUG+x} ]] && [[ ${D_ZSH_DEBUG} -ne 0 ]]; then
-  set -x;
+    set -x;
 fi
 
 
@@ -24,7 +24,7 @@ fi
 #
 
 if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-  D_ZSH_STIO_VLEV=-5
+    D_ZSH_STIO_VLEV=-5
 fi
 
 

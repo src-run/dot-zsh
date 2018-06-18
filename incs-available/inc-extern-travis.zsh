@@ -9,15 +9,14 @@
 # file distributed with this source code.
 #
 
-D_ZSH_TRAVIS_SHELL_COMPLETION="${HOME}/.travis/travis.sh"
-
 
 #
 # Source Travis shell completion script
 #
 
 if [[ -f "${D_ZSH_TRAVIS_SHELL_COMPLETION}" ]]; then
-  source "${D_ZSH_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && _incLog 2 2 "Sourcing file ${D_ZSH_TRAVIS_SHELL_COMPLETION}"
+    source "${D_ZSH_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && \
+        _incLog 2 2 "Sourcing file ${D_ZSH_TRAVIS_SHELL_COMPLETION}"
 fi
 
 # EOF
