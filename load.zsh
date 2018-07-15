@@ -11,10 +11,23 @@
 
 
 #
+# Date function
+#
+function _getDate {
+    local date="$(which gdate)"
+
+    if [[ ${date} == "" ]]; then
+        date="$(which date)"
+    fi
+
+    date +"${1}"
+}
+
+#
 # Define function to return microsecond aware unix time.
 #
 function _getPreciseUnixTime {
-    echo -n $(date +%s.%N)
+    echo -n $(_getDate '%s.%N')
 }
 
 

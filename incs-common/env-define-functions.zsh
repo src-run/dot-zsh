@@ -267,7 +267,7 @@ function _topLog {
     local c="$USER/dot-zsh"
     local l="${1}" ; shift
 
-    d=$(date +%s)
+    d=$(_getDate %s)
     m="$(echo ${1} | sed 's/[ ]*$//g')" ; shift
 
     if [[ ! "${m}" ]]; then
@@ -313,7 +313,7 @@ function _dzsh_warning {
     local m="!!! WARNING: $(echo ${1} | sed 's/[ ]*$//g')" ; shift
     local l="${1:-2}"
 
-    d=$(date +%s)
+    d=$(_getDate %s)
 
     _wrtLog "${d}" "${l}" "${c}" "$(_indent ${l})${m}" "$@"
 
@@ -576,7 +576,7 @@ function _dotZshParseZshVers {
 
 
 function _profGetPrecTime {
-    echo $(date +%s%N | cut -b1-13)
+    echo $(_getDate %s%N | cut -b1-13)
 }
 
 
@@ -770,7 +770,7 @@ function _warning {
 
     shift
 
-    d=$(date +%s)
+    d=$(_getDate %s)
     w="$(printf ${m} "$@")"
 
     b_warn_sout+=("${w}")
