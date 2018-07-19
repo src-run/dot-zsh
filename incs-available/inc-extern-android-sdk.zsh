@@ -14,7 +14,7 @@
 # Add Android SDK to PATH
 #
 
-_dotZshPathVariableAddition "${D_ZSH_ANDROID_SDK_BIN_PATH}" scripted && \
-    _actLog "Added ${D_ZSH_ANDROID_SDK_BIN_PATH} to path"
+_add_env_path_dir "${_DZ_ANDROID_SDK_BIN_PATH}" scripted && \
+    _log_action "Added ${_DZ_ANDROID_SDK_BIN_PATH} to path"
 
 # EOF

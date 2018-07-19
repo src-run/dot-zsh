@@ -14,16 +14,16 @@
 # Add platform.sh binaries to PATH
 #
 
-_dotZshPathVariableAddition "${D_ZSH_PLATFORM_SH_BIN}" scripted
+_add_env_path_dir "${_DZ_PLATFORM_SH_BIN}" scripted
 
 
 #
 # Source platform.sh shell config
 #
 
-if [[ -f "${D_ZSH_PLATFORM_SH_SHELL_CONFIG}" ]]; then
-    source "${D_ZSH_PLATFORM_SH_SHELL_CONFIG}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${inc}"
+if [[ -f "${_DZ_PLATFORM_SH_SHELL_CONFIG}" ]]; then
+    source "${_DZ_PLATFORM_SH_SHELL_CONFIG}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${inc}"
 fi
 
 # EOF

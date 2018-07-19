@@ -14,14 +14,14 @@
 # Source Google Cloud SDK path helper and completion scripts
 #
 
-if [[ -f "${D_ZSH_GCLOUD_PATH_FILE}" ]]; then
-    source "${D_ZSH_GCLOUD_PATH_FILE}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${inc}"
+if [[ -f "${_DZ_GCLOUD_PATH_FILE}" ]]; then
+    source "${_DZ_GCLOUD_PATH_FILE}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${inc}"
 fi
 
-if [[ -f "${D_ZSH_GCLOUD_SHELL_COMPLETION}" ]]; then
-    source "${D_ZSH_GCLOUD_SHELL_COMPLETION}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${inc}"
+if [[ -f "${_DZ_GCLOUD_SHELL_COMPLETION}" ]]; then
+    source "${_DZ_GCLOUD_SHELL_COMPLETION}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${inc}"
 fi
 
 # EOF

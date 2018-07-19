@@ -14,10 +14,10 @@
 # Loop though exports array and export 'em.
 #
 
-for e in "${D_ZSH_LIST_EXPORT[@]}"; do
+for e in "${_DZ_LIST_EXPORT[@]}"; do
     export "${e}" &&
-        _actLog "Variable export '${e}'" ||
-        _dzsh_warning "Failed to export '${e}' variable"
+        _log_action "Variable export '${e}'" ||
+        _log_warn "Failed to export '${e}' variable"
 done
 
 # EOF

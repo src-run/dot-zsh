@@ -11,21 +11,21 @@
 
 
 #
-# Enable shell-debugging if $D_ZSH_DEBUG is defined and non-zero.
+# Enable shell-debugging if ${DEBUG} var is set to true or 1.
 #
 
-if [[ ${D_ZSH_DEBUG+x} ]] && [[ ${D_ZSH_DEBUG} -ne 0 ]]; then
-    set -x;
+if [[ ${DEBUG} -eq 1 ]] || [[ ${DEBUG} == "true" ]]; then
+    _log_buffer 2 \
+        "--- Enabling debug mode with 'set -x' (set from \${DEBUG} var)"
+    set -x
 fi
 
 
 #
-# Assign default verbose-level if $D_ZSH_STIO_VLEV is not yet defined.
+# Enable shell-debugging if enabled in config file.
 #
 
-if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-    D_ZSH_STIO_VLEV=-5
-fi
-
-
-# EOF
+_try_read_conf_bool_ret 'internal.dot_zsh_settings.debug' && \
+    _log_buffer 2 \
+        "--- Enabling debut mode with 'set -x' (set from config file)" && \
+    set -x

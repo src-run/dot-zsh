@@ -1,0 +1,154 @@
+{
+    "globals": {
+        "scheme": "1.0.0",
+        "author": "Rob Frawley 2nd <rmf@src.run>"
+    },
+    "internal": {
+        "dot_zsh_settings": {
+            "log_path": "${HOME}/.dot-zsh.log",
+            "very_quiet": true,
+            "norm_verbose": true,
+            "very_verbose": false,
+            "debug": false,
+            "show_summary": true,
+            "language": "en_US.UTF-8"
+        },
+        "general_settings": {
+            "editor": {
+                "loc": "subl",
+                "ssh": "nano"
+            },
+            "ssh": {
+                "key_path": "${HOME}/.ssh/id_rsa"
+            }
+        },
+        "change_dir_paths": [
+            "${HOME}",
+            "${HOME}/projects"
+        ],
+        "register_aliases": {
+            "foo-bar": "echo \"foo-bar\""
+        },
+        "completion_paths": {
+            "foo-bar-path-completions": "~/foo/bar/baz"
+        },
+        "completion_files": {
+            "foo-bar-file-completions": "~/foo/bar/baz.ext"
+        },
+        "define_variables": {
+            "VAR_FOO": "a foo variable",
+            "VAR_BAR": "a bar variable"
+        },
+        "export_variables": [
+            "VAR_FOO",
+            "VAR_BAR"
+        ],
+        "executable_paths": [
+            "~/bin/foo",
+            "~/bin/bar",
+            "/opt/foo",
+            "/opt/bar"
+        ]
+    },
+    "external": {
+        "android-sdk": {
+            "_enabled": true,
+            "executable_paths": [
+                "${HOME}/Android/Sdk/platform-tools"
+            ]
+        },
+        "apt-fast": {
+            "_enabled": true,
+            "completion_files": [
+                "/usr/share/zsh/functions/Completion/Debian/_apt-fast"
+            ]
+        },
+        "chruby": {
+            "_enabled": true,
+            "system_root_path": "/usr/local/share/chruby",
+            "auto_set_version": "2.4",
+            "env_source_files": [
+                "{{system_root_path}}/chruby.sh",
+                "{{system_root_path}}/auto.sh"
+            ]
+        },
+        "composer": {
+            "_enabled": true,
+            "executable_paths": [
+                "${HOME}/.config/composer/vendor/bin"
+            ]
+        },
+        "docker": {
+            "_enabled": true,
+            "machine_env_type": "default"
+        },
+        "gnupg": {
+            "_enabled": true,
+            "secret_key": "466839F8117362D877E438BE02B8697CE6AA381A",
+            "export_tty": "${TTY}"
+        },
+        "golang": {
+            "_enabled": true,
+            "system_root_path": "/usr/lib/go-1.10",
+            "mortal_root_path": "${HOME}/golang/1.9",
+            "executable_paths": [
+                "{{mortal_root_path}}/bin"
+            ]
+        },
+        "google-cloud-sdk": {
+            "_enabled": true,
+            "system_root_path": "/opt/google-cloud-sdk",
+            "env_source_files": [
+                "{{system_root_path}}/path.zsh.inc"
+            ],
+            "completion_files": [
+                "{{system_root_path}}/completion.zsh.inc"
+            ]
+        },
+        "npm": {
+            "_enabled": true,
+            "mortal_root_path": "${HOME}/.npm-packages",
+            "manset_load_path": "{{mortal_root_path}}/share/man",
+            "executable_paths": [
+                "${HOME}/node_modules/.bin/",
+                "{{mortal_root_path}}/bin"
+            ]
+        },
+        "phpenv": {
+            "_enabled": true,
+            "mortal_root_path": "${HOME}/.phpenv",
+            "executable_paths": [
+                "{{mortal_root_path}}/bin"
+            ],
+            "completion_files": [
+                "{{mortal_root_path}}/completions/rbenv.zsh"
+            ]
+        },
+        "platform-sh": {
+            "_enabled": true,
+            "mortal_root_path": "${HOME}/.platformsh",
+            "executable_paths": [
+                "{{mortal_root_path}}/bin"
+            ],
+            "env_source_files": [
+                "{{mortal_root_path}}/shell-config.rc"
+            ]
+        },
+        "travis": {
+            "_enabled": true,
+            "mortal_root_path": "${HOME}/.travis",
+            "completion_files": [
+                "{{mortal_root_path}}/travis.sh"
+            ]
+        },
+        "wine-hq": {
+            "_enabled": true,
+            "system_root_path": "/opt",
+            "executable_paths": [
+                "{{system_root_path}}/wine-stable/bin",
+                "{{system_root_path}}/wine-devel/bin",
+                "{{system_root_path}}/wine-staging/bin"
+            ]
+        }
+    }
+}

@@ -14,14 +14,14 @@
 # Source chruby environment and auto-selector scripts
 #
 
-if [[ -f "${D_ZSH_CHRUBY_ENVIRONMENT}" ]]; then
-    source "${D_ZSH_CHRUBY_ENVIRONMENT}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${inc}"
+if [[ -f "${_DZ_CHRUBY_ENVIRONMENT}" ]]; then
+    source "${_DZ_CHRUBY_ENVIRONMENT}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${_DZ_CHRUBY_ENVIRONMENT}"
 fi
 
-if [[ -f "${D_ZSH_CHRUBY_AUTO_SELECT}" ]]; then
-    source "${D_ZSH_CHRUBY_AUTO_SELECT}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${inc}"
+if [[ -f "${_DZ_CHRUBY_AUTO_SELECT}" ]]; then
+    source "${_DZ_CHRUBY_AUTO_SELECT}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${_DZ_CHRUBY_AUTO_SELECT}"
 fi
 
 
@@ -29,8 +29,6 @@ fi
 # Set Ruby 2.4.x as the default interpreter
 #
 
-which chruby &> /dev/null && \
-    chruby 2.4 &> /dev/null || \
-    _dzsh_warning "Could not set chruby ruby version to 2.4"
-
-# EOF
+chruby 2.4 &> /dev/null && \
+    _log_action "Set ruby version 2.4 as default" || \
+    _log_warn "Could not set chruby ruby version to 2.4"

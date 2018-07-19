@@ -14,6 +14,6 @@
 # Add wine paths when installed from official PPA
 #
 
-_dotZshPathVariableAddition "/opt/wine-stable/bin" scripted
-_dotZshPathVariableAddition "/opt/wine-devel/bin" scripted
-_dotZshPathVariableAddition "/opt/wine-staging/bin" scripted
+_add_env_path_dir "/opt/wine-stable/bin" scripted
+_add_env_path_dir "/opt/wine-devel/bin" scripted
+_add_env_path_dir "/opt/wine-staging/bin" scripted

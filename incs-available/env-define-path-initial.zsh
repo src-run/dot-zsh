@@ -15,11 +15,11 @@
 #
 
 if \
-    [[ ! -z ${D_ZSH_PATH_ADDITIONS_LIST} ]] && \
-    [[ $D_ZSH_PATH_ADDITIONS_LIST[(I)$D_ZSH_PATH_ADDITIONS_LIST[-1]] -gt 0 ]];\
+    [[ ! -z ${_DZ_PATH_ADDITIONS_LIST} ]] && \
+    [[ $_DZ_PATH_ADDITIONS_LIST[(I)$_DZ_PATH_ADDITIONS_LIST[-1]] -gt 0 ]];
     then
-    for p in "${(@k)D_ZSH_PATH_ADDITIONS_LIST}"; do
-        _dotZshPathVariableAddition "${p}" default
+    for p in "${(@k)_DZ_PATH_ADDITIONS_LIST}"; do
+        _add_env_path_dir "${p}" default
     done
 fi
 
@@ -29,12 +29,12 @@ fi
 #
 
 if \
-    [[ ! -z ${D_ZSH_PATH_ADDITIONS_FILE} ]] && \
-    [[ -r "${D_ZSH_PATH_ADDITIONS_FILE}" ]]; \
+    [[ ! -z ${_DZ_PATH_ADDITIONS_FILE} ]] && \
+    [[ -r "${_DZ_PATH_ADDITIONS_FILE}" ]]; \
     then
     while read p; do
-        _dotZshPathVariableAddition "${p}" custom
-    done <"${D_ZSH_PATH_ADDITIONS_FILE}"
+        _add_env_path_dir "${p}" custom
+    done <"${_DZ_PATH_ADDITIONS_FILE}"
 fi
 
 # EOF

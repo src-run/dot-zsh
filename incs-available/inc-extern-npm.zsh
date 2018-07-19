@@ -14,47 +14,47 @@
 # Add NPM binaries to PATH
 #
 
-_dotZshPathVariableAddition "${HOME}/node_modules/.bin/" scripted
-_dotZshPathVariableAddition "${D_ZSH_NPM_PACKAGES_PATH}/bin" scripted
+_add_env_path_dir "${HOME}/node_modules/.bin/" scripted
+_add_env_path_dir "${_DZ_NPM_PACKAGES_PATH}/bin" scripted
 
 
 #
 # Setup manpath
 #
 
-if [[ -d "${D_ZSH_NPM_MANPAGES_PATH}" ]]; then
-    D_ZSH_MAN_PATH_ORIGINAL="${MANPATH}"
+if [[ -d "${_DZ_NPM_MANPAGES_PATH}" ]]; then
+    _DZ_MAN_PATH_ORIGINAL="${MANPATH}"
     unset MANPATH
-    D_ZSH_MAN_PATH_DEFAULTS="$(manpath)"
-    D_ZSH_MAN_PATH_TO_APPLY=""
-    D_ZSH_PATH_DELIMITER=":"
+    _DZ_MAN_PATH_DEFAULTS="$(manpath)"
+    _DZ_MAN_PATH_TO_APPLY=""
+    _DZ_PATH_DELIMITER=":"
 
-    if [[ ! -z "${D_ZSH_MAN_PATH_ORIGINAL// }" ]]; then
-        for p in "${(ps:$D_ZSH_PATH_DELIMITER:)D_ZSH_MAN_PATH_ORIGINAL}"; do
-            D_ZSH_MAN_PATH_TO_APPLY="${p}:${D_ZSH_MAN_PATH_TO_APPLY}"
+    if [[ ! -z "${_DZ_MAN_PATH_ORIGINAL// }" ]]; then
+        for p in "${(ps:$_DZ_PATH_DELIMITER:)_DZ_MAN_PATH_ORIGINAL}"; do
+            _DZ_MAN_PATH_TO_APPLY="${p}:${_DZ_MAN_PATH_TO_APPLY}"
         done
     fi
 
-    if [[ ! -z "${D_ZSH_MAN_PATH_DEFAULTS// }" ]]; then
-        for p in "${(ps:$D_ZSH_PATH_DELIMITER:)D_ZSH_MAN_PATH_DEFAULTS}"; do
-            if [[ ":$D_ZSH_MAN_PATH_TO_APPLY:" != *":${p}:"* ]]; then
-                D_ZSH_MAN_PATH_TO_APPLY="${p}:${D_ZSH_MAN_PATH_TO_APPLY}"
+    if [[ ! -z "${_DZ_MAN_PATH_DEFAULTS// }" ]]; then
+        for p in "${(ps:$_DZ_PATH_DELIMITER:)_DZ_MAN_PATH_DEFAULTS}"; do
+            if [[ ":$_DZ_MAN_PATH_TO_APPLY:" != *":${p}:"* ]]; then
+                _DZ_MAN_PATH_TO_APPLY="${p}:${_DZ_MAN_PATH_TO_APPLY}"
             fi
         done
     fi
 
     if \
-        [[ ! -z "${D_ZSH_NPM_MANPAGES_PATH// }" ]] && \
-        [[ ":$D_ZSH_MAN_PATH_TO_APPLY:" != *":${D_ZSH_NPM_MANPAGES_PATH}:"* ]];\
+        [[ ! -z "${_DZ_NPM_MANPAGES_PATH// }" ]] && \
+        [[ ":$_DZ_MAN_PATH_TO_APPLY:" != *":${_DZ_NPM_MANPAGES_PATH}:"* ]];\
         then
-        D_ZSH_MAN_PATH_TO_APPLY="${D_ZSH_NPM_MANPAGES_PATH}:${D_ZSH_MAN_PATH_TO_APPLY}"
+        _DZ_MAN_PATH_TO_APPLY="${_DZ_NPM_MANPAGES_PATH}:${_DZ_MAN_PATH_TO_APPLY}"
     fi
 
-    export MANPATH="${D_ZSH_MAN_PATH_TO_APPLY%?}"
+    export MANPATH="${_DZ_MAN_PATH_TO_APPLY%?}"
 
-    unset D_ZSH_MAN_PATH_ORIGINAL
-    unset D_ZSH_MAN_PATH_DEFAULTS
-    unset D_ZSH_MAN_PATH_TO_APPLY
+    unset _DZ_MAN_PATH_ORIGINAL
+    unset _DZ_MAN_PATH_DEFAULTS
+    unset _DZ_MAN_PATH_TO_APPLY
 fi
 
 # EOF

@@ -14,21 +14,21 @@
 # Include phpenv shell helpers.
 #
 
-_incLog 2 2 "Initializing phpenv"
+_log_source 2 2 "Initializing phpenv"
 
-_dotZshPathVariableAddition "${_DOT_ZSH_PHPENV_BIN}" scripted && \
-    _actLog "Added ${_DOT_ZSH_PHPENV_BIN} to path"
+_add_env_path_dir "${_DZ_PHPENV_BIN}" scripted && \
+    _log_action "Added ${_DZ_PHPENV_BIN} to path"
 
-if [[ -d "${_DOT_ZSH_PHPENV_ROOT}" ]]; then
-    if [[ ! -f "${_DOT_ZSH_PHPENV_COMPLETIONS}" ]]; then
-        _dzsh_warning \
-            "Completions for phpenv not found: ${_DOT_ZSH_PHPENV_COMPLETIONS}"
+if [[ -d "${_DZ_PHPENV_ROOT}" ]]; then
+    if [[ ! -f "${_DZ_PHPENV_COMPLETIONS}" ]]; then
+        _log_warn \
+            "Completions for phpenv not found: ${_DZ_PHPENV_COMPLETIONS}"
     else
-        source "${_DOT_ZSH_PHPENV_COMPLETIONS}" 2>/dev/null && \
-            _incLog 2 2 "Sourcing file ${_DOT_ZSH_PHPENV_COMPLETIONS}"
+        source "${_DZ_PHPENV_COMPLETIONS}" 2>/dev/null && \
+            _log_source 2 2 "Sourcing file ${_DZ_PHPENV_COMPLETIONS}"
     fi
 
-    eval "$(phpenv init -)" && _actLog "Initializing phpenv"
+    eval "$(phpenv init -)" && _log_action "Initializing phpenv"
 fi
 
 # EOF

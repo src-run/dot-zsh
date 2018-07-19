@@ -1,1 +1,0 @@
-../incs-common/env-define-functions.zsh

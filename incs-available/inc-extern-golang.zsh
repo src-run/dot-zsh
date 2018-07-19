@@ -15,6 +15,6 @@
 #
 
 export GOROOT
-_dotZshPathVariableAddition "${GOROOT}/bin"
+_add_env_path_dir "${GOROOT}/bin"
 
 # EOF

@@ -15,14 +15,14 @@
 #
 
 if \
-    [[ ! -z "${D_ZSH_PATH_SCRIPTED_FILE}" ]] && \
-    [[ -r "${D_ZSH_PATH_SCRIPTED_FILE}" ]]; \
+    [[ ! -z "${_DZ_PATH_SCRIPTED_FILE}" ]] && \
+    [[ -r "${_DZ_PATH_SCRIPTED_FILE}" ]]; \
     then
     while read p; do
-        _dotZshPathVariableAddition "${p}" custom
-    done <"${D_ZSH_PATH_SCRIPTED_FILE}"
+        _add_env_path_dir "${p}" custom
+    done <"${_DZ_PATH_SCRIPTED_FILE}"
 fi
 
-_dotZshPathVariableAdditionRequestCleanup
+_clean_env_path_dir_temp
 
 # EOF

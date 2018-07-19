@@ -14,9 +14,9 @@
 # Source apt-fast shell completion script
 #
 
-#if [[ -f "${D_ZSH_APT_FAST_COMPLETION}" ]]; then
-#    source "${D_ZSH_APT_FAST_COMPLETION}" 2>/dev/null && \
-#        _incLog 2 2 "Sourcing file ${D_ZSH_APT_FAST_COMPLETION}"
+#if [[ -f "${_DZ_APT_FAST_COMPLETION}" ]]; then
+#    source "${_DZ_APT_FAST_COMPLETION}" 2>/dev/null && \
+#        _log_source 2 2 "Sourcing file ${_DZ_APT_FAST_COMPLETION}"
 #fi
 
 # EOF

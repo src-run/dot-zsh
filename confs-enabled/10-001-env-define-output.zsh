@@ -1,1 +1,0 @@
-../confs-available/env-define-output.zsh

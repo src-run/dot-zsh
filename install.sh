@@ -1,160 +1,301 @@
 #!/bin/bash
 
-declare INST_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}" 2> /dev/null)" && pwd)"
+#
+# Internal variables
+#
+INSTALL_SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}" 2> /dev/null)" && pwd)"
 
-STATE_DESC=""
-STATE_INFO_OUTPUT=0
-STATE_INFO_NLS=0
-
-out_nl()
-{
+#
+# Output new line
+#
+function out_nl {
     echo -en "\n"
 }
 
-out()
-{
-    echo -n "${1:-}"
-    [ "${2:-false}" == "true" ] && out_nl
+#
+# Output conditional new line
+#
+function out_nl_conditional {
+    if [[ "${1:-true}" == "true" ]] || [[ ${1:-0} -eq 0 ]]; then
+        out_nl
+    fi
 }
 
-out_prefix()
-{
-    return
-    [ -z $out_prefix_count ] && count=0
-    out_prefix_count=$((($out_prefix_count + 1)))
+#
+# Output text
+#
+function out {
+    local value="${1:-}"
+    local style="${2:-}"
 
-    out_custom "[$(basename $0):$(printf "%03d" $out_prefix_count)]" \
-        "fg:black bg:white style:reverse"
-    out " " false
+    if [[ -z "${style}" ]]; then
+        printf "${value}"
+    else
+        out_custom "${value}" "${style}"
+    fi
 }
 
-out_line()
-{
+#
+# Output single space padded string
+#
+function out_padded {
+    out " ${1:-} " "${2:-}"
+}
+
+#
+# Output line prefix text
+#
+function out_prefix {
+    out_padded "${1:-―――}" "${2:-fg:magenta style:bold}"
+}
+
+#
+# Output line prefix text (subs)
+#
+function out_prefix_subs {
     out_prefix
-    out_custom " ――― " "fg:magenta style:bold"
-    out ' ○'
-    out " $1" true
 }
 
-out_title()
-{
-    out_prefix
-    out_custom " +++ " "style:bold style:reverse"
-    out_custom ' ◎ [ src-run/dot-zsh installer ]' 'style:bold'
-    out_nl
+#
+# Output line prefix text (bold)
+#
+function out_prefix_bold {
+    out_prefix '+++' 'style:bold style:reverse'
 }
 
-out_complete()
-{
-    out_prefix
-    out_custom " +++ " "style:bold style:reverse"
-    out_custom ' ◎ [ completed installation ]' 'style:bold'
-    out_nl
+#
+# Output line prefix text (fail)
+#
+function out_prefix_fail {
+    out_prefix '!!!' 'fg:white bg:red'
 }
 
-out_error()
-{
-    out_prefix
-    out_custom " !!! " "bg:red"
-    out_custom ' ○' 'fg:light-red'
-    out_custom " $1" "fg:red style:bold"
-    out_nl
+#
+# Output line bullet character
+#
+function out_bullet {
+    out_padded "${1:-○}" "${2:-}"
 }
 
-out_instructions()
-{
+#
+# Output line bullet character (subs)
+#
+function out_bullet_subs {
+    out_bullet_bold '  ►' 'style:dim'
+}
+
+#
+# Output line bullet character (bold)
+#
+function out_bullet_bold {
+    out_bullet '◎' 'style:bold'
+}
+
+#
+# Output line bullet character (fail)
+#
+function out_bullet_fail {
+    out_bullet '○' 'fg:light-red'
+}
+
+#
+# Output ellipsis character
+#
+function out_ellipsis {
+    out_padded '…'
+}
+
+#
+# Output styled line string
+#
+function out_string {
+    out "${1:-}" "${2:-}"
+    out_nl_conditional ${3:-true}
+}
+
+
+#
+# Output styled line string (subs)
+#
+function out_string_subs {
+    out_string "${1}" 'fg:white' false
+    out_ellipsis
+    out_nl_conditional ${2:-false}
+}
+
+#
+# Output styled line string (bold)
+#
+function out_string_bold {
+    out_string "[ ${1} ]" 'style:bold' ${2:-true}
+}
+
+#
+# Output styled line string (fail)
+#
+function out_string_fail {
+    out_string "${1}" "fg:red style:bold" ${2:-true}
+}
+
+#
+# Output line of text (optionally styled with optional newline)
+#
+function out_line {
+    local type="${1:-norm}"
+    local text="${2:-}"
+    local line="${3:-true}"
+
+    case "${type}" in
+        subs)
+            out_prefix_subs
+            ;;
+        bold)
+            out_prefix_bold
+            ;;
+        fail)
+            out_prefix_fail
+            ;;
+        *)
+            out_prefix
+    esac
+
+    if [[ -z "${text}" ]]; then
+        out_nl_conditional ${line} && return
+    fi
+
+    case "${type}" in
+        subs)
+            out_bullet_subs
+            out_string "${text}" ${line}
+            ;;
+        bold)
+            out_bullet_bold
+            out_string "${text}" ${line}
+            ;;
+        fail)
+            out_bullet_fail
+            out_string "${text}" ${line}
+            ;;
+        *)
+            out_bullet
+            out_string "${text}" ${line}
+    esac
+
+}
+
+#
+# Output title line of text
+#
+function out_title {
+    out_line 'bold' 'src-run/dot-zsh installer'
+}
+
+#
+# Output completion line of text
+#
+function out_complete {
+    out_line 'bold' 'completed all steps of installer'
+}
+
+#
+# Output fail line of text
+#
+function out_fail {
+    out_line 'fail' "${1}"
+}
+
+#
+# Output inst line of text
+#
+function out_inst {
     out_custom "$1" "fg:white style:bold"
     out_nl
 }
 
-out_state_start()
-{
-    local desc="${1:-starting operation}"
-
-    STATE_DESC="${desc}"
-
+#
+# Start state output
+#
+function out_state_start {
     out_prefix
-    out_custom " ――― " "fg:magenta style:bold"
-    out ' ○'
-    out " ${desc} … " false
+    out_bullet
+    out "${1:-starting operation}"
+    out_ellipsis
 }
 
-out_state_info()
-{
-    STATE_INFO_OUTPUT=1
-    out_custom "(${1,,}) " "fg:white"
-}
-
-out_state_status()
-{
+#
+# Start sub-state output
+#
+function out_state_start_subs {
     out_prefix
-    out_custom ' ――― ' 'fg:magenta style:bold'
-    out_custom '   ► ' 'fg:white style:dim'
-    out_custom "${1} … " 'fg:white'
+    out_bullet_subs
+    out "${1}" 'fg:white'
+    out_ellipsis
 }
 
-out_state_done_prefix()
-{
-    if [[ ${STATE_INFO_NLS} -eq 1 ]]; then
-        out_nl
-        out_state_start "${STATE_DESC}"
-    fi
-
-    if [[ ${STATE_INFO_OUTPUT} -eq 1 ]]; then
-        out_custom '… ' 'fg:white'
-    fi
-
-    STATE_INFO_OUTPUT=0
+#
+# Close state output as okay
+#
+function out_state_close_okay {
+    out_string "${1:-OKAY}" "fg:green style:bold"
 }
 
-out_state_done_success()
-{
-    out_custom "${1:-OKAY}" "fg:green style:bold"
-    out_nl
+#
+# Close state output as fail
+#
+function out_state_close_fail {
+    out_string "${1:-FAIL}" "fg:red style:bold"
 }
 
-out_state_done_error()
-{
-    out_custom "${1:-FAIL}" "fg:red style:bold"
-    out_nl
+#
+# Close state output as done
+#
+function out_state_close_done {
+    out_string "${1:-DONE}  " "bg:blue style:bold"
 }
 
-out_state_done_okay()
-{
-    out_custom "${1:-DONE}  " "bg:blue style:bold"
-    out_nl
-}
-
-out_state_done()
-{
-    case "$1" in
-            0 ) out_state_done_success ;;
-            * ) out_state_done_error ;;
-    esac
-}
-
-out_state_custom()
-{
+#
+# Close state output as cust
+#
+function out_state_close_cust {
     local desc="${1}"
     local type="${2:-fg:white style:bold}"
 
-    out_custom "${desc}" "${type}"
-    out_nl
+    out_string "${desc}" "${type}"
 }
 
-get_os_type()
-{
+#
+# Close state output based on return code
+#
+function out_state_close {
+    local result="${1:-0}"
+
+    case "${result}" in
+            0)
+                out_state_close_okay
+                ;;
+            *)
+                out_state_close_fail
+                out_fail 'Haling script due to previous error!'
+                exit ${result}
+                ;;
+    esac
+}
+
+#
+# Determine operating system type
+#
+function get_os_type {
     case "${OSTYPE}" in
-        linux* )
+        linux*)
             printf 'linux'
             ;;
-        darwin* )
+        darwin*)
             printf 'darwin'
-            ;; 
-        solaris* )
+            ;;
+        solaris*)
             printf 'solaris'
             ;;
-        bsd* )
+        bsd*)
             printf 'bsd'
             ;;
         *)
@@ -163,162 +304,221 @@ get_os_type()
     esac
 }
 
-is_os_linux()
-{
+#
+# Checks if operating system is linux
+#
+function is_os_linux {
     [[ $(get_os_type) == 'linux' ]] && echo true || echo false
 }
 
-is_os_darwin()
-{
+#
+# Checks if operating system is darwin
+#
+function is_os_darwin {
     [[ $(get_os_type) == 'darwin' ]] && echo true || echo false
 }
 
-resolve_brew_pkg_manager_bin()
-{
+#
+# Locates the absolute bin path of brew
+#
+function resolve_brew_pkg_manager_bin {
     which brew 2> /dev/null
 }
 
-resolve_apt_get_pkg_manager_bin()
-{
+#
+# Locates the absolute bin path of apt-get
+#
+function resolve_apt_get_pkg_manager_bin {
     which apt-get 2> /dev/null
 }
 
-install_darwin_dependencies()
-{
-    out_state_start "Installing deps"
+function install_dependencies_info {
+    local os="${1}"
+    local pkg_manager_name="${2}"
+    local pkg_manager_path="${3}"
+
+    out_state_start "Installing dependencies"
     out_nl
-    out_state_status 'Detected operating system'
-    out_state_custom 'darwin (osx)'
+    out_state_start_subs 'Detected operating system'
+    out_state_close_cust "$(get_os_type)"
 
-    local brew="$(resolve_brew_pkg_manager_bin)"
-
-    if [[ -z "${brew}" ]]; then
-        out_state_done_error
-        out_error 'You must install the "brew" package manager before continuing!'
+    if [[ -z "${pkg_manager_path}" ]] || [[ ! -f "${pkg_manager_path}" ]]; then
+        out_state_close_fail
+        out_fail \
+            "The \"${pkg_manager_name}\" package manager must be installed!"
         exit 255
     fi
 
-    out_state_status "Detected package manager"
-    out_state_custom "${brew}"
-
-    for p in grep gnu-sed coreutils zsh; do
-        out_state_status "Installing \"${p}\" package"
-        ${brew} install ${p} --with-default-names &> /dev/null
-        out_state_done $?
-    done
+    out_state_start_subs "Detected package manager"
+    out_state_close_cust "${pkg_manager_path}"
 }
 
-install_linux_dependencies()
-{
-    out_state_start "Installing deps"
-    out_nl
-    out_state_status 'Detected operating system'
-    out_state_custom 'linux'
+function install_dependencies_acts {
+    local pkg_manager_path="${1}"; shift
+    local pkg_manager_call="${1}"; shift
+    local pkg_manager_opts="${1}"; shift
 
-    local apt="$(resolve_apt_get_pkg_manager_bin)"
-
-    if [[ -z "${apt}" ]]; then
-        out_state_done_error
-        out_error 'You must install the "apt" package manager before continuing!'
-        exit 255
-    fi
-
-    out_state_status "Detected package manager"
-    out_state_custom "${apt}"
-
-    for p in make bc zsh; do
-        out_state_status "Installing \"${p}\" package"
-        sudo ${apt} install ${p} &> /dev/null
-        out_state_done $?
+    for package in "$@"; do
+        out_state_start_subs "Installing \"${package}\" package"
+        ${pkg_manager_path} ${pkg_manager_call} ${package} ${pkg_manager_opts}
+        out_state_close $?
     done
+
+    out_state_start_subs "Completed installation of ${#} packages"
+    out_state_close_done
 }
 
-main()
-{
+#
+# Installs dependencies for darwin systems
+#
+function install_darwin_dependencies {
+    local brew
+    local packages="grep gnu-sed coreutils jq zsh"
+
+    brew="$(resolve_brew_pkg_manager_bin)"
+
+    install_dependencies_info 'darwin' 'brew' "${brew}"
+    install_dependencies_acts "${brew}" 'install' '--with-default-names' \
+        'grep' 'gnu-sed' 'coreutils' 'jq' 'zsh'
+}
+
+#
+# Installs dependencies for linux systems
+#
+function install_linux_dependencies {
+    local apt
+    local packages="make bc jq zsh"
+
+    apt="$(resolve_apt_get_pkg_manager_bin)"
+    export DEBIAN_FRONTEND=noninteractive
+
+    install_dependencies_info 'linux' 'apt-get' "${apt}"
+    install_dependencies_acts "${brew}" 'install' '-yq' \
+        'make' 'bc' 'jq' 'zsh'
+}
+
+#
+# The main program function (all the magic starts here)
+#
+function main {
+    # Define out install paths and git remotes
+    local _DZ_INSTALL_TO="${HOME}/.dot-zsh"
+    local _DZ_GIT_REMOTE="https://github.com/src-run/dot-zsh.git"
+    local OMY_ZSH_INSTALL_TO="${HOME}/.oh-my-zsh"
+    local OMY_ZSH_GIT_REMOTE="https://github.com/robbyrussell/oh-my-zsh.git"
+
+    # Prevent the cloned repository from having insecure permissions. Failing to
+    # do so causes failures like "command not found: " for users with insecure
+    # umasks (e.g., "002", allowing group writing).
     umask g-w,o-w
 
+    # Write out title
     out_title
 
+    # Start environment state and force newline
     out_state_start 'Preparing environment'
     out_nl
- 
-    out_state_status 'Determined "dot-zsh" install path'
-    out_state_custom "$HOME/.dot-zsh"
- 
-    out_state_status 'Determined "oh-my-zsh" install path'
-    out_state_custom "$HOME/.oh-my-zsh"
- 
-    if [[ -d "$HOME/.dot-zsh" ]]; then
-        out_state_status 'Removing previous "dot-zsh" install'
-        rm -fr $HOME/.dot-zsh &> /dev/null
-        out_state_done $?
+
+    # Write dot-zsh install path
+    out_state_start_subs 'Determined "dot-zsh" install path'
+    out_state_close_cust "${_DZ_INSTALL_TO}"
+
+    # Write oh-my-zsh install path
+    out_state_start_subs 'Determined "oh-my-zsh" install path'
+    out_state_close_cust "${OMY_ZSH_INSTALL_TO}"
+
+    # Remove previous dot-zsh install if exists
+    if [[ -d "${_DZ_INSTALL_TO}" ]]; then
+        out_state_start_subs 'Removing previous "dot-zsh" install'
+        rm -fr ${_DZ_INSTALL_TO} &> /dev/null
+        out_state_close $?
     fi
 
-    if [[ -d "$HOME/.oh-my-zsh" ]]; then
-        out_state_status 'Removing previous "oh-my-zsh" install'
-        rm -fr $HOME/.oh-my-zsh &> /dev/null
-        out_state_done $?
+    # Remove previous oh-my-zsh install if exists
+    if [[ -d "${OMY_ZSH_INSTALL_TO}" ]]; then
+        out_state_start_subs 'Removing previous "oh-my-zsh" install'
+        rm -fr ${OMY_ZSH_INSTALL_TO} &> /dev/null
+        out_state_close $?
     fi
 
+    # Install dependencies
     if [[ $(is_os_darwin) == "true" ]]; then
         install_darwin_dependencies
     elif [[ $(is_os_linux) == "true" ]]; then
         install_linux_dependencies
     else
-        out_error 'Unsupported OS!'
+        out_fail "Your operating system is unsupported: $(get_os_type)"
         exit 255
     fi
 
+    # Start install components state and force newline
     out_state_start "Installing components"
     out_nl
-    out_state_status 'Fetching "https://github.com/src-run/dot-zsh.git"'
-    git clone https://github.com/src-run/dot-zsh.git $HOME/.dot-zsh &> /dev/null && \
-        cd $HOME/.dot-zsh &> /dev/null && \
-        git submodule update --init &> /dev/null
-    out_state_done $?
 
-    out_state_status 'Fetching "https://github.com/robbyrussell/oh-my-zsh.git"'
-    git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh &> /dev/null && \
-        cd $HOME/.dot-zsh &> /dev/null && \
+    # Clone dot-zsh and initialize/update any submodules
+    out_state_start_subs "Fetching \"${_DZ_GIT_REMOTE}\""
+    git clone ${_DZ_GIT_REMOTE} ${_DZ_INSTALL_TO} &> /dev/null && \
+        cd ${_DZ_INSTALL_TO} &> /dev/null && \
         git submodule update --init &> /dev/null
-    out_state_done $?
+    out_state_close $?
+
+    # Clone oh-my-zsh and initialize/update any submodules
+    out_state_start_subs "Fetching \"${OMY_ZSH_GIT_REMOTE}\""
+    git clone --depth=1 \
+        ${OMY_ZSH_GIT_REMOTE} ${OMY_ZSH_INSTALL_TO} &> /dev/null && \
+        cd ${OMY_ZSH_INSTALL_TO} &> /dev/null && \
+        git submodule update --init &> /dev/null
+    out_state_close $?
 
     #out_state_start "Installing fonts"
-    #$HOME/.dot-zsh/fonts/install.sh &> /dev/null
-    #out_state_done $?
+    #${_DZ_INSTALL_TO}/fonts/install.sh &> /dev/null
+    #out_state_close $?
 
     #out_state_start "Installing fonts"
     #wget -O chruby-0.3.9.tar.gz https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz &> /dev/null
     #tar -xzvf chruby-0.3.9.tar.gz &> /dev/null
     #cd chruby-0.3.9/ &> /dev/null
     #sudo make install
-    #out_state_done $?
+    #out_state_close $?
 
     #cd ..
 
     #out_state_start "Installing phpenv"
     #git clone https://github.com/src-run/phpenv.git &> /dev/null
     #phpenv/bin/phpenv-install.sh
-    #out_state_done $?
+    #out_state_close $?
 
+    # Start config components state and force newline
     out_state_start "Configuring components"
     out_nl
 
-    out_state_status "Linking $HOME/.zshrc file"
+    # Creating from ~/.zshrc to package rc.zsh file
+    out_state_start_subs "Linking $HOME/.zshrc file"
     rm -f $HOME/.zshrc &> /dev/null && \
-        ln -s $HOME/.dot-zsh/rc.zsh $HOME/.zshrc &> /dev/null
-    out_state_done $?
+        ln -s ${_DZ_INSTALL_TO}/rc.zsh $HOME/.zshrc &> /dev/null
+    out_state_close $?
 
+    # White script completion notice
     out_complete
 
-    out_instructions
-    out_instructions " # Run the following to enable ZSH"
-    out_instructions " $ $(which chsh) -s $(which zsh)"
-    out_instructions
+    # Write instructions to enable zsh shell by default
+    out_inst
+    out_inst " # Run the following to enable ZSH"
+    out_inst " $ $(which chsh) -s $(which zsh)"
+    out_inst
 }
 
+#
+# Include the bright library to enable colored output
+#
+source ${INSTALL_SELF_PATH}/bright/bright.bash
 
-source ${INST_PATH}/bright/bright.bash
+#
+# Configure bright library not to auto output new lines
+#
 BRIGHT_AUTO_NL=0
 
+#
+# Call the main script function (go!)
+#
 main

@@ -14,16 +14,16 @@
 # Assign ssh aliases
 #
 
-_dotZshSshAliasAssigments
+_aliases_setup_ssh_connections
 
 
 #
 # Assign simple aliases
 #
 
-for n in "${(@k)D_ZSH_ALIAS_LIST}"; do
-    alias $n="${D_ZSH_ALIAS_LIST[$n]}" &&
-        _actLog "Alias defined '${n}=\"${D_ZSH_ALIAS_LIST[$n]}\"'"
+for n in "${(@k)_DZ_ALIAS_LIST}"; do
+    alias $n="${_DZ_ALIAS_LIST[$n]}" &&
+        _log_action "Alias defined '${n}=\"${_DZ_ALIAS_LIST[$n]}\"'"
 done
 
 # EOF

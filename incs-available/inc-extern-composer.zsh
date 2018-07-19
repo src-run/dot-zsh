@@ -14,4 +14,4 @@
 # Add global composer binaries to PATH
 #
 
-_dotZshPathVariableAddition "${D_ZSH_GLOBAL_COMPOSER_BIN}" scripted
+_add_env_path_dir "${_DZ_GLOBAL_COMPOSER_BIN}" scripted

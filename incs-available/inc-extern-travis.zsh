@@ -14,9 +14,9 @@
 # Source Travis shell completion script
 #
 
-if [[ -f "${D_ZSH_TRAVIS_SHELL_COMPLETION}" ]]; then
-    source "${D_ZSH_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && \
-        _incLog 2 2 "Sourcing file ${D_ZSH_TRAVIS_SHELL_COMPLETION}"
+if [[ -f "${_DZ_TRAVIS_SHELL_COMPLETION}" ]]; then
+    source "${_DZ_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && \
+        _log_source 2 2 "Sourcing file ${_DZ_TRAVIS_SHELL_COMPLETION}"
 fi
 
 # EOF

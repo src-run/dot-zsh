@@ -10,7 +10,8 @@
 #
 
 
-SSH_KEY_PATH="~/.ssh/id_rsa"
-
-
-# EOF
+SSH_KEY_PATH=$(
+    _try_read_conf_string \
+        'internal.general_settings.ssh.key_path' \
+        "${HOME}/.ssh/id_rsa"
+) && _log_buffer 2 "--- Setting ssh key path to '${SSH_KEY_PATH}'"

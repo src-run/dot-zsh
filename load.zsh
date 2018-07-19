@@ -11,142 +11,182 @@
 
 
 #
+# Use PCRE regular expressions
+#
+
+setopt re_match_pcre
+
+#
 # Date function
 #
-function _getDate {
-    local date="$(which gdate)"
+function _get_date {
+    local date
 
-    if [[ ${date} == "" ]]; then
+    date="$(which gdate)"
+
+    if [[ $? -ne 0 ]]; then
         date="$(which date)"
+
+        if [[ $? -ne 0 ]]; then
+            return
+        fi
     fi
 
-    date +"${1}"
+    ${date} +"${1}"
 }
 
 #
 # Define function to return microsecond aware unix time.
 #
-function _getPreciseUnixTime {
-    echo -n $(_getDate '%s.%N')
+function _get_microtime {
+    echo -n $(_get_date '%s.%N')
 }
+
+
+#
+# String padding routine.
+#
+
+function _out_indent {
+    for i in `seq 1 ${1:-2}`; do
+        echo -n "    "
+    done
+}
+
+
+#
+# Format log output buffer
+#
+function _format_buffer {
+    printf '[%s:%s] %s%s' \
+        "${USER}/dot-zsh" \
+        "$(_get_date %s)" \
+        "$(_out_indent ${1})" \
+        "$(echo "${2}" | sed 's/[ ]*$//g')"
+}
+
+
+#
+# Add to output buffer
+#
+function _log_buffer {
+    local indent="${1}"; shift
+    local string
+
+    if [[ -z ${_DZ_OUT_BUFFER_LINES} ]]; then
+        typeset -g _DZ_OUT_BUFFER_LINES=()
+    fi
+
+    if [[ -z ${_DZ_LOG_BUFFER_LINES} ]]; then
+        typeset -g _DZ_LOG_BUFFER_LINES=()
+    fi
+
+    for line in "${@}"; do
+        string="$(_format_buffer ${indent} "${line}")"
+        _DZ_OUT_BUFFER_LINES+=("${string}")
+        _DZ_LOG_BUFFER_LINES+=("${string}")
+    done
+}
+
+
+#
+# Inform about script initialization
+#
+_log_buffer 0 "--> Initializing loader script ..."
 
 
 #
 # Get the start time so we can profile performnce start to end.
 #
 
-_DOT_ZSH_LOAD_TIME_START=$(_getPreciseUnixTime)
-
-
-#
-# Enable shell-debugging and/or profiler from generic env variables.
-#
-
-if [[ ${ZSH_DEBUG+x}   ]]; then
-    set -x
-fi
-if [[ ${ZSH_PROFILE+x} ]]; then
-    ZSH_PROFILE=1
-fi
-
-
-#
-# Hard-code our LANG.
-#
-LANG=en_US.UTF-8
+_DZ_LOAD_TIME_START=$(_get_microtime)
+_log_buffer 1 "--- Starting micro-time is '${_DZ_LOAD_TIME_START}'"
 
 
 #
 # Define vars for script name, script dir path, and complete script file path.
 #
 
-D_ZSH_NAME=${(%):-%x}
-D_ZSH_BASE=$(basename ${D_ZSH_NAME})
-D_ZSH_PATH=${HOME}/.dot-zsh
-D_ZSH_CFG_ENABL_PATH=${D_ZSH_PATH}/confs-enabled
-D_ZSH_INC_VARIABLES="${D_ZSH_PATH}/incs-common/env-define-variables.zsh"
-D_ZSH_INC_FUNCTIONS="${D_ZSH_PATH}/incs-common/env-define-functions.zsh"
+_DZ_NAME="${(%):-%x}"
+_DZ_BASE="$(basename ${_DZ_NAME})"
+_DZ_PATH="${HOME}/.dot-zsh"
+_DZ_CFG_ENABL_PATH="${_DZ_PATH}/confs-enabled"
+_DZ_INC_ENABL_PATH="${_DZ_PATH}/incs-enabled"
+_DZ_REQ_INC_FILES=("${_DZ_PATH}/incs-common/env-define-variables-intern.zsh")
+_DZ_REQ_INC_FILES+=("${_DZ_PATH}/incs-common/env-define-functions-intern.zsh")
+_DZ_INC_VARIABLES="${_DZ_PATH}/incs-common/env-define-variables-intern.zsh"
+_DZ_INC_FUNCTIONS="${_DZ_PATH}/incs-common/env-define-functions-intern.zsh"
+_DZ_INC_JSON_CONF="${HOME}/.dot-zsh.json"
+_DZ_VERBOSITY=-5
+_DZ_STIO_BUFF=-1
 
 
 #
 # Source requires variables assignments and function definitions
 #
-for f in "${D_ZSH_INC_VARIABLES}" "${D_ZSH_INC_FUNCTIONS}"; do
+for f in "${_DZ_REQ_INC_FILES[@]}"; do
     if [[ ! -r "${f}" ]]; then
-        printf "Required file include is not readable or does not exist: %s" \
-            "${f}"
-        exit 255
+        printf \
+            "Required file include is not readable or does not exist: %s" \
+            "${f}" && \
+            exit 255
     fi
 
-    source "${f}"
+    source "${f}" && \
+        _log_buffer 1 "--- Sourcing core file '${f}'"
 done
-
-
-#
-# Set print mode to log to buffer until config is loaded.
-#
-
-if [[ ! ${D_ZSH_STIO_BUFF+x} ]]; then
-    D_ZSH_STIO_BUFF=-1
-fi
-
-
-#
-# Assign verbosity if variable is unset.
-#
-
-if [[ ! ${D_ZSH_STIO_VLEV+x} ]]; then
-    D_ZSH_STIO_VLEV=-5;
-fi
-
-
-#
-# Assign verbosity using common variables
-#
-
-if [[ ${VERBOSE+x} ]]; then
-    D_ZSH_STIO_VLEV=2
-fi
-
-if [[ ${VERY_VERBOSE+x} ]]; then
-    D_ZSH_STIO_VLEV=4
-fi
-
-if [[ ${DEBUG+x} ]]; then
-    D_ZSH_STIO_VLEV=10
-fi
 
 
 #
 # Let the user know we've begun and provide some environment context
 #
 
-_topLog 3 '--> Initializing loader script ...'
-_topLog 3 '    --> PROJECT NAME ............ %s' "dot-zsh"
-_topLog 3 '    --> PRIMARY AUTHOR .......... %s' "$(_dotZshWhos)"
-_topLog 3 '    --> RELEASE VERSION ......... %s' "$(_dotZshVers)"
-_topLog 3 '    --> GIT REMOTE .............. %s' "$(_dotZshRepo)"
-_topLog 3 '    --> GIT REFERENCE ........... %s' "$(_dotZshTag)"
-_topLog 3 '    --> GIT COMMIT .............. %s' "$(_dotZshHash)"
+_add_2col_aligned_to_middle_row 1 "PROJECT NAME" \
+    "${_DZ_BASE}"
+_add_2col_aligned_to_middle_row 1 "PRIMARY AUTHOR" \
+    "$(_self_repo_whos)"
+_add_2col_aligned_to_middle_row 1 "RELEASE VERSION" \
+    "$(_self_repo_vers)"
+_add_2col_aligned_to_middle_row 1 "GIT REMOTE" \
+    "$(_self_repo_repo)"
+_add_2col_aligned_to_middle_row 1 "GIT REFERENCE" \
+    "$(_self_repo_tag)"
+_add_2col_aligned_to_middle_row 1 "GIT COMMIT" \
+    "$(_self_repo_hash)"
+_add_2col_aligned_to_middle_row 1 "CONFIGURATION FILE" \
+    "${_DZ_INC_JSON_CONF}"
+_add_2col_aligned_to_middle_row 1 "LOADER SCRIPT PATH" \
+    "$(_self_repo_load)"
+_add_2col_aligned_to_middle_row 1 "PREVIOUS SHELL BIN PATH" \
+    "$(_parse_shell_path)"
+_add_2col_aligned_to_middle_row 1 "FOUND ZSH BIN PATH" \
+    "$(_parse_zsh_path)"
+_add_2col_aligned_to_middle_row 1 "FOUND ZSH VERSION" \
+    "$(_parse_zsh_version)"
+_log_normal 3 '--> Loader script environment variables ...'
+_log_2col_aligned_to_middle_row
 
-_topLog 3 '--> Resolved runtime configuration ...'
-_topLog 3 '    --> LOADER SCRIPT PATH ...... %s' "$(_dotZshLoad)"
-_topLog 3 '    --> PRIOR SHELL BIN PATH .... %s' "$(_dotZshParseShellPath)"
-_topLog 3 '    --> FOUND ZSH BIN PATH ...... %s' "$(_dotZshParseZshPath)"
-_topLog 3 '    --> FOUND ZSH VERSION ....... %s' "$(_dotZshParseZshVers)"
+#
+#
+#
+
+_log_buffer_flush
+
 
 #
 # Load our configuration files.
 #
 
-_topLog 1 "--> Loading configuration file(s) from ${D_ZSH_CFG_ENABL_PATH} ..."
+_log_normal 1 \
+    "--> Loading configuration file(s) from '${_DZ_CFG_ENABL_PATH}' ..."
 
-for f in ${D_ZSH_CFG_ENABL_PATH}/??-???-*.zsh; do
+for f in ${_DZ_CFG_ENABL_PATH}/??-???-*.zsh; do
     [[ ! -f "${f}" ]] && \
-        _topLog 1 "    --> Failed to source $(basename ${f})" && \
+        _log_normal 1 \
+            "    --> Failed to source config file '$(basename ${f})'" && \
         continue
 
-    _topLog 1 "    --> Sourcing file $(basename ${f})" && \
+    _log_normal 1 "    --> Sourcing config file '$(basename ${f})'" && \
         source "${f}"
 done
 
@@ -155,43 +195,45 @@ done
 # Source all enabled includes by int-prefix order.
 #
 
-_topLog 1 \
-    "--> Loading enabled include files(s) from ${D_ZSH_INC_ENABL_PATH} ..."
+_log_normal 1 \
+    "--> Loading enabled include files(s) from '${_DZ_INC_ENABL_PATH}' ..."
 
-for f in ${D_ZSH_INC_ENABL_PATH}/??-???-*.zsh; do
+for f in ${_DZ_INC_ENABL_PATH}/??-???-*.zsh; do
     [[ ! -f "${f}" ]] && \
-        _topLog 1 "    --> Failed to source $(basename ${f})" && \
+        _log_normal 1 \
+            "    --> Failed to source include file '$(basename ${f})'" && \
         continue
 
-    _topLog 1 "    --> Sourcing file $(basename ${f})" && \
+    _log_normal 1 "    --> Sourcing include file '$(basename ${f})'" && \
         source "${f}"
 done
+
 
 #
 # Generate completion message (can't be done after unsetting vars/functions)
 #
 
-_DOT_ZSH_DONE_MESSAGE="$(_dotZshWriteFancyComplete)"
+_DZ_DONE_MESSAGE="$(_wrt_completion_summary)"
 
 
 #
 # Cleanup variables, functions, etc
 #
 
-_topLog 1 "--> Performing final cleanup pass ..."
-_actLog "Unsetting global variables defined by this script ..." 1
+_log_normal 1 "--> Performing final cleanup pass ..."
+_log_action "Unsetting global variables defined by this script ..." 1
 
-for v in ${D_ZSH_UNSET_VS[@]}; do
-    eval "unset ${v}" && _actLog "Variable unset '${v}'"
+for v in ${_DZ_UNSET_VS[@]}; do
+    eval "unset ${v}" && _log_action "Variable unset '${v}'"
 done
 
-_actLog "Unsetting global functions defined by this script ..." 1
+_log_action "Unsetting global functions defined by this script ..." 1
 
-for f in ${D_ZSH_UNSET_FS[@]}; do
-    _actLog "Function unset '${f}'"
+for f in ${_DZ_UNSET_FS[@]}; do
+    _log_action "Function unset '${f}'"
 done
 
-for f in ${D_ZSH_UNSET_FS[@]}; do
+for f in ${_DZ_UNSET_FS[@]}; do
     eval "unset -f ${f}"
 done
 
@@ -200,4 +242,7 @@ done
 # Write completion message if verbosity high enough
 #
 
-[[ ${D_ZSH_STIO_VLEV:--5} == -5 ]] && echo -en "${_DOT_ZSH_DONE_MESSAGE}"
+_try_read_conf_bool_ret 'internal.dot_zsh_settings.show_summary' && \
+    echo -en "${_DZ_DONE_MESSAGE}"
+
+unset _DZ_DONE_MESSAGE

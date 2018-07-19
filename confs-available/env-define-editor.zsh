@@ -15,10 +15,22 @@
 #
 
 if [[ -n ${SSH_CONNECTION} ]]; then
-    EDITOR='vi'
+    EDITOR_NAME=$(
+        _try_read_conf_string 'internal.general_settings.editor.ssh' 'nano'
+    )
 else
-    EDITOR='subl'
+    EDITOR_NAME=$(
+        _try_read_conf_string 'internal.general_settings.editor.loc' 'subl'
+    )
 fi
+
+EDITOR=$(which ${EDITOR_NAME})
+
+if [[ $? -ne 0 ]]; then
+    _log_buffer 2 "--- Failed to resolve editor absolute path for '${EDITOR}'"
+fi
+
+_log_buffer 2 "--- Setting default editor to '${EDITOR}'"
 
 
 # EOF

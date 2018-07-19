@@ -17,7 +17,7 @@
 which docker-machine &> /dev/null
 
 if [[ $? -eq 0 ]]; then
-    eval "$(docker-machine env ${D_ZSH_DOCKER_ENVIRONMENT})"
+    eval "$(docker-machine env ${_DZ_DOCKER_ENVIRONMENT})"
 fi
 
 # EOF
