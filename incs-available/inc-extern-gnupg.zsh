@@ -14,9 +14,24 @@
 # Export our default gnupg key and tty
 #
 
-export GPGKEY="${_DZ_GNUPG_KEY}"
+v=$(_config_read_string 'extern["gnupg"].secret_key')
 
-#GPG_TTY="$(tty)""
-#export GPG_TTY
+if [[ ! -z "${v}" ]]; then
+    export GPGKEY="${v}" && \
+        _log_action "Assigned gpg key to '${v}'" || \
+        _log_warn "Failed to assign gpg key to '${v}'"
+else
+    _log_normal 1 \
+        "        --- Skipping gpg key assignment (missing configuration)"
+fi
 
-# EOF
+v=$(_config_read_string 'extern["gnupg"].export_tty')
+
+if [[ ! -z "${v}" ]]; then
+    export GPG_TTY="${v}" && \
+        _log_action "Assigned gpg tty to '${v}'" || \
+        _log_warn "Failed to assign gpg tty to '${v}'"
+else
+    _log_normal 1 \
+        "        --- Skipping gpg tty assignment (missing configuration)"
+fi

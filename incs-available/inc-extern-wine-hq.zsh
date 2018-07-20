@@ -14,6 +14,6 @@
 # Add wine paths when installed from official PPA
 #
 
-_add_env_path_dir "/opt/wine-stable/bin" scripted
-_add_env_path_dir "/opt/wine-devel/bin" scripted
-_add_env_path_dir "/opt/wine-staging/bin" scripted
+for f in $(_config_read_array_vals 'extern["wine-hq"].executable_paths'); do
+    _add_env_path_dir "${f}" scripted
+done

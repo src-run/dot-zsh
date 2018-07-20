@@ -14,14 +14,10 @@
 # Source Google Cloud SDK path helper and completion scripts
 #
 
-if [[ -f "${_DZ_GCLOUD_PATH_FILE}" ]]; then
-    source "${_DZ_GCLOUD_PATH_FILE}" 2>/dev/null && \
-        _log_source 2 2 "Sourcing file ${inc}"
-fi
+for f in $(_config_read_array_vals 'extern["google-cloud-sdk"].env_source_files'); do
+    _check_extern_source_file "${f}" 2 'google-cloud-sdk' && source "${f}"
+done
 
-if [[ -f "${_DZ_GCLOUD_SHELL_COMPLETION}" ]]; then
-    source "${_DZ_GCLOUD_SHELL_COMPLETION}" 2>/dev/null && \
-        _log_source 2 2 "Sourcing file ${inc}"
-fi
-
-# EOF
+for f in $(_config_read_array_vals 'extern["google-cloud-sdk"].completion_files'); do
+    _check_extern_source_file "${f}" 2 'google-cloud-sdk' && source "${f}"
+done

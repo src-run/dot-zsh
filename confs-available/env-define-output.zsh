@@ -22,13 +22,12 @@ _DZ_LOGS_PATH=$(
 
 
 #
-# Remove prior log file and start fresh if over 1000 lines.
+# Remove prior log file and start fresh.
 #
 
-[[ -f "${_DZ_LOGS_PATH}" ]] && \
-    [[ $(cat "${_DZ_LOGS_PATH}" | wc -l) -gt 1000 ]] && \
+[[ -f "${_DZ_LOGS_PATH}" ]] &&
     rm "${_DZ_LOGS_PATH}" && \
-    _log_buffer 2 "--- Purging previous log file contents (over 1000 lines)"
+    _log_buffer 2 "--- Purging previous log file contents"
 
 
 #

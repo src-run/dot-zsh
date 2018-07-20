@@ -16,11 +16,11 @@
 
 if [[ -n ${SSH_CONNECTION} ]]; then
     EDITOR_NAME=$(
-        _try_read_conf_string 'internal.general_settings.editor.ssh' 'nano'
+        _config_read_string 'internal.general_settings.editor.ssh' 'nano'
     )
 else
     EDITOR_NAME=$(
-        _try_read_conf_string 'internal.general_settings.editor.loc' 'subl'
+        _config_read_string 'internal.general_settings.editor.loc' 'subl'
     )
 fi
 

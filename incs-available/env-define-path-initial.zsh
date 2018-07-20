@@ -14,27 +14,6 @@
 # Add default directories to environment PATH variable
 #
 
-if \
-    [[ ! -z ${_DZ_PATH_ADDITIONS_LIST} ]] && \
-    [[ $_DZ_PATH_ADDITIONS_LIST[(I)$_DZ_PATH_ADDITIONS_LIST[-1]] -gt 0 ]];
-    then
-    for p in "${(@k)_DZ_PATH_ADDITIONS_LIST}"; do
-        _add_env_path_dir "${p}" default
-    done
-fi
-
-
-#
-# Add custom directories from user-file to environment PATH variable (if exists)
-#
-
-if \
-    [[ ! -z ${_DZ_PATH_ADDITIONS_FILE} ]] && \
-    [[ -r "${_DZ_PATH_ADDITIONS_FILE}" ]]; \
-    then
-    while read p; do
-        _add_env_path_dir "${p}" custom
-    done <"${_DZ_PATH_ADDITIONS_FILE}"
-fi
-
-# EOF
+for p in $(_config_read_array_vals 'define.path.paths'); do
+    _add_env_path_dir "${p}" default
+done

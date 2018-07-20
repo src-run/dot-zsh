@@ -15,7 +15,7 @@
 # is set to true or 1.
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.very_quiet' 'true' && \
+_config_return_boolean 'internal.dot_zsh_settings.very_quiet' 'true' && \
     _DZ_VERBOSITY=-5 && \
     _log_buffer 2 "--- Setting verbosity to '-05: ...... quiet' due to config"
 
@@ -31,7 +31,7 @@ fi
 # var is set to true or 1 (overwriting QUIET settings).
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.norm_verbose' && \
+_config_return_boolean 'internal.dot_zsh_settings.norm_verbose' && \
     _DZ_VERBOSITY=2 && \
     _log_buffer 2 "--- Setting verbosity to '+02: .... verbose' due to config"
 
@@ -47,7 +47,7 @@ fi
 # var is set to true or 1 (overwriting VERBOSE settings).
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.very_verbose' && \
+_config_return_boolean 'internal.dot_zsh_settings.very_verbose' && \
     _DZ_VERBOSITY=4 && \
     _log_buffer 2 "--- Setting verbosity to '+04: very verbose' due to config"
 
@@ -63,7 +63,7 @@ fi
 # to true or 1 (overwriting VERY_VERBOSE settings).
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.debug' && \
+_config_return_boolean 'internal.dot_zsh_settings.debug' && \
     _DZ_VERBOSITY=10 && \
     _log_buffer 2 "--- Setting verbosity to '+10: ..... debug' due to config"
 

@@ -7,7 +7,7 @@
         "dot_zsh_settings": {
             "log_path": "${HOME}/.dot-zsh.log",
             "very_quiet": true,
-            "norm_verbose": true,
+            "norm_verbose": false,
             "very_verbose": false,
             "debug": false,
             "show_summary": true,
@@ -21,44 +21,87 @@
             "ssh": {
                 "key_path": "${HOME}/.ssh/id_rsa"
             }
-        },
-        "change_dir_paths": [
-            "${HOME}",
-            "${HOME}/projects"
-        ],
-        "register_aliases": {
-            "foo-bar": "echo \"foo-bar\""
-        },
-        "completion_paths": {
-            "foo-bar-path-completions": "~/foo/bar/baz"
-        },
-        "completion_files": {
-            "foo-bar-file-completions": "~/foo/bar/baz.ext"
-        },
-        "define_variables": {
-            "VAR_FOO": "a foo variable",
-            "VAR_BAR": "a bar variable"
-        },
-        "export_variables": [
-            "VAR_FOO",
-            "VAR_BAR"
-        ],
-        "executable_paths": [
-            "~/bin/foo",
-            "~/bin/bar",
-            "/opt/foo",
-            "/opt/bar"
-        ]
+        }
     },
-    "external": {
+    "define": {
+        "aliases": {
+            "_enabled": true,
+            "set_simple_cmds": {
+                "ccat": "pygmentize -g",
+                "vcat": "pygmentize -g -O style=colorful,linenos=1",
+                "gpg": "gpg2"
+            },
+            "ssh_connections": {
+                "obes": {
+                    "user": "rmf",
+                    "host": "obes.rmf.systems",
+                    "port": 2222
+                },
+                "twoface": {
+                    "user": "rmf",
+                    "host": "twoface.rmf.systems"
+                },
+                "sr": {
+                    "user": "rmf",
+                    "host": "src.run"
+                },
+                "sp": {
+                    "user": "rmf",
+                    "host": "silverpapillon.com"
+                }
+            }
+        },
+        "path": {
+            "_enabled": true,
+            "paths": [
+                "${HOME}/bin",
+                "${HOME}/scripts",
+                "${HOME}/scripts/bin-enabled"
+            ]
+        },
+        "change-directory-paths": {
+            "_enabled": true,
+            "paths": [
+                "${HOME}",
+                "${HOME}/projects"
+            ]
+        },
+        "ssh": {
+            "_enabled": true
+        },
+        "completions": {
+            "_enabled": true,
+            "paths": [
+                "${_DZ_PATH}/resources/completions"
+            ]
+        },
+        "exports": {
+            "_enabled": true,
+            "variables": [
+                "ZSH",
+                "PATH",
+                "LANG",
+                "EDITOR",
+                "SSH_KEY_PATH"
+            ]
+        },
+        "variables-extern": {
+            "_enabled": true
+        },
+        "functions-extern": {
+            "_enabled": true
+        }
+    },
+    "extern": {
         "android-sdk": {
             "_enabled": true,
+            "mortal_root_path": "${HOME}/Android/Sdk",
             "executable_paths": [
-                "${HOME}/Android/Sdk/platform-tools"
+                "{{mortal_root_path}}/platform-tools"
             ]
         },
         "apt-fast": {
-            "_enabled": true,
+            "_enabled": false,
             "completion_files": [
                 "/usr/share/zsh/functions/Completion/Debian/_apt-fast"
             ]
@@ -66,7 +109,7 @@
         "chruby": {
             "_enabled": true,
             "system_root_path": "/usr/local/share/chruby",
-            "auto_set_version": "2.4",
+            "auto_set_version": 2.4,
             "env_source_files": [
                 "{{system_root_path}}/chruby.sh",
                 "{{system_root_path}}/auto.sh"
@@ -90,10 +133,8 @@
         "golang": {
             "_enabled": true,
             "system_root_path": "/usr/lib/go-1.10",
-            "mortal_root_path": "${HOME}/golang/1.9",
-            "executable_paths": [
-                "{{mortal_root_path}}/bin"
-            ]
+            "mortal_root_path": "${HOME}/golang/1.10",
+            "mortal_exec_path": "{{mortal_root_path}}/bin"
         },
         "google-cloud-sdk": {
             "_enabled": true,
@@ -117,6 +158,9 @@
         "phpenv": {
             "_enabled": true,
             "mortal_root_path": "${HOME}/.phpenv",
+            "initialize_evals": [
+                "phpenv init -"
+            ],
             "executable_paths": [
                 "{{mortal_root_path}}/bin"
             ],

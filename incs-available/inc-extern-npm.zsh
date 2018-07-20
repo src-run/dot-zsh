@@ -14,13 +14,16 @@
 # Add NPM binaries to PATH
 #
 
-_add_env_path_dir "${HOME}/node_modules/.bin/" scripted
-_add_env_path_dir "${_DZ_NPM_PACKAGES_PATH}/bin" scripted
+for f in $(_config_read_array_vals 'extern["npm"].executable_paths'); do
+    _add_env_path_dir "${f}" scripted
+done
 
 
 #
 # Setup manpath
 #
+
+_DZ_NPM_MANPAGES_PATH="$(_config_read_string 'extern.npm.manset_load_path')"
 
 if [[ -d "${_DZ_NPM_MANPAGES_PATH}" ]]; then
     _DZ_MAN_PATH_ORIGINAL="${MANPATH}"
@@ -50,11 +53,14 @@ if [[ -d "${_DZ_NPM_MANPAGES_PATH}" ]]; then
         _DZ_MAN_PATH_TO_APPLY="${_DZ_NPM_MANPAGES_PATH}:${_DZ_MAN_PATH_TO_APPLY}"
     fi
 
-    export MANPATH="${_DZ_MAN_PATH_TO_APPLY%?}"
+    export MANPATH="${_DZ_MAN_PATH_TO_APPLY%?}" && \
+        _log_action "Registering '${_DZ_NPM_MANPAGES_PATH}' to 'MANPATH'" || \
+        _log_warn "Failed registering '${_DZ_NPM_MANPAGES_PATH}' to 'MANPATH'"
 
     unset _DZ_MAN_PATH_ORIGINAL
     unset _DZ_MAN_PATH_DEFAULTS
     unset _DZ_MAN_PATH_TO_APPLY
+else
+    _log_normal 1 \
+        "        --- Skipped registering '${_DZ_NPM_MANPAGES_PATH}' to 'MANPATH' (does not exist)"
 fi
-
-# EOF

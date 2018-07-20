@@ -14,21 +14,18 @@
 # Source chruby environment and auto-selector scripts
 #
 
-if [[ -f "${_DZ_CHRUBY_ENVIRONMENT}" ]]; then
-    source "${_DZ_CHRUBY_ENVIRONMENT}" 2>/dev/null && \
-        _log_source 2 2 "Sourcing file ${_DZ_CHRUBY_ENVIRONMENT}"
-fi
-
-if [[ -f "${_DZ_CHRUBY_AUTO_SELECT}" ]]; then
-    source "${_DZ_CHRUBY_AUTO_SELECT}" 2>/dev/null && \
-        _log_source 2 2 "Sourcing file ${_DZ_CHRUBY_AUTO_SELECT}"
-fi
+for f in $(_config_read_array_vals 'extern["chruby"].env_source_files'); do
+    _check_extern_source_file "${f}" 2 'chruby' && source "${f}"
+done
 
 
 #
-# Set Ruby 2.4.x as the default interpreter
+# Set ruby default interpreter
 #
+v=$(_config_read_integer 'extern["chruby"].auto_set_version' 'false')
 
-chruby 2.4 &> /dev/null && \
-    _log_action "Set ruby version 2.4 as default" || \
-    _log_warn "Could not set chruby ruby version to 2.4"
+if [[ "${v}" != 'false' ]]; then
+    chruby ${v} &> /dev/null && \
+        _log_action "Assigned default ruby version to '${v}'" || \
+        _log_warn "Failed to set default ruby version to '${v}'"
+fi

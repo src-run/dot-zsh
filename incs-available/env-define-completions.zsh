@@ -14,11 +14,15 @@
 # Register our custom completions.
 #
 
-fpath=(${_DZ_BASE}/resources/completions ${fpath}) && \
-    _log_action 'FPath addition ${_DZ_BASE}/resources/completions'
+for p in $(_config_read_array_vals 'define.completions.paths'); do
+    if [[ ! -d "${p}" ]]; then
+        continue
+    fi
+
+    fpath=("${p}" ${fpath}) && \
+        _log_action "Registering '${p}' in 'fpath' environment variable"
+done
+
 
 autoload -U compinit && compinit &&
-    _log_action "Evaluating 'autoload -U compinit && compinit'"
-
-
-# EOF
+    _log_action "Auto-loading and initializing 'compinit'"

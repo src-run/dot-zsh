@@ -14,21 +14,18 @@
 # Include phpenv shell helpers.
 #
 
-_log_source 2 2 "Initializing phpenv"
+for f in $(_config_read_array_vals 'extern["phpenv"].executable_paths'); do
+    _add_env_path_dir "${f}" scripted
+done
 
-_add_env_path_dir "${_DZ_PHPENV_BIN}" scripted && \
-    _log_action "Added ${_DZ_PHPENV_BIN} to path"
+for f in $(_config_read_array_vals 'extern["phpenv"].completion_files'); do
+    _check_extern_source_file "${f}" 2 'phpenv' && source "${f}"
+done
 
-if [[ -d "${_DZ_PHPENV_ROOT}" ]]; then
-    if [[ ! -f "${_DZ_PHPENV_COMPLETIONS}" ]]; then
-        _log_warn \
-            "Completions for phpenv not found: ${_DZ_PHPENV_COMPLETIONS}"
-    else
-        source "${_DZ_PHPENV_COMPLETIONS}" 2>/dev/null && \
-            _log_source 2 2 "Sourcing file ${_DZ_PHPENV_COMPLETIONS}"
-    fi
-
-    eval "$(phpenv init -)" && _log_action "Initializing phpenv"
-fi
-
-# EOF
+_ifs_newlines
+for e in $(_config_read_array_vals 'extern["phpenv"].initialize_evals'); do
+    eval "$(eval ${e})" && \
+        _log_action "Evaluated initialization command '${e}'" || \
+        _log_warn "Failed evaluated initialization command '${e}'"
+done
+_ifs_reset

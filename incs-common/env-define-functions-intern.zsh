@@ -846,36 +846,21 @@ function _add_env_path_dir {
     p=$(zsh -c "echo ${1}")
     t="${2:-default}"
 
-    if [[ -d "${p}" ]] && [[ ":$PATH:" != *":${p}:"* ]]; then
-        PATH="${p}:${PATH}" && \
-            _log_source 2 2 "Prefixed 'PATH' with ${p} (${t})"
-    fi
-}
-
-
-#
-# Add temporary request for environment PATH addition
-#
-
-function _add_env_path_dir_temp {
-    local p="${1}"
-
-    if [[ ! -f "${_DZ_PATH_SCRIPTED_FILE}" ]]; then
-        touch "${_DZ_PATH_SCRIPTED_FILE}" &> /dev/null
+    if [[ ! -d "${p}" ]]; then
+        _log_normal 2 \
+            "        --- Skipping '${p}' addition to 'PATH' environment variable (does not exist)"
+        return
     fi
 
-    echo "${p}" >> "${_DZ_PATH_SCRIPTED_FILE}" &> /dev/null
-}
-
-
-#
-# Cleanup temporary environment PATH file
-#
-
-function _clean_env_path_dir_temp {
-    if [[ -f "${_DZ_PATH_SCRIPTED_FILE}" ]]; then
-        rm "${_DZ_PATH_SCRIPTED_FILE}" &> /dev/null
+    if [[ ":$PATH:" == *":${p}:"* ]]; then
+        _log_normal 2 \
+            "        --- Skipping '${p}' addition to 'PATH' environment variable (already added)"
+        return
     fi
+
+    PATH="${p}:${PATH}" && \
+        _log_source 2 2 \
+            "Registering '${p}' in 'PATH' environment variable (${t})"
 }
 
 
@@ -885,37 +870,64 @@ function _clean_env_path_dir_temp {
 
 function _aliases_setup_ssh_connections {
     local prefixes=( "ssh-" "s-" "" )
-    local name
+    local opts_desc
     local host
     local port
     local user
     local opts
     local wait
-    local opts_desc
-    local alias_key
-    local alias_val
+    local alias_k
+    local alias_v
 
-    for name in "${(@k)_DZ_SSH_ALIAS_HOST}"; do
-        host="${_DZ_SSH_ALIAS_HOST[$name]}"
-        port=22
-        user='rmf'
-        opts='-y -v'
-        wait=1.0
+    for name in $(_config_read_index_key 'define.aliases.ssh_connections'); do
+        host="$(
+            _config_read_string \
+                "define.aliases.ssh_connections[\"${name}\"].host" \
+                'false'
+        )"
 
-        if [[ "${_DZ_SSH_ALIAS_PORT[$name]}" != "" ]]; then
-            port="${_DZ_SSH_ALIAS_PORT[$name]}"
+        if [[ "${host}" == 'false' ]]; then
+            continue;
         fi
 
-        if [[ "${_DZ_SSH_ALIAS_USER[$name]}" != "" ]]; then
-            user="${_DZ_SSH_ALIAS_USER[$name]}"
+        port="$(
+            _config_read_integer \
+                "define.aliases.ssh_connections[\"${name}\"].port" \
+                'false'
+        )"
+
+        if [[ "${port}" == 'false' ]]; then
+            port=22
         fi
 
-        if [[ "${_DZ_SSH_ALIAS_OPTS[$name]}" != "" ]]; then
-            opts="${_DZ_SSH_ALIAS_OPTS[$name]}"
+        user="$(
+            _config_read_string \
+                "define.aliases.ssh_connections[\"${name}\"].user" \
+                'false'
+        )"
+
+        if [[ "${user}" == 'false' ]]; then
+            user="${USER}"
         fi
 
-        if [[ "${_DZ_SSH_ALIAS_WAIT[$name]}" != "" ]]; then
-            wait="${_DZ_SSH_ALIAS_WAIT[$name]}"
+        opts="$(
+            _config_read_string \
+                "define.aliases.ssh_connections[\"${name}\"].opts" \
+                'false'
+        )"
+
+        if [[ "${opts}" == 'false' ]]; then
+            opts="-y -v"
+        fi
+
+        wait="$(
+            _config_read_integer \
+                "define.aliases.ssh_connections[\"${name}\"].wait" \
+                'false'
+        )"
+
+        if [[ "${wait}" == 'false' ]]; then
+            wait=1.0
         fi
 
         opts_desc="${opts}"
@@ -940,7 +952,7 @@ function _aliases_setup_ssh_connections {
             fi
 
             alias $alias_key="${alias_val}" &> /dev/null && \
-                _log_action "Alias defined '${alias_key}=\"${alias_val}\"'"
+                _log_action "Alias defined '${alias_key}' => '${alias_val}'"
         done
     done
 }
@@ -995,10 +1007,24 @@ function _aliases_build_ssh_command {
 
 
 #
+# Read and cache config file
+#
+
+function _config_read_file {
+    if [[ -z ${_DZ_INC_JSON_CONF_CONTENTS} ]]; then
+        typeset -g _DZ_INC_JSON_CONF_CONTENTS
+        _DZ_INC_JSON_CONF_CONTENTS="$(cat "${_DZ_INC_JSON_CONF}")"
+    fi
+
+    echo "${_DZ_INC_JSON_CONF_CONTENTS}"
+}
+
+
+#
 # Read configuration string
 #
 
-function _read_conf_file_index_key {
+function _config_read_index_key {
     local jq_bin
     local jq_key=".${1:-} | keys"
     local return
@@ -1013,7 +1039,7 @@ function _read_conf_file_index_key {
         return
     fi
 
-    ${jq_bin} -e -r "${jq_key}" "${_DZ_INC_JSON_CONF}" | grep -o -E '[a-Z_]+'
+    _config_read_file | ${jq_bin} -e -r "${jq_key}" | grep -o -E '[a-Z_]+'
 
     return $?
 }
@@ -1023,7 +1049,7 @@ function _read_conf_file_index_key {
 # Read configuration string
 #
 
-function _read_conf_file_index_val {
+function _config_read_index_val {
     local jq_bin
     local jq_key=".${1:-}"
     local return
@@ -1038,7 +1064,7 @@ function _read_conf_file_index_val {
         return
     fi
 
-    ${jq_bin} -e -r "${jq_key}" "${_DZ_INC_JSON_CONF}"
+    _config_read_file | ${jq_bin} -e -r "${jq_key}"
 
     return $?
 }
@@ -1048,7 +1074,7 @@ function _read_conf_file_index_val {
 # Read configuration string
 #
 
-function _read_conf_file_index_type {
+function _config_read_index_type {
     local jq_bin
     local jq_key=".${1:-} | type"
     local return
@@ -1063,7 +1089,7 @@ function _read_conf_file_index_type {
         return
     fi
 
-    ${jq_bin} -e -r "${jq_key}" "${_DZ_INC_JSON_CONF}"
+    _config_read_file | ${jq_bin} -e -r "${jq_key}"
 
     return $?
 }
@@ -1073,12 +1099,12 @@ function _read_conf_file_index_type {
 # Read configuration string
 #
 
-function _read_conf_string {
-    if [[ "$(_read_conf_file_index_type "${1}")" != "string" ]]; then
+function _config_read_string_required {
+    if [[ "$(_config_read_index_type "${1}")" != "string" ]]; then
         _log_crit "Configuration index '${1}' is not a string!"
     fi
 
-    _read_conf_file_index_val "${1} | @text"
+    _config_read_index_val "${1} | @text"
 }
 
 
@@ -1086,12 +1112,12 @@ function _read_conf_string {
 # Read configuration string
 #
 
-function _read_conf_array_values {
-    if [[ "$(_read_conf_file_index_type "${1}")" != "array" ]]; then
+function _config_read_array_values_required {
+    if [[ "$(_config_read_index_type "${1}")" != "array" ]]; then
         _log_crit "Configuration index '${1}' is not an array!"
     fi
 
-    _read_conf_file_index_val "${1}[] | @text"
+    _config_read_index_val "${1}[] | @text"
 }
 
 
@@ -1099,7 +1125,7 @@ function _read_conf_array_values {
 # Replace inner paths from JSON string
 #
 
-function _parse_conf_string {
+function _config_resolve_string {
     local index="${1%.*}"; shift
     local value="${@}"
     local search
@@ -1111,7 +1137,7 @@ function _parse_conf_string {
     )
 
     if [[ "${search}" != "" ]]; then
-        replace="$(_read_conf_string "${index}.${search}" 2> /dev/null)"
+        replace="$(_config_read_string_required "${index}.${search}" 2> /dev/null)"
 
         if [[ $? -eq 0 ]]; then
             eval echo -e "${value/\{\{$search\}\}/$replace}"
@@ -1128,11 +1154,11 @@ function _parse_conf_string {
 # Replace inner paths from JSON array
 #
 
-function _parse_conf_array {
+function _config_resolve_array {
     local index="${1}"; shift
 
     for value in ${@}; do
-        _parse_conf_string "${index}" "${value}"
+        _config_resolve_string "${index}" "${value}"
     done
 }
 
@@ -1141,14 +1167,14 @@ function _parse_conf_array {
 # Read configuration string
 #
 
-function _try_read_conf_string {
+function _config_read_string {
     local value
 
-    if [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "string" ]]; then
+    if [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "string" ]]; then
         echo "${2}" && return 1
     fi
 
-    value="$(_parse_conf_string "${1}" $(_read_conf_file_index_val "${1} | @text" 2> /dev/null))"
+    value="$(_config_resolve_string "${1}" $(_config_read_index_val "${1} | @text" 2> /dev/null))"
 
     if [[ "${value}" == "" ]]; then
         echo "${2}" && return 1
@@ -1164,14 +1190,14 @@ function _try_read_conf_string {
 # Read configuration string
 #
 
-function _try_read_conf_integer {
+function _config_read_integer {
     local value
 
-    if [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "number" ]]; then
+    if [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "number" ]]; then
         echo "${2}" && return 1
     fi
 
-    value="$(_read_conf_file_index_val "${1} | @text" 2> /dev/null)"
+    value="$(_config_read_index_val "${1} | @text" 2> /dev/null)"
 
     if [[ "${value}" == "" ]]; then
         echo "${2}" && return 1
@@ -1187,18 +1213,18 @@ function _try_read_conf_integer {
 # Read configuration boolean as string
 #
 
-function _try_read_conf_bool_val {
+function _config_read_boolean {
     local default="${2:-}"
 
     if [[ "${default}" != "true" ]]; then
         default="false"
     fi
 
-    if [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "boolean" ]]; then
+    if [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "boolean" ]]; then
         echo "${default}" && return
     fi
 
-    _read_conf_file_index_val "${1} | @text" 2> /dev/null || echo "${default}"
+    _config_read_index_val "${1} | @text" 2> /dev/null || echo "${default}"
 }
 
 
@@ -1206,8 +1232,8 @@ function _try_read_conf_bool_val {
 # Read configuration boolean as return
 #
 
-function _try_read_conf_bool_ret {
-    if [[ "$(_try_read_conf_bool_val "${1}" "${2:-}")" == "true" ]]; then
+function _config_return_boolean {
+    if [[ "$(_config_read_boolean "${1}" "${2:-}")" == "true" ]]; then
         return 0
     else
         return 1
@@ -1219,14 +1245,14 @@ function _try_read_conf_bool_ret {
 # Read configuration string
 #
 
-function _try_read_conf_array_values {
+function _config_read_array_vals {
     local value
 
-    if [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "array" ]] && [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "object" ]]; then
+    if [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "array" ]] && [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "object" ]]; then
         echo "${2}" && return
     fi
 
-    _parse_conf_array "${1}[]" $(_read_conf_file_index_val "${1}[] | @text" 2> /dev/null | xargs || echo "${2}")
+    _config_resolve_array "${1}[]" $(_config_read_index_val "${1}[] | @text" 2> /dev/null | xargs || echo "${2}")
 }
 
 
@@ -1234,17 +1260,17 @@ function _try_read_conf_array_values {
 # Read configuration string
 #
 
-function _try_read_conf_array_values_assoc {
+function _config_read_array_assoc {
     local value
     local keys
 
-    if [[ "$(_read_conf_file_index_type "${1}" 2> /dev/null)" != "object" ]]; then
+    if [[ "$(_config_read_index_type "${1}" 2> /dev/null)" != "object" ]]; then
         echo "${2}" && return
     fi
 
-    for k in $(_read_conf_file_index_key "${1}"); do
+    for k in $(_config_read_index_key "${1}"); do
         echo -en "${k}="
-        _parse_conf_string "${1}[\"${k}\"]" $(_read_conf_file_index_val "${1}[\"${k}\"] | @text" 2> /dev/null || echo "${2}")
+        _config_resolve_string "${1}[\"${k}\"]" $(_config_read_index_val "${1}[\"${k}\"] | @text" 2> /dev/null || echo "${2}")
     done
 }
 
@@ -1264,6 +1290,204 @@ function _get_array_key {
 
 function _get_array_val {
     echo "${1#*=}"
+}
+
+
+#
+# Format log source file message
+#
+
+function _printf_log_src {
+    local what="${1}"
+    local file="${2}"
+    local desc="${3:-}"
+    local levl="${4:-1}"
+    local type="${5:-}"
+    local base
+    local text
+
+    base="$(
+        basename "${file}" | cut -d. -f1
+    )"
+
+    if [[ -z "${type}" ]]; then
+        type="$(
+            echo "${base}" | \
+                cut -d- -f3- | \
+                cut -d- -f2
+        )"
+    fi
+
+    text="$(
+        printf "$(_out_indent "${levl}")==> %s %s file include '%s'" \
+            "${what}" \
+            "${type}" \
+            "${file/$_DZ_PATH\//}"
+    )"
+
+    if [[ ! -z "${desc}" ]]; then
+        text="$(
+            printf '%s (%s)' \
+                "${text}" \
+                "${desc}"
+        )"
+    fi
+
+    echo "${text}"
+}
+
+
+#
+# Log file source failure
+#
+
+function _log_src_fail {
+    local file="${1}"
+    local desc="${2:-unknown reason}"
+    local levl=${3:-1}
+    local what=${4:-}
+
+    _log_normal ${levl} "$(
+        _printf_log_src 'Failures for' "${file}" "${desc}" ${levl} "${what}"
+    )"
+}
+
+
+#
+# Log file source skip
+#
+
+function _log_src_skip {
+    local file="${1}"
+    local desc="${2:-unknown reason}"
+    local levl=${3:-1}
+    local what=${4:-}
+
+    _log_normal ${levl} "$(
+        _printf_log_src 'Skipping the' "${file}" "${desc}" ${levl} "${what}"
+    )"
+}
+
+
+#
+# Log file source
+#
+
+function _log_src_done {
+    local file="${1}"
+    local desc="${2:-}"
+    local levl=${3:-1}
+    local what=${4:-}
+
+    _log_normal ${levl} "$(
+        _printf_log_src 'Sourcing the' "${file}" "${desc}" ${levl} "${what}"
+    )"
+}
+
+
+#
+# Check if extern include file exists and is enabled
+#
+
+function _check_extern_source_file {
+    local file="${1}"
+    local levl="${2:-1}"
+    local what="${3:-}"
+    local base
+    local type
+
+    if [[ ! -f "${file}" ]]; then
+        _log_src_fail "${file}" 'does not exist' ${levl} "${what}"
+        return 255
+    fi
+
+    if [[ ! -r "${file}" ]]; then
+        _log_src_fail "${file}" 'is not readable' ${levl} "${what}"
+        return 255
+    fi
+
+    base="$(
+        basename "${file}" | cut -d. -f1
+    )"
+
+    _log_src_done "${file}" "$(
+        printf '%s' "$(echo "${base}" | tr '-' ' ')"
+    )" ${levl} "${what}"
+
+    return 0
+}
+
+
+#
+# Check if extern include file exists and is enabled
+#
+
+function _check_extern_source_file_enabled {
+    local file="${1}"
+    local levl="${2:-1}"
+    local base
+    local type
+    local name
+
+    if [[ ! -f "${file}" ]]; then
+        _log_src_fail "${file}" 'does not exist' ${levl}
+        return 255
+    fi
+
+    if [[ ! -r "${file}" ]]; then
+        _log_src_fail "${file}" 'is not readable' ${levl}
+        return 255
+    fi
+
+    base="$(basename "${file}" '.zsh')"
+
+    type="$(
+        echo "${base}" | \
+            cut -d- -f3- | \
+            cut -d- -f2
+    )"
+
+    name="$(
+        echo "${base}" | \
+            cut -d- -f5-
+    )"
+
+    if [[ "$(_config_read_boolean "${type}[\"${name}\"]._enabled")" != 'true' ]]; then
+        _log_src_skip "${file}" 'disabled in configuration' ${levl}
+        return 255
+    fi
+
+    _log_src_done "${file}" "$(
+        printf '%s' "$(echo "${name}" | tr '-' ' ')"
+    )" ${levl}
+
+    return 0
+}
+
+
+#
+# Set IFS to newline (saving previous state)
+#
+
+function _ifs_newlines {
+    if [[ -z ${IFS_ORIGINAL} ]]; then
+        typeset -g IFS_ORIGINAL
+    fi
+
+    IFS_ORIGINAL="${IFS}"
+    IFS='
+'
+}
+
+
+#
+# Reset IFS to previous state
+#
+
+function _ifs_reset {
+    if [[ ! -z ${IFS_ORIGINAL} ]]; then
+        IFS="${IFS_ORIGINAL}"
+    fi
 }
 
 
@@ -1301,10 +1525,6 @@ function _resolve_value_type {
     if [[ ${value} =~ '^[0-9]+\.[0-9]+\.[0-9]+-[0-9]+?[a-z]+[0-9]+?' ]]; then
         echo -en "version : sys pkgs" && return
     fi
-
-    #if [[ ${value} =~ '^([a-z]+/)?(master)$' ]]; then
-    #    echo -en "version : git tags" && return
-    #fi
 
     if [[ ${value} =~ '^([0-9]+\.[0-9]+\.[0-9]+|[a-z]+)(-[0-9]+)?(-[a-z0-9]{7,8})(\s?\([a-z]+\))?$' ]]; then
         echo -en "version : git hash" && return

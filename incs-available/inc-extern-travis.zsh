@@ -14,9 +14,6 @@
 # Source Travis shell completion script
 #
 
-if [[ -f "${_DZ_TRAVIS_SHELL_COMPLETION}" ]]; then
-    source "${_DZ_TRAVIS_SHELL_COMPLETION}" 2>/dev/null && \
-        _log_source 2 2 "Sourcing file ${_DZ_TRAVIS_SHELL_COMPLETION}"
-fi
-
-# EOF
+for f in $(_config_read_array_vals 'extern["travis"].completion_files'); do
+    _check_extern_source_file "${f}" 2 'travis' && source "${f}"
+done

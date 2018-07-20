@@ -14,7 +14,15 @@
 # Setup golang environment
 #
 
-export GOROOT
-_add_env_path_dir "${GOROOT}/bin"
+v="$(_config_read_string 'extern.golang.mortal_root_path')"
 
-# EOF
+if [[ -d "${v}" ]]; then
+    export GOROOT="${v}" && \
+        _log_action "Assigning 'GOROOT' to '${v}'" || \
+        _log_warn "Failed assigning 'GOROOT' to '${v}'"
+else
+    _log_normal 1 \
+        "        --- Skipping 'GOROOT' assignment '${v}' (does not exist)"
+fi
+
+_add_env_path_dir "$(_config_read_string 'extern.golang.mortal_exec_path')" scripted

@@ -14,9 +14,19 @@
 # Source apt-fast shell completion script
 #
 
-#if [[ -f "${_DZ_APT_FAST_COMPLETION}" ]]; then
-#    source "${_DZ_APT_FAST_COMPLETION}" 2>/dev/null && \
-#        _log_source 2 2 "Sourcing file ${_DZ_APT_FAST_COMPLETION}"
-#fi
+for f in $(_config_read_array_vals 'extern["apt-fast"].completion_files'); do
+    if [[ ! -f "${f}" ]] || [[ ! -r "${f}" ]]; then
+        _log_normal 2 \
+            "        --- Skipping '${f}' completion file (does not exist)"
+        return
+    fi
 
-# EOF
+    if [[ ! -r "${f}" ]]; then
+        _log_normal 2 \
+            "        --- Skipping '${f}' completion file (is not readable)"
+        return
+    fi
+
+    source "${f}" 2> /dev/null && \
+        _log_source 2 2 "Sourcing completions file '${f}'"
+done

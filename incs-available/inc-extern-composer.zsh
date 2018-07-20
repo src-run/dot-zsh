@@ -14,4 +14,6 @@
 # Add global composer binaries to PATH
 #
 
-_add_env_path_dir "${_DZ_GLOBAL_COMPOSER_BIN}" scripted
+for p in $(_config_read_array_vals 'extern["composer"].executable_paths'); do
+    _add_env_path_dir "${p}" scripted
+done

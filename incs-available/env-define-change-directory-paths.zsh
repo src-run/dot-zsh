@@ -14,14 +14,14 @@
 # Loop though exports array and export 'em.
 #
 
-for dir in $(_try_read_conf_array_values "internal.change_dir_paths" "${_DZ_CHANGE_DIR_PATHS[@]}"); do
+for dir in $(_config_read_array_vals 'define["change-directory-paths"].paths'); do
     if [[ ! -d "${dir}" ]]; then
         continue
     fi
 
     cdpath+=( "${dir}" ) && \
-        _log_action "Added '${dir}' to \$cdpath environment" ||
-        _log_warn "Failed to add '${dir}' to \$cdpath environment"
+        _log_action "Registering '${dir}' in 'cdpath' environment variable" ||
+        _log_warn "Failed to add '${dir}' to 'cdpath' environment variable"
 done
 
 # EOF

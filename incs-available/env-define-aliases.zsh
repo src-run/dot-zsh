@@ -21,9 +21,11 @@ _aliases_setup_ssh_connections
 # Assign simple aliases
 #
 
-for n in "${(@k)_DZ_ALIAS_LIST}"; do
-    alias $n="${_DZ_ALIAS_LIST[$n]}" &&
-        _log_action "Alias defined '${n}=\"${_DZ_ALIAS_LIST[$n]}\"'"
+_ifs_newlines
+for a in $(_config_read_array_assoc 'define.aliases.set_simple_cmds'); do
+    k="$(_get_array_key "${a}")"
+    v="$(_get_array_val "${a}")"
+    alias ${k}="${v}" &&
+        _log_action "Alias defined '${k}' => '${v}'"
 done
-
-# EOF
+_ifs_reset

@@ -25,7 +25,7 @@ fi
 # Enable shell-debugging if enabled in config file.
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.debug' && \
+_config_return_boolean 'internal.dot_zsh_settings.debug' && \
     _log_buffer 2 \
         "--- Enabling debut mode with 'set -x' (set from config file)" && \
     set -x

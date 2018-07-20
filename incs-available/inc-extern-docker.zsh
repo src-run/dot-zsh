@@ -17,7 +17,13 @@
 which docker-machine &> /dev/null
 
 if [[ $? -eq 0 ]]; then
-    eval "$(docker-machine env ${_DZ_DOCKER_ENVIRONMENT})"
+    v=$(_config_read_string 'extern["docker"].machine_env_type')
+    eval "$(docker-machine env ${v})" && \
+        _log_action "Docker machine environment '${v}' setup" || \
+        _log_warn "Failed to setup docker machine '${v}' environment"
+else
+    _log_normal 1 \
+        "        --- Skipping docker machine configuration (missing 'docker-machine' cmd)"
 fi
 
 # EOF

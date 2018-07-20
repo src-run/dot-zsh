@@ -9,7 +9,6 @@
 # file distributed with this source code.
 #
 
-
 #
 # Use PCRE regular expressions
 #
@@ -120,7 +119,6 @@ _DZ_INC_JSON_CONF="${HOME}/.dot-zsh.json"
 _DZ_VERBOSITY=-5
 _DZ_STIO_BUFF=-1
 
-
 #
 # Source requires variables assignments and function definitions
 #
@@ -199,13 +197,7 @@ _log_normal 1 \
     "--> Loading enabled include files(s) from '${_DZ_INC_ENABL_PATH}' ..."
 
 for f in ${_DZ_INC_ENABL_PATH}/??-???-*.zsh; do
-    [[ ! -f "${f}" ]] && \
-        _log_normal 1 \
-            "    --> Failed to source include file '$(basename ${f})'" && \
-        continue
-
-    _log_normal 1 "    --> Sourcing include file '$(basename ${f})'" && \
-        source "${f}"
+    _check_extern_source_file_enabled "${f}" && source "${f}"
 done
 
 
@@ -221,20 +213,17 @@ _DZ_DONE_MESSAGE="$(_wrt_completion_summary)"
 #
 
 _log_normal 1 "--> Performing final cleanup pass ..."
-_log_action "Unsetting global variables defined by this script ..." 1
+_log_action "Unsetting ${#_DZ_UNSET_VS[@]} internal variables ..." 1
 
 for v in ${_DZ_UNSET_VS[@]}; do
-    eval "unset ${v}" && _log_action "Variable unset '${v}'"
+    eval "unset ${v}" 2> /dev/null
 done
 
-_log_action "Unsetting global functions defined by this script ..." 1
+_log_action "Unsetting ${#_DZ_UNSET_FS[@]} internal functions ..." 1
+_log_normal 1 "--> Completed all operations ..."
 
 for f in ${_DZ_UNSET_FS[@]}; do
-    _log_action "Function unset '${f}'"
-done
-
-for f in ${_DZ_UNSET_FS[@]}; do
-    eval "unset -f ${f}"
+    eval "unset -f ${f}" 2> /dev/null
 done
 
 
@@ -242,7 +231,7 @@ done
 # Write completion message if verbosity high enough
 #
 
-_try_read_conf_bool_ret 'internal.dot_zsh_settings.show_summary' && \
+_config_return_boolean 'internal.dot_zsh_settings.show_summary' && \
     echo -en "${_DZ_DONE_MESSAGE}"
 
 unset _DZ_DONE_MESSAGE

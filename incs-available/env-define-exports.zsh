@@ -14,9 +14,9 @@
 # Loop though exports array and export 'em.
 #
 
-for e in "${_DZ_LIST_EXPORT[@]}"; do
+for e in $(_config_read_array_vals 'define.exports.variables'); do
     export "${e}" &&
-        _log_action "Variable export '${e}'" ||
+        _log_action "Exporting '${e}' variable" ||
         _log_warn "Failed to export '${e}' variable"
 done
 
