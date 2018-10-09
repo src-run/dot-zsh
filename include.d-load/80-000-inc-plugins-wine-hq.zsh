@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -10,6 +11,9 @@
 
 
 #
-# IntelliJ IDE Directory
+# Add wine paths when installed from official PPA
 #
-/.idea/
+
+for f in $(_cfg_get_array_values 'plugins.wine_hq.executable_paths'); do
+    _add_env_path_dir "${f}" scripted
+done

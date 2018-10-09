@@ -1,81 +1,199 @@
 {
-    "globals": {
-        "scheme": "1.0.0",
-        "author": "Rob Frawley 2nd <rmf@src.run>"
-    },
-    "internal": {
-        "dot_zsh_settings": {
-            "log_path": "${HOME}/.dot-zsh.log",
-            "very_quiet": true,
-            "norm_verbose": false,
-            "very_verbose": false,
-            "debug": false,
-            "show_summary": true,
-            "language": "en_US.UTF-8"
+    "package":
+    {
+        "name": "src-run/dot-zsh",
+        "link": "https://github.com/src-run/dot-zsh",
+        "license":
+        {
+            "name": "MIT",
+            "link": "https://src.run/mit"
         },
-        "general_settings": {
-            "editor": {
-                "loc": "subl",
-                "ssh": "nano"
-            },
-            "ssh": {
-                "key_path": "${HOME}/.ssh/id_rsa"
+        "version":
+        {
+            "epithet": "beetle-bronx-boxing",
+            "release": "2.0.1",
+            "schemes": "0.2.1"
+        },
+        "authors": [
+        {
+            "name": "Rob Frawley 2nd",
+            "mail": "rmf@src.run",
+            "home": "{{urls.website_own}}",
+            "urls":
+            {
+                "website_own": "https://robfrawley.com",
+                "website_org": "https://src.run",
+                "github_own": "https://github.com/robfrawley",
+                "github_org": "https://github.com/src-run",
+                "gitlab_own": "https://gitlab.com/robfrawley",
+                "gitlab_org": "https://gitlab.com/src-run"
             }
+        }]
+    },
+    "systems":
+    {
+        "dot_zsh":
+        {
+            "lang": "en_US.UTF-8",
+            "logs":
+            {
+                "path": "${HOME}/.dot-zsh.log",
+                "enabled": false
+            },
+            "outs":
+            {
+                "verbose": false,
+                "quiet": true,
+                "debug": false
+            },
+            "show":
+            {
+                "loading": true,
+                "summary": true
+            }
+        },
+        "oh_my_zsh":
+        {
+            "_enabled": true,
+            "language": "en_US.UTF-8",
+            "display":
+            {
+                "prompt_theme": "agnoster",
+                "use_ls_color": true,
+                "window_title_assign": true,
+                "history_date_format": "yyyy-mm-dd"
+            },
+            "completions":
+            {
+                "use_case_sensitivity": true,
+                "use_hyph_sensitivity": true,
+                "cmd_show_corrections": true,
+                "display_working_dots": true,
+                "no_permisions_checks": true
+            },
+            "git":
+            {
+                "use_untracked_in_dirty_check": false
+            },
+            "updates":
+            {
+                "auto_check": true,
+                "every_days": 7
+            },
+            "plugins": [
+                "git",
+                "git-auto-fetch",
+                "git-extras",
+                "gitignore",
+                "github",
+                "sudo",
+                "colored-man-pages",
+                "colorize",
+                "composer",
+                "bower",
+                "command-not-found",
+                "composer",
+                "docker",
+                "ruby",
+                "bundler",
+                "gem",
+                "chruby",
+                "gulp",
+                "grunt",
+                "node",
+                "npm",
+                "rake",
+                "rsync",
+                "screen",
+                "sublime",
+                "symfony",
+                "systemd",
+                "zsh-syntax-highlighting",
+                "history-substring-search"
+            ]
         }
     },
-    "define": {
-        "aliases": {
+    "configs":
+    {
+        "editor":
+        {
+            "internal_session": "subl",
+            "external_session": "nano"
+        },
+        "key_bindings":
+        {
+            "history_substring_search_up": "kcuu1",
+            "history_substring_search_down": "kcud1"
+        },
+        "aliases":
+        {
             "_enabled": true,
-            "set_simple_cmds": {
-                "ccat": "pygmentize -g",
-                "vcat": "pygmentize -g -O style=colorful,linenos=1",
-                "gpg": "gpg2"
+            "set_simple_cmds":
+            {
+                "ccat": "$(which pygmentize) -g",
+                "vcat": "$(which pygmentize) -g -O style=colorful,linenos=1",
+                "gpg": "$(which gpg2)"
             },
-            "ssh_connections": {
-                "obes": {
+            "ssh_connections":
+            {
+                "obes":
+                {
                     "user": "rmf",
                     "host": "obes.rmf.systems",
                     "port": 2222
                 },
-                "twoface": {
+                "twoface":
+                {
                     "user": "rmf",
                     "host": "twoface.rmf.systems"
                 },
-                "sr": {
+                "sr":
+                {
                     "user": "rmf",
                     "host": "src.run"
                 },
-                "sp": {
+                "sp":
+                {
                     "user": "rmf",
                     "host": "silverpapillon.com"
                 }
             }
         },
-        "path": {
+        "path":
+        {
             "_enabled": true,
             "paths": [
+                "/opt/scripts/bin",
                 "${HOME}/bin",
                 "${HOME}/scripts",
-                "${HOME}/scripts/bin-enabled"
+                "${HOME}/scripts/bin-enabled",
+                "${HOME}/.local/bin/",
+                "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin"
             ]
         },
-        "change-directory-paths": {
+        "change_directory_paths":
+        {
             "_enabled": true,
             "paths": [
                 "${HOME}",
                 "${HOME}/projects"
             ]
         },
-        "ssh": {
-            "_enabled": true
+        "ssh":
+        {
+            "_enabled": true,
+            "root_path": "${HOME}/.ssh",
+            "cert_file": "{{keys_path}}/id_rsa"
         },
-        "completions": {
+        "completions":
+        {
             "_enabled": true,
             "paths": [
                 "${_DZ_PATH}/resources/completions"
             ]
         },
-        "exports": {
+        "exports":
+        {
             "_enabled": true,
             "variables": [
                 "ZSH",
@@ -84,59 +202,65 @@
                 "EDITOR",
                 "SSH_KEY_PATH"
             ]
-        },
-        "variables-extern": {
-            "_enabled": true
-        },
-        "functions-extern": {
-            "_enabled": true
         }
     },
-    "extern": {
-        "android-sdk": {
+    "plugins":
+    {
+
+        "android_sdk":
+        {
             "_enabled": true,
             "mortal_root_path": "${HOME}/Android/Sdk",
             "executable_paths": [
                 "{{mortal_root_path}}/platform-tools"
             ]
         },
-        "apt-fast": {
+        "apt_fast":
+        {
             "_enabled": false,
             "completion_files": [
                 "/usr/share/zsh/functions/Completion/Debian/_apt-fast"
             ]
         },
-        "chruby": {
+        "chruby":
+        {
             "_enabled": true,
             "system_root_path": "/usr/local/share/chruby",
-            "auto_set_version": 2.4,
+            "auto_set_version": "2.4.4",
             "env_source_files": [
                 "{{system_root_path}}/chruby.sh",
                 "{{system_root_path}}/auto.sh"
             ]
         },
-        "composer": {
+        "composer":
+        {
             "_enabled": true,
             "executable_paths": [
+                "${HOME}/.composer/vendor/bin",
                 "${HOME}/.config/composer/vendor/bin"
             ]
         },
-        "docker": {
+        "docker":
+        {
             "_enabled": true,
             "machine_env_type": "default"
         },
-        "gnupg": {
+        "gnupg":
+        {
             "_enabled": true,
             "secret_key": "466839F8117362D877E438BE02B8697CE6AA381A",
             "export_tty": "${TTY}"
         },
-        "golang": {
+        "golang":
+        {
             "_enabled": true,
             "system_root_path": "/usr/lib/go-1.10",
+            "system_exec_path": "{{system_root_path}}/bin",
             "mortal_root_path": "${HOME}/golang/1.10",
             "mortal_exec_path": "{{mortal_root_path}}/bin"
         },
-        "google-cloud-sdk": {
+        "google_cloud_sdk":
+        {
             "_enabled": true,
             "system_root_path": "/opt/google-cloud-sdk",
             "env_source_files": [
@@ -146,7 +270,8 @@
                 "{{system_root_path}}/completion.zsh.inc"
             ]
         },
-        "npm": {
+        "npm":
+        {
             "_enabled": true,
             "mortal_root_path": "${HOME}/.npm-packages",
             "manset_load_path": "{{mortal_root_path}}/share/man",
@@ -155,7 +280,8 @@
                 "{{mortal_root_path}}/bin"
             ]
         },
-        "phpenv": {
+        "phpenv":
+        {
             "_enabled": true,
             "mortal_root_path": "${HOME}/.phpenv",
             "initialize_evals": [
@@ -168,7 +294,8 @@
                 "{{mortal_root_path}}/completions/rbenv.zsh"
             ]
         },
-        "platform-sh": {
+        "platform_sh":
+        {
             "_enabled": true,
             "mortal_root_path": "${HOME}/.platformsh",
             "executable_paths": [
@@ -178,14 +305,16 @@
                 "{{mortal_root_path}}/shell-config.rc"
             ]
         },
-        "travis": {
+        "travis":
+        {
             "_enabled": true,
             "mortal_root_path": "${HOME}/.travis",
             "completion_files": [
                 "{{mortal_root_path}}/travis.sh"
             ]
         },
-        "wine-hq": {
+        "wine_hq":
+        {
             "_enabled": true,
             "system_root_path": "/opt",
             "executable_paths": [
@@ -193,6 +322,17 @@
                 "{{system_root_path}}/wine-devel/bin",
                 "{{system_root_path}}/wine-staging/bin"
             ]
+        }
+    },
+    "exports":
+    {
+        "variables":
+        {
+            "_enabled": true
+        },
+        "functions":
+        {
+            "_enabled": true
         }
     }
 }

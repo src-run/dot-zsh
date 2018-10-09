@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -8,8 +9,14 @@
 # file distributed with this source code.
 #
 
+#
+# An implementation of bash eval for zsh.
+#
 
-#
-# IntelliJ IDE Directory
-#
-/.idea/
+autoload -U bash_source
+
+function bash_eval {
+    bash_source <(<<<"${*}")
+}
+
+bash_eval "${@}"

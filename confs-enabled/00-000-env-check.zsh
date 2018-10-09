@@ -1,1 +1,0 @@
-../confs-available/env-check.zsh

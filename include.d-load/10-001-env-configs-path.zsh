@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -10,6 +11,9 @@
 
 
 #
-# IntelliJ IDE Directory
+# Add default directories to environment PATH variable
 #
-/.idea/
+
+for p in $(_cfg_get_array_values 'configs.path.paths'); do
+    _add_env_path_dir "${p}" default
+done

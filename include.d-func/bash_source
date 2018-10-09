@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+
+#
+# This file is part of the `src-run/dot-zsh` project.
+#
+# (c) Rob Frawley 2nd <rmf@src.run>
+#
+# For the full copyright and license information, view the LICENSE.md
+# file distributed with this source code.
+#
+
+#
+# An implementation of bash source for zsh.
+#
+
+emulate -R zsh -c 'autoload -Uz is-at-least'
+
+if is-at-least 5.0.0; then
+    emulate -R sh -o kshglob +o shglob +o ignorebraces -o bash_rematch -c '
+        function bash_source {
+            source "${@}"
+        }
+    '
+else
+    emulate -R sh -c '
+        function bash_source {
+            # Do note that functions about to be defined will not be set
+            # with these options when run
+            setopt kshglob noshglob braceexpand bash_rematch
+            source "${@}"
+        }
+    '
+fi
+
+bash_source "${@}"

@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -10,6 +11,9 @@
 
 
 #
-# IntelliJ IDE Directory
+# Source Travis shell completion script
 #
-/.idea/
+
+for f in $(_cfg_get_array_values 'plugins.travis.completion_files'); do
+    _check_extern_source_file "${f}" 2 'travis' && source "${f}"
+done

@@ -1,6 +1,6 @@
 [submodule "fonts"]
-	path = fonts
+	path = include.d-libs/fonts
 	url = https://github.com/powerline/fonts.git
 [submodule "bright"]
-	path = bright
+	path = include.d-libs/bright
 	url = https://github.com/src-run/bright-library.git

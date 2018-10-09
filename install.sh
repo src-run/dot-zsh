@@ -1,29 +1,37 @@
 #!/bin/bash
 
-#
-# Internal variables
-#
-INSTALL_SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}" 2> /dev/null)" && pwd)"
 
 #
-# Output new line
+# Internal variables.
 #
+
+_DZ_INSTALLER_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}" 2> /dev/null)" && pwd)"
+
+
+#
+# Output new line.
+#
+
 function out_nl {
     echo -en "\n"
 }
 
+
 #
-# Output conditional new line
+# Output conditional new line.
 #
+
 function out_nl_conditional {
     if [[ "${1:-true}" == "true" ]] || [[ ${1:-0} -eq 0 ]]; then
         out_nl
     fi
 }
 
+
 #
-# Output text
+# Output text.
 #
+
 function out {
     local value="${1:-}"
     local style="${2:-}"
@@ -35,111 +43,141 @@ function out {
     fi
 }
 
+
 #
-# Output single space padded string
+# Output single space padded string.
 #
+
 function out_padded {
     out " ${1:-} " "${2:-}"
 }
 
+
 #
-# Output line prefix text
+# Output line prefix text.
 #
+
 function out_prefix {
     out_padded "${1:-―――}" "${2:-fg:magenta style:bold}"
 }
 
+
 #
-# Output line prefix text (subs)
+# Output line prefix text (subs).
 #
+
 function out_prefix_subs {
     out_prefix
 }
 
+
 #
-# Output line prefix text (bold)
+# Output line prefix text (bold).
 #
+
 function out_prefix_bold {
     out_prefix '+++' 'style:bold style:reverse'
 }
 
+
 #
-# Output line prefix text (fail)
+# Output line prefix text (fail).
 #
+
 function out_prefix_fail {
     out_prefix '!!!' 'fg:white bg:red'
 }
 
+
 #
-# Output line bullet character
+# Output line bullet character.
 #
+
 function out_bullet {
     out_padded "${1:-○}" "${2:-}"
 }
 
+
 #
-# Output line bullet character (subs)
+# Output line bullet character (subs).
 #
+
 function out_bullet_subs {
     out_bullet_bold '  ►' 'style:dim'
 }
 
+
 #
-# Output line bullet character (bold)
+# Output line bullet character (bold).
 #
+
 function out_bullet_bold {
     out_bullet '◎' 'style:bold'
 }
 
+
 #
-# Output line bullet character (fail)
+# Output line bullet character (fail).
 #
+
 function out_bullet_fail {
     out_bullet '○' 'fg:light-red'
 }
 
+
 #
-# Output ellipsis character
+# Output ellipsis character.
 #
+
 function out_ellipsis {
     out_padded '…'
 }
 
+
 #
-# Output styled line string
+# Output styled line string.
 #
+
 function out_string {
     out "${1:-}" "${2:-}"
     out_nl_conditional ${3:-true}
 }
 
 
+
 #
-# Output styled line string (subs)
+# Output styled line string (subs).
 #
+
 function out_string_subs {
     out_string "${1}" 'fg:white' false
     out_ellipsis
     out_nl_conditional ${2:-false}
 }
 
+
 #
-# Output styled line string (bold)
+# Output styled line string (bold).
 #
+
 function out_string_bold {
     out_string "[ ${1} ]" 'style:bold' ${2:-true}
 }
 
+
 #
-# Output styled line string (fail)
+# Output styled line string (fail).
 #
+
 function out_string_fail {
     out_string "${1}" "fg:red style:bold" ${2:-true}
 }
 
+
 #
-# Output line of text (optionally styled with optional newline)
+# Output line of text (optionally styled with optional newline).
 #
+
 function out_line {
     local type="${1:-norm}"
     local text="${2:-}"
@@ -183,38 +221,48 @@ function out_line {
 
 }
 
+
 #
-# Output title line of text
+# Output title line of text.
 #
+
 function out_title {
     out_line 'bold' 'src-run/dot-zsh installer'
 }
 
+
 #
-# Output completion line of text
+# Output completion line of text.
 #
+
 function out_complete {
     out_line 'bold' 'completed all steps of installer'
 }
 
+
 #
-# Output fail line of text
+# Output fail line of text.
 #
+
 function out_fail {
     out_line 'fail' "${1}"
 }
 
+
 #
-# Output inst line of text
+# Output inst line of text.
 #
+
 function out_inst {
     out_custom "$1" "fg:white style:bold"
     out_nl
 }
 
+
 #
-# Start state output
+# Start state output.
 #
+
 function out_state_start {
     out_prefix
     out_bullet
@@ -222,9 +270,11 @@ function out_state_start {
     out_ellipsis
 }
 
+
 #
-# Start sub-state output
+# Start sub-state output.
 #
+
 function out_state_start_subs {
     out_prefix
     out_bullet_subs
@@ -232,30 +282,38 @@ function out_state_start_subs {
     out_ellipsis
 }
 
+
 #
-# Close state output as okay
+# Close state output as okay.
 #
+
 function out_state_close_okay {
     out_string "${1:-OKAY}" "fg:green style:bold"
 }
 
+
 #
-# Close state output as fail
+# Close state output as fail.
 #
+
 function out_state_close_fail {
     out_string "${1:-FAIL}" "fg:red style:bold"
 }
 
+
 #
-# Close state output as done
+# Close state output as done.
 #
+
 function out_state_close_done {
     out_string "${1:-DONE}  " "bg:blue style:bold"
 }
 
+
 #
-# Close state output as cust
+# Close state output as cust.
 #
+
 function out_state_close_cust {
     local desc="${1}"
     local type="${2:-fg:white style:bold}"
@@ -263,9 +321,11 @@ function out_state_close_cust {
     out_string "${desc}" "${type}"
 }
 
+
 #
-# Close state output based on return code
+# Close state output based on return code.
 #
+
 function out_state_close {
     local result="${1:-0}"
 
@@ -281,9 +341,11 @@ function out_state_close {
     esac
 }
 
+
 #
-# Determine operating system type
+# Determine operating system type.
 #
+
 function get_os_type {
     case "${OSTYPE}" in
         linux*)
@@ -304,33 +366,46 @@ function get_os_type {
     esac
 }
 
+
 #
-# Checks if operating system is linux
+# Checks if operating system is linux.
 #
+
 function is_os_linux {
     [[ $(get_os_type) == 'linux' ]] && echo true || echo false
 }
 
+
 #
-# Checks if operating system is darwin
+# Checks if operating system is darwin.
 #
+
 function is_os_darwin {
     [[ $(get_os_type) == 'darwin' ]] && echo true || echo false
 }
 
+
 #
-# Locates the absolute bin path of brew
+# Locates the absolute bin path of brew.
 #
+
 function resolve_brew_pkg_manager_bin {
     which brew 2> /dev/null
 }
 
+
 #
-# Locates the absolute bin path of apt-get
+# Locates the absolute bin path of apt-get.
 #
+
 function resolve_apt_get_pkg_manager_bin {
     which apt-get 2> /dev/null
 }
+
+
+#
+# Output dependency installation info.
+#
 
 function install_dependencies_info {
     local os="${1}"
@@ -353,6 +428,11 @@ function install_dependencies_info {
     out_state_close_cust "${pkg_manager_path}"
 }
 
+
+#
+# Installs dependencies using provided bin, call, and opts.
+#
+
 function install_dependencies_acts {
     local pkg_manager_path="${1}"; shift
     local pkg_manager_call="${1}"; shift
@@ -368,9 +448,11 @@ function install_dependencies_acts {
     out_state_close_done
 }
 
+
 #
-# Installs dependencies for darwin systems
+# Installs dependencies for darwin systems.
 #
+
 function install_darwin_dependencies {
     local brew
     local packages="grep gnu-sed coreutils jq zsh"
@@ -382,9 +464,11 @@ function install_darwin_dependencies {
         'grep' 'gnu-sed' 'coreutils' 'jq' 'zsh'
 }
 
+
 #
-# Installs dependencies for linux systems
+# Installs dependencies for linux systems.
 #
+
 function install_linux_dependencies {
     local apt
     local packages="make bc jq zsh"
@@ -397,15 +481,17 @@ function install_linux_dependencies {
         'make' 'bc' 'jq' 'zsh'
 }
 
+
 #
-# The main program function (all the magic starts here)
+# The main program function (all the magic starts here).
 #
+
 function main {
     # Define out install paths and git remotes
     local _DZ_INSTALL_TO="${HOME}/.dot-zsh"
     local _DZ_GIT_REMOTE="https://github.com/src-run/dot-zsh.git"
-    local OMY_ZSH_INSTALL_TO="${HOME}/.oh-my-zsh"
-    local OMY_ZSH_GIT_REMOTE="https://github.com/robbyrussell/oh-my-zsh.git"
+    local _OZ_ZSH_INSTALL_TO="${HOME}/.oh-my-zsh"
+    local _OZ_ZSH_GIT_REMOTE="https://github.com/robbyrussell/oh-my-zsh.git"
 
     # Prevent the cloned repository from having insecure permissions. Failing to
     # do so causes failures like "command not found: " for users with insecure
@@ -425,7 +511,7 @@ function main {
 
     # Write oh-my-zsh install path
     out_state_start_subs 'Determined "oh-my-zsh" install path'
-    out_state_close_cust "${OMY_ZSH_INSTALL_TO}"
+    out_state_close_cust "${_OZ_ZSH_INSTALL_TO}"
 
     # Remove previous dot-zsh install if exists
     if [[ -d "${_DZ_INSTALL_TO}" ]]; then
@@ -435,9 +521,9 @@ function main {
     fi
 
     # Remove previous oh-my-zsh install if exists
-    if [[ -d "${OMY_ZSH_INSTALL_TO}" ]]; then
+    if [[ -d "${_OZ_ZSH_INSTALL_TO}" ]]; then
         out_state_start_subs 'Removing previous "oh-my-zsh" install'
-        rm -fr ${OMY_ZSH_INSTALL_TO} &> /dev/null
+        rm -fr ${_OZ_ZSH_INSTALL_TO} &> /dev/null
         out_state_close $?
     fi
 
@@ -463,10 +549,10 @@ function main {
     out_state_close $?
 
     # Clone oh-my-zsh and initialize/update any submodules
-    out_state_start_subs "Fetching \"${OMY_ZSH_GIT_REMOTE}\""
+    out_state_start_subs "Fetching \"${_OZ_ZSH_GIT_REMOTE}\""
     git clone --depth=1 \
-        ${OMY_ZSH_GIT_REMOTE} ${OMY_ZSH_INSTALL_TO} &> /dev/null && \
-        cd ${OMY_ZSH_INSTALL_TO} &> /dev/null && \
+        ${_OZ_ZSH_GIT_REMOTE} ${_OZ_ZSH_INSTALL_TO} &> /dev/null && \
+        cd ${_OZ_ZSH_INSTALL_TO} &> /dev/null && \
         git submodule update --init &> /dev/null
     out_state_close $?
 
@@ -508,17 +594,40 @@ function main {
     out_inst
 }
 
+
 #
 # Include the bright library to enable colored output
 #
-source ${INSTALL_SELF_PATH}/bright/bright.bash
+source "${_DZ_INSTALLER_PATH}/include.d-libs/bright/bright.bash"
+
 
 #
-# Configure bright library not to auto output new lines
+# Configure bright library not to auto output new lines.
 #
+
 BRIGHT_AUTO_NL=0
 
+
 #
-# Call the main script function (go!)
+# Go!
 #
+
 main
+
+
+#
+# Cleanup internal variables (unset them).
+#
+
+for v in BRIGHT_AUTO_NL DEBIAN_FRONTEND _DZ_GIT_REMOTE _DZ_INSTALLER_PATH _DZ_INSTALL_TO _OZ_ZSH_GIT_REMOTE _OZ_ZSH_INSTALL_TO; do
+    eval "unset ${v} 2> /dev/null" 2> /dev/null
+done
+
+
+#
+# Cleanup internal functions (unset them).
+#
+
+for f in out_nl out_nl_conditional out out_padded out_prefix out_prefix_subs out_prefix_bold out_prefix_fail out_bullet out_bullet_subs out_bullet_bold out_bullet_fail out_ellipsis out_string out_string_subs out_string_bold out_string_fail out_line out_title out_complete out_fail out_inst out_state_start out_state_start_subs out_state_close_okay out_state_close_fail out_state_close_done out_state_close_cust out_state_close get_os_type is_os_linux is_os_darwin resolve_brew_pkg_manager_bin resolve_apt_get_pkg_manager_bin install_dependencies_info install_dependencies_acts install_darwin_dependencies install_linux_dependencies main; do
+    eval "unset -f ${f} 2> /dev/null" 2> /dev/null
+done

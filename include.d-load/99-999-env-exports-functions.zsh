@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -7,9 +8,3 @@
 # For the full copyright and license information, view the LICENSE.md
 # file distributed with this source code.
 #
-
-
-#
-# IntelliJ IDE Directory
-#
-/.idea/

@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 #
 # This file is part of the `src-run/dot-zsh` project.
@@ -9,7 +10,6 @@
 #
 
 
-#
-# IntelliJ IDE Directory
-#
-/.idea/
+
+SSH_KEY_PATH=$(_cfg_get_string 'configs.ssh.cert_file' "${HOME}/.ssh/id_rsa") \
+    && _log_buffer 2 "--- Setting ssh key path to '${SSH_KEY_PATH}'"

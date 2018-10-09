@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+#
+# This file is part of the `src-run/dot-zsh` project.
+#
+# (c) Rob Frawley 2nd <rmf@src.run>
+#
+# For the full copyright and license information, view the LICENSE.md
+# file distributed with this source code.
+#
+
+#
+# Checks zsh file syntax.
+#
+
+autoload -Uz is-at-least
+
+if { is-at-least 5.0.0 } {
+    function syntax-check {
+        setopt local_options err_return
+        local file
+        for file ("$@") zsh -o no_exec -o no_rcs $file
+    }
+} else {
+    function syntax-check {
+        setopt local_options err_return multios
+        local file
+        for file ("$@") {
+            local stderr
+            {
+                zsh -o no_exec -o no_rcs $file 3>&1 4>&2 1>&2 2>&3 2>&4 | read -rd '' stderr || :
+            } 2>&1
+            [[ -z $stderr ]]
+        }
+    }
+}
+
+syntax-check "$@"

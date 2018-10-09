@@ -1,0 +1,111 @@
+<?php
+
+/*
+ * This file is part of the `src-run/dot-zsh` project.
+ *
+ * (c) Rob Frawley 2nd <rmf@src.run>
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
+use SLLH\StyleCIBridge\ConfigBridge;
+
+/**
+ * @param string     $variable
+ * @param null|mixed $default
+ *
+ * @throws \InvalidArgumentException
+ *
+ * @return mixed
+ */
+function environment($variable, $default = null)
+{
+  $value = getenv($variable);
+
+  if ($value === false && $default === null) {
+    throw new \InvalidArgumentException(sprintf('Invalid environment var $%s and no default set.', $value));
+  }
+
+  return $value !== false ? $value : $default;
+}
+
+/**
+ * @param string $path
+ * @param bool   $require
+ *
+ * @throws \RuntimeException
+ *
+ * @return bool
+ */
+function attemptInclude($path, $require = false)
+{
+  if (file_exists($path)) {
+    return (include_once $path);
+  }
+
+  if ($require) {
+    throw new \RuntimeException(sprintf('Could not include required file %s', $path));
+  }
+
+  return false;
+}
+
+/**
+ * @param string $path
+ *
+ * @return bool
+ */
+function requireInclude($path)
+{
+  return attemptInclude($path, true);
+}
+
+function git($what, $default)
+{
+
+}
+
+// Composer auto-load include error message
+$composerAutoloadError = <<<STR
+Unable to include a composer vendor autoload file. This is required. Ensure you
+have composer installed globally and that an appropriate autoload file resides
+in your home directory (at "~/.composer/vendor/autoload.php"). Alternativly, you
+can set the "COMPOSER_AUTOLOAD" environment variable to a different location.
+STR;
+
+// PHP file-level doc-block used
+$header = <<<HDR
+This file is part of the `{{ repo_org }}/{{ repo_name }}` project.
+
+(c) {{ copyright_holder }}
+
+For the full copyright and license information, please view the LICENSE.md
+file that was distributed with this source code.
+HDR;
+
+// Get our environment variables setup
+$pathHome             = environment('HOME',              '/home/rmf');
+$pathComposerAutoload = environment('COMPOSER_AUTOLOAD', $pathHome.'/.composer/vendor/autoload.php');
+$headerCopyrightName  = environment('PHP_CS_COPY_NAME',  git('identity', 'Rob Frawley 2nd <rmf@src.run>'));
+$headerRepositoryOrg  = environment('PHP_CS_REPO_ORG',   repository('org', 'src-run'));
+$headerRepositoryName = environment('PHP_CS_REPO_NAME',  repository('name', '<project-name>'));
+
+// Include our composer autoloader
+try {
+  requireInclude($pathComposerAutoload);
+} catch (\RuntimeException $e) {
+  fwrite(STDERR, $composerAutoloadError);
+  throw $e;
+}
+
+
+
+
+$config = ConfigBridge::create();
+$config->setRules(array_merge($config->getRules(), [
+  'header_comment' => [ 'header' => $header ]
+]));
+
+return $config;
+
