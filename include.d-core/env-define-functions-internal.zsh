@@ -18,6 +18,7 @@ function _o_nl {
     echo -en "\n"
 }
 
+
 #
 # format and output text
 #
@@ -69,13 +70,14 @@ function _get_unix_time_diff {
     local time_start="${1}"
     local time_ended="${2}"
 
-    _o_text '%.5f' $((${time_ended} - ${time_start}))
+    _o_text '%.4f' $((${time_ended} - ${time_start}))
 }
 
 
 #
 # create ANSI color sequence with optional style
 #
+
 function _ansi_color {
     local color="${1}"
     local style="${2:-}"
@@ -91,7 +93,8 @@ function _ansi_color {
 #
 # disable (clear) all console formatting attributes
 #
-function _ansi_clear {
+
+function _o_ansi_clear {
     echo -n "\e[0m"
 }
 
@@ -99,31 +102,32 @@ function _ansi_clear {
 #
 # enable styling attributes: bold, dim, underline, blink, invert, and hide
 #
-function _style_bold {
+
+function _o_style_bold {
     echo -n "\e[1m"
 }
 
-function _style_dim {
+function _o_style_dim {
     echo -n "\e[2m"
 }
 
-function _style_underline {
+function _o_style_underline {
     echo -n "\e[4m"
 }
 
-function _style_blink {
+function _o_style_blink {
     echo -n "\e[5m"
 }
 
-function _style_invert {
+function _o_style_invert {
     echo -n "\e[7m"
 }
 
-function _style_hide {
+function _o_style_hide {
     echo -n "\e[8m"
 }
 
-function _style_strikeout {
+function _o_style_strikeout {
     echo -n "\e[9m"
 }
 
@@ -131,71 +135,72 @@ function _style_strikeout {
 #
 # output foreground ANSI color sequence
 #
-function _fg_default {
+
+function _o_fg_default {
     echo -n $(_ansi_color 39 "${1}")
 }
 
-function _fg_black {
+function _o_fg_black {
     echo -n $(_ansi_color 30 "${1}")
 }
 
-function _fg_red {
+function _o_fg_red {
     echo -n $(_ansi_color 31 "${1}")
 }
 
-function _fg_green {
+function _o_fg_green {
     echo -n $(_ansi_color 32 "${1}")
 }
 
-function _fg_yellow {
+function _o_fg_yellow {
     echo -n $(_ansi_color 33 "${1}")
 }
 
-function _fg_blue {
+function _o_fg_blue {
     echo -n $(_ansi_color 34 "${1}")
 }
 
-function _fg_magenta {
+function _o_fg_magenta {
     echo -n $(_ansi_color 35 "${1}")
 }
 
-function _fg_cyan {
+function _o_fg_cyan {
     echo -n $(_ansi_color 36 "${1}")
 }
 
-function _fg_light_gray {
+function _o_fg_light_gray {
     echo -n $(_ansi_color 37 "${1}")
 }
 
-function _fg_dark_gray {
+function _o_fg_dark_gray {
     echo -n $(_ansi_color 90 "${1}")
 }
 
-function _fg_light_red {
+function _o_fg_light_red {
     echo -n $(_ansi_color 91 "${1}")
 }
 
-function _fg_light_green {
+function _o_fg_light_green {
     echo -n $(_ansi_color 92 "${1}")
 }
 
-function _fg_light_yellow {
+function _o_fg_light_yellow {
     echo -n $(_ansi_color 93 "${1}")
 }
 
-function _fg_light_blue {
+function _o_fg_light_blue {
     echo -n $(_ansi_color 94 "${1}")
 }
 
-function _fg_light_magenta {
+function _o_fg_light_magenta {
     echo -n $(_ansi_color 95 "${1}")
 }
 
-function _fg_light_cyan {
+function _o_fg_light_cyan {
     echo -n $(_ansi_color 96 "${1}")
 }
 
-function _fg_white {
+function _o_fg_white {
     echo -n $(_ansi_color 97 "${1}")
 }
 
@@ -203,71 +208,72 @@ function _fg_white {
 #
 # output background ANSI color sequence
 #
-function _bg_default {
+
+function _o_bg_default {
     echo -n $(_ansi_color 49 "${1}")
 }
 
-function _bg_black {
+function _o_bg_black {
     echo -n $(_ansi_color 40 "${1}")
 }
 
-function _bg_red {
+function _o_bg_red {
     echo -n $(_ansi_color 41 "${1}")
 }
 
-function _bg_green {
+function _o_bg_green {
     echo -n $(_ansi_color 42 "${1}")
 }
 
-function _bg_yellow {
+function _o_bg_yellow {
     echo -n $(_ansi_color 43 "${1}")
 }
 
-function _bg_blue {
+function _o_bg_blue {
     echo -n $(_ansi_color 44 "${1}")
 }
 
-function _bg_magenta {
+function _o_bg_magenta {
     echo -n $(_ansi_color 45 "${1}")
 }
 
-function _bg_cyan {
+function _o_bg_cyan {
     echo -n $(_ansi_color 46 "${1}")
 }
 
-function _bg_light_gray {
+function _o_bg_light_gray {
     echo -n $(_ansi_color 47 "${1}")
 }
 
-function _bg_dark_gray {
+function _o_bg_dark_gray {
     echo -n $(_ansi_color 100 "${1}")
 }
 
-function _bg_light_red {
+function _o_bg_light_red {
     echo -n $(_ansi_color 101 "${1}")
 }
 
-function _bg_light_green {
+function _o_bg_light_green {
     echo -n $(_ansi_color 102 "${1}")
 }
 
-function _bg_light_yellow {
+function _o_bg_light_yellow {
     echo -n $(_ansi_color 103 "${1}")
 }
 
-function _bg_light_blue {
+function _o_bg_light_blue {
     echo -n $(_ansi_color 104 "${1}")
 }
 
-function _bg_light_magenta {
+function _o_bg_light_magenta {
     echo -n $(_ansi_color 105 "${1}")
 }
 
-function _bg_light_cyan {
+function _o_bg_light_cyan {
     echo -n $(_ansi_color 106 "${1}")
 }
 
-function _bg_white {
+function _o_bg_white {
     echo -n $(_ansi_color 107 "${1}")
 }
 
@@ -275,7 +281,8 @@ function _bg_white {
 #
 # remove all ANSI SGR and EL escape sequences
 #
-function _ansi_rm_sgr_el {
+
+function _o_ansi_al_sequence_remove {
     echo "${1}" | sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})*)?m//g"
 }
 
@@ -649,6 +656,7 @@ function _config_read_array_assoc {
 #
 # trim line width to max columns of terminal window
 #
+
 function _trim_line_width {
     local cols
     local line="${1}"
@@ -732,13 +740,13 @@ function _wrt_log {
 
 function _buf_flush_lines {
     _cfg_ret_bool 'systems.dot_zsh.show.loading' 'true' \
-        && _show_loading \
-        || _disable_loading
+        && _load_progress_display \
+        || _load_progress_disable
 
     if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
         return
     fi
-    _disable_loading
+    _load_progress_disable
 
     for line in ${_DZ_IO_BUFF_LINES[@]}; do
         _trim_line_width "$(_o_text '%s\n' "${line}")"
@@ -892,6 +900,7 @@ function _self_repo_parse_branch {
 #
 # Get last commit hash prepended with @ (i.e. @8a323d0)
 #
+
 function _self_repo_parse_hash {
     export _DZ_SELF_COMMIT
     local prepend="${1:-0}"
@@ -1191,74 +1200,93 @@ function _flatten_lines {
 
 
 #
+# Output padding of the specified length
+#
+
+function _o_padding {
+    local padding_len="${1:-0}"
+    local padding_str="${2:- }"
+
+    if [[ ${padding_len} -gt 0 ]]; then
+        for i in $(seq 1 ${padding_len}); do
+            _o_text "${padding_str}"
+        done
+    fi
+}
+
+
+#
 # Define fancy complete message display function.
 #
 
-function _show_summary {
-    local frmt_stat="%s - %s - %s"
-    local frmt_desc="%sInitialized %s%s@%s%s shell configuration%s"
-    local frmt_time="%s(%sloaded in %s seconds%s)%s"
-    local text_stat="${1:-OK}"
-    local text_desc
-    local text_time
-    local text_comp
-    local text_comp_no_seq
-    local columns
-    local pre_pad=0
+function _load_summary_display {
+    local padding_len=0
+    local format_stat="%s - %s - %s"
+    local format_info="%sInitialized %s%s@%s%s shell configuration%s"
+    local format_used="%s(%sloaded in %s seconds and mapped %s%s memory%s)%s"
+    local format_comp="%s %s %s...%s %s"
+    local string_stat="${1:-OK}"
+    local string_ansi
+    local string_none
+    local memory_used
+    local memory_size
+    local memory_type
 
-    columns=$(tput cols)
-
-    text_desc="$(
-        _o_text "${frmt_desc}" \
-            "$(_ansi_clear; _fg_light_gray; _style_dim)" \
-            "$(_style_bold)" \
-            "${USER}" \
-            "$(hostname -s)" \
-            "$(_ansi_clear; _fg_light_gray; _style_dim)" \
-            "$(_ansi_clear)"
+    memory_used="$(
+        pmap -d ${$} 2> /dev/null \
+            | tail -n 1 2> /dev/null \
+            | sed -E 's/^mapped: ([0-9]+[A-Z]{0,2}).+/\1/g' 2> /dev/null
     )"
-
-    text_time="$(
-        _o_text "${frmt_time}" \
-            "$(_fg_dark_gray; _style_dim)" \
-            "$(_fg_dark_gray)" \
+    memory_size="$(
+        grep -o -E '[0-9]+' <<< "${memory_used}"
+    )"
+    memory_type="$(
+        grep -o -E '[A-Z]{0,3}' <<< "${memory_used}"
+    )"
+    string_ansi="$(
+        _o_text "${format_comp}" \
             "$(
-                _get_unix_time_diff \
-                    "${_DZ_LOAD_TIME}" \
-                    "$(_get_microtime)"
+                _o_text "${format_info}" \
+                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
+                    "$(_o_style_bold)" \
+                    "${USER}" \
+                    "$(hostname -s)" \
+                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
+                    "$(_o_ansi_clear)"
             )" \
-            "$(_fg_dark_gray; _style_dim)" \
-            "$(_ansi_clear)"
+            "$(
+                _o_text "${format_used}" \
+                    "$(_o_fg_dark_gray; _o_style_dim)" \
+                    "$(_o_fg_dark_gray)" \
+                    "$(
+                        _get_unix_time_diff \
+                            "${_DZ_LOAD_TIME}" \
+                            "$(_get_microtime)"
+                    )" \
+                    "$(
+                        LC_NUMERIC=en_US printf "%'.f\n" "${memory_size}"
+                    )" \
+                    "${memory_type}" \
+                    "$(_o_fg_dark_gray; _o_style_dim)" \
+                    "$(_o_ansi_clear)"
+            )" \
+            "$(_o_fg_light_gray; _o_style_dim)" \
+            "$(_o_ansi_clear)" \
+            "$(
+                _o_text "${format_stat}" \
+                    "$(_o_fg_green; _o_bg_black; _o_style_invert; _o_style_bold)" \
+                    "${string_stat}" \
+                    "$(_o_ansi_clear)"
+            )"
     )"
 
-    text_stat="$(
-        _o_text "${frmt_stat}" \
-            "$(_fg_green; _bg_black; _style_invert; _style_bold)" \
-            "${text_stat}" \
-            "$(_ansi_clear)"
-    )"
+    string_none=$(_o_ansi_al_sequence_remove "${string_ansi}")
+    padding_len=$(($(tput cols) - ${#string_none} - 1))
 
-    text_comp="$(
-        _o_text "%s %s $(_fg_light_gray; _style_dim)...$(_ansi_clear) %s" \
-            "${text_desc}" \
-            "${text_time}" \
-            "${text_stat}"
-    )"
-
-    text_comp_no_seq=$(_ansi_rm_sgr_el "${text_comp}")
-    pre_pad=$((${columns} - ${#text_comp_no_seq} - 1))
-
-    _ansi_clear
-    echo -en "\n"
-
-    if [[ ${pre_pad} -gt 0 ]]; then
-        for i in $(seq 1 ${pre_pad}); do
-            echo -en ' '
-        done
-    fi
-
-    echo -en "${text_comp}\n" && \
-        _ansi_clear
+    _o_nl
+    _o_padding ${padding_len}
+    _o_line "${string_ansi}"
+    _o_ansi_clear
 }
 
 
@@ -1266,7 +1294,7 @@ function _show_summary {
 # ready loading global vars
 #
 
-function _show_loader_globals {
+function _load_progress_setup {
     if [[ -z ${_DZ_LOADER_OUT_LVL} ]]; then
         typeset -g _DZ_LOADER_OUT_LVL=0
         typeset -g _DZ_LOADER_DISABLE=0
@@ -1279,9 +1307,15 @@ function _show_loader_globals {
 # Define fancy complete message display function.
 #
 
-function _disable_loading {
-    _show_loader_globals
-    _clear_loading
+function _load_progress_disable {
+    _load_progress_setup
+
+    if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLE} -ne 1 ]]; then
+        _load_progress_display_step_close
+        sleep 0.5
+    fi
+
+    _load_progress_clear
     _DZ_LOADER_DISABLE=1
 }
 
@@ -1290,8 +1324,8 @@ function _disable_loading {
 # Define fancy complete message display function.
 #
 
-function _clear_loading {
-    _show_loader_globals
+function _load_progress_clear {
+    _load_progress_setup
 
     if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLED} -eq 0 ]] && [[ ${_DZ_LOADER_CLEARED} -eq 0 ]]; then
         clear
@@ -1303,11 +1337,74 @@ function _clear_loading {
 
 
 #
+# Output load progress step indicator
+#
+
+function _load_progress_display_step_section {
+    local frmt="%s%s%s"
+    local text="${1}"
+
+    _o_text "${frmt}" \
+        "$(_o_ansi_clear; _o_fg_dark_gray; _o_style_dim)" \
+        "${text}" \
+        "$(_o_ansi_clear)"
+}
+
+
+#
+# Output load progress step indicator
+#
+
+function _load_progress_display_step_open {
+    _load_progress_display_step_section "["
+}
+
+
+#
+# Output load progress step indicator
+#
+
+function _load_progress_display_step_close {
+    _load_progress_display_step_section "] "
+}
+
+
+#
+# Output load progress step indicator
+#
+
+function _load_progress_display_step {
+    _load_progress_display_step_section "—"
+}
+
+
+#
+# Output load progress "loading" text
+#
+
+function _load_progress_display_text {
+    local frmt=" %s %s %s "
+    local text="LOADING"
+
+    _o_nl
+    _o_text "${frmt}" \
+        "$(_o_fg_dark_gray; _o_bg_black; _o_style_invert; _o_style_bold; _o_style_dim)" \
+        "${text}" \
+        "$(_o_ansi_clear)"
+
+    _load_progress_display_step_open
+    _load_progress_display_step
+    _load_progress_display_step
+    _load_progress_display_step
+}
+
+
+#
 # Define fancy complete message display function.
 #
 
-function _show_loading {
-    _show_loader_globals
+function _load_progress_display {
+    _load_progress_setup
 
     if [[ ${_DZ_LOADER_DISABLE} -eq 1 ]]; then
         return
@@ -1316,9 +1413,9 @@ function _show_loading {
     _DZ_LOADER_CLEARED=0
 
     if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]]; then
-        _o_text "$(_ansi_clear; _fg_dark_gray; _style_dim).$(_ansi_clear)"
+        _load_progress_display_step
     else
-        _o_text "\n $(_ansi_clear; _fg_dark_gray; _style_bold)Loading$(_ansi_clear)$(_ansi_clear; _fg_dark_gray; _style_dim)...$(_ansi_clear)"
+        _load_progress_display_text
         _DZ_LOADER_OUT_LVL=1
     fi
 }
@@ -1907,6 +2004,7 @@ function _bool_reverse {
 #
 # Add to output buffer
 #
+
 function _file_log_buffer {
     local string="${1}"
     local indent="${2:-3}"; shift

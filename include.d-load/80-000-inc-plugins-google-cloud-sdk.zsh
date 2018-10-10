@@ -11,12 +11,17 @@
 
 
 #
-# Source Google Cloud SDK path helper and completion scripts
+# Source Google Cloud SDK path helpers
 #
 
 for f in $(_cfg_get_array_values 'plugins.google_cloud_sdk.env_source_files'); do
     _check_extern_source_file "${f}" 2 'google-cloud-sdk' && source "${f}"
 done
+
+
+#
+# Source Google Cloud SDK completion scripts
+#
 
 for f in $(_cfg_get_array_values 'plugins.google_cloud_sdk.completion_files'); do
     _check_extern_source_file "${f}" 2 'google-cloud-sdk' && source "${f}"

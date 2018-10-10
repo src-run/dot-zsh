@@ -13,6 +13,7 @@
 #
 # Date function
 #
+
 function _get_date {
     local date
 
@@ -33,6 +34,7 @@ function _get_date {
 #
 # Define function to return microsecond aware unix time.
 #
+
 function _get_microtime {
     echo -n $(_get_date '%s.%N')
 }
@@ -41,6 +43,7 @@ function _get_microtime {
 #
 # String padding routine.
 #
+
 
 function _out_indent {
     for i in `seq 1 ${1:-2}`; do
@@ -52,6 +55,7 @@ function _out_indent {
 #
 # Format log output buffer
 #
+
 function _format_buffer {
     printf '[%s:%s] %s%s' \
         "${USER}/dot-zsh" \
@@ -64,6 +68,7 @@ function _format_buffer {
 #
 # Add to output buffer
 #
+
 function _log_buffer {
     local indent="${1}"; shift
     local string

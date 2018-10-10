@@ -22,13 +22,16 @@ _log_action "Loading configured plugins"
 # Configure theme to use (See ".oh-my-zsh/themes/" for available themes or use
 # the name "random" to have a random theme each time the shell is loaded).
 #
+
 ZSH_THEME="$(_log_assignment ZSH_THEME "$(
     _cfg_get_string 'systems.oh_my_zsh.display.prompt_theme'
 )")"
 
+
 #
 # Configure colors for "ls" command.
 #
+
 DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
     _bool_reverse $(
         _cfg_get_bool 'systems.oh_my_zsh.display.use_ls_color'
@@ -39,6 +42,7 @@ DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
 #
 # Configure auto-setting of the terminal title.
 #
+
 DISABLE_AUTO_TITLE="$(_log_assignment DISABLE_AUTO_TITLE "$(
     _bool_reverse $(
         _cfg_get_bool 'systems.oh_my_zsh.display.window_title_assign'
@@ -50,6 +54,7 @@ DISABLE_AUTO_TITLE="$(_log_assignment DISABLE_AUTO_TITLE "$(
 # Configure the command execution time stamp shown in the history command.
 # Formats include: "mm/dd/yyyy" or "dd.mm.yyyy" or "yyyy-mm-dd".
 #
+
 HIST_STAMPS="$(_log_assignment HIST_STAMPS "$(
     _cfg_get_string 'systems.oh_my_zsh.display.history_date_format'
 )")"
@@ -58,6 +63,7 @@ HIST_STAMPS="$(_log_assignment HIST_STAMPS "$(
 #
 # Use case-sensitive completion.
 #
+
 CASE_SENSITIVE="$(_log_assignment CASE_SENSITIVE "$(
     _cfg_get_bool 'systems.oh_my_zsh.completions.use_case_sensitivity'
 )")"
@@ -67,6 +73,7 @@ CASE_SENSITIVE="$(_log_assignment CASE_SENSITIVE "$(
 # Use hyphen-insensitive completion. Case-sensitive completion must be off
 # and _ and - will be interchangeable.
 #
+
 HYPHEN_INSENSITIVE="$(_log_assignment HYPHEN_INSENSITIVE "$(
     _bool_reverse $(
         _cfg_get_bool 'systems.oh_my_zsh.completions.use_hyph_sensitivity'
@@ -77,6 +84,7 @@ HYPHEN_INSENSITIVE="$(_log_assignment HYPHEN_INSENSITIVE "$(
 #
 # Configure command auto-correction.
 #
+
 ENABLE_CORRECTION="$(_log_assignment ENABLE_CORRECTION "$(
     _cfg_get_bool 'systems.oh_my_zsh.completions.cmd_show_corrections'
 )")"
@@ -85,13 +93,16 @@ ENABLE_CORRECTION="$(_log_assignment ENABLE_CORRECTION "$(
 #
 # Configure display of red dots while waiting for completion.
 #
+
 COMPLETION_WAITING_DOTS="$(_log_assignment COMPLETION_WAITING_DOTS "$(
     _cfg_get_bool 'systems.oh_my_zsh.completions.display_working_dots'
 )")"
 
+
 #
 # Ignore permissions issues when completion files are loaded
 #
+
 ZSH_DISABLE_COMPFIX="$(_log_assignment ZSH_DISABLE_COMPFIX "$(
     _cfg_get_bool 'systems.oh_my_zsh.completions.no_permisions_checks'
 )")"
@@ -100,6 +111,7 @@ ZSH_DISABLE_COMPFIX="$(_log_assignment ZSH_DISABLE_COMPFIX "$(
 #
 # Configure bi-weekly auto-update checks.
 #
+
 DISABLE_AUTO_UPDATE="$(_log_assignment DISABLE_AUTO_UPDATE "$(
     _bool_reverse $(
         _cfg_get_bool 'systems.oh_my_zsh.updates.auto_check'
@@ -110,6 +122,7 @@ DISABLE_AUTO_UPDATE="$(_log_assignment DISABLE_AUTO_UPDATE "$(
 #
 # Set how often to auto-update (in days).
 #
+
 export UPDATE_ZSH_DAYS="$(_log_assignment UPDATE_ZSH_DAYS "$(
     _cfg_get_number 'systems.oh_my_zsh.updates.every_days'
 )")"
@@ -163,6 +176,7 @@ done
 #
 # attempt to resolve oh-my-zsh real paths
 #
+
 if [[ $(which realpath 2> /dev/null) ]]; then
     _OH_ROOT_PATH="$(realpath "${_OH_ROOT_PATH}" 2> /dev/null)"
     _OH_LOAD_PATH="$(realpath "${_OH_LOAD_PATH}" 2> /dev/null)"
@@ -172,6 +186,7 @@ fi
 #
 # export and source oh-my-zsh or display error message
 #
+
 if [[ -d "${_OH_ROOT_PATH}" ]] && [[ -f "${_OH_LOAD_PATH}" ]]; then
     export ZSH="${_OH_ROOT_PATH}"
     source "${_OH_LOAD_PATH}" \

@@ -22,6 +22,7 @@ done
 #
 # Set ruby default interpreter
 #
+
 v=$(_cfg_get_string 'plugins.chruby.auto_set_version' 'false')
 
 if [[ "${v}" != 'false' ]]; then

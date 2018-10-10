@@ -10,6 +10,9 @@
 #
 
 
+#
+# Assign ssh key path
+#
 
 SSH_KEY_PATH=$(_cfg_get_string 'configs.ssh.cert_file' "${HOME}/.ssh/id_rsa") \
     && _log_buffer 2 "--- Setting ssh key path to '${SSH_KEY_PATH}'"

@@ -11,16 +11,26 @@
 
 
 #
-# Include phpenv shell helpers.
+# Add phpenv executable directories to PATH
 #
 
 for f in $(_cfg_get_array_values 'plugins.phpenv.executable_paths'); do
     _add_env_path_dir "${f}" scripted
 done
 
+
+#
+# Add phpenv completion files to environment
+#
+
 for f in $(_cfg_get_array_values 'plugins.phpenv.completion_files'); do
     _check_extern_source_file "${f}" 2 'phpenv' && source "${f}"
 done
+
+
+#
+# Initialize phpenv
+#
 
 _ifs_newlines
 for e in $(_cfg_get_array_values 'plugins.phpenv.initialize_evals'); do

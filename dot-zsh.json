@@ -168,7 +168,8 @@
                 "${HOME}/scripts",
                 "${HOME}/scripts/bin-enabled",
                 "${HOME}/.local/bin/",
-                "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin"
+                "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin",
+                "/opt/nginx-lint/bin"
             ]
         },
         "change_directory_paths":

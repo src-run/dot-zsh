@@ -9,11 +9,13 @@
 # file distributed with this source code.
 #
 
+
 #
 # Use PCRE regular expressions
 #
 
 setopt re_match_pcre
+
 
 #
 # Define root path
@@ -68,6 +70,7 @@ _log_buffer 1 "--- Starting micro-time logged at '${_DZ_LOAD_TIME}'"
 #
 # Source requires variables assignments and function definitions
 #
+
 for f in ${_DZ_PATH}/include.d-core/*-internal.zsh; do
     if [[ ! -f "${f}" ]]; then
         _failed_required_file_source "${f}" 'it does not exist'
@@ -77,6 +80,7 @@ for f in ${_DZ_PATH}/include.d-core/*-internal.zsh; do
         && _log_buffer 1 "--- Sourcing core file '${f}'" \
         || _failed_required_file_source "${f}" 'it could not be sourced'
 done
+
 
 #
 # Validate config scheme version.
@@ -110,6 +114,7 @@ _buf_definition_list 1 "FOUND ZSH VERSION" "$(_parse_zsh_version)"
 _log_normal 3 '--> Loader script environment variables ...'
 _log_definition_list
 
+
 #
 # Flushed all buffered lines.
 #
@@ -134,6 +139,7 @@ for f in ${_DZ_INC_CONF_PATH}/??-???-*.zsh; do
         source "${f}"
 done
 
+
 #
 # Source all enabled includes by int-prefix order.
 #
@@ -151,7 +157,7 @@ done
 #
 
 _cfg_ret_bool 'systems.dot_zsh.show.loading' && \
-    _disable_loading
+    _load_progress_disable
 
 
 #
@@ -159,7 +165,7 @@ _cfg_ret_bool 'systems.dot_zsh.show.loading' && \
 #
 
 _cfg_ret_bool 'systems.dot_zsh.show.summary' && \
-    _DZ_DONE_MESSAGE="$(_show_summary)"
+    _DZ_DONE_MESSAGE="$(_load_summary_display)"
 
 
 #
