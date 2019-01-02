@@ -11,7 +11,7 @@
 
 
 #
-# Source apt-fast shell completion script
+# Source apt-fast shell completion scripts
 #
 
 for f in $(_cfg_get_array_values 'plugins.apt_fast.completion_files'); do

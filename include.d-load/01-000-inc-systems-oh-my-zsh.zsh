@@ -27,13 +27,17 @@ ZSH_THEME="$(_log_assignment ZSH_THEME "$(
     _cfg_get_string 'systems.oh_my_zsh.display.prompt_theme'
 )")"
 
+if [[ "${TERM}" != "xterm-256color" ]] && [[ "${TERM}" != "xterm-color" ]]; then
+    ZSH_THEME="$(_log_assignment ZSH_THEME "af-magic")"
+fi
+
 
 #
 # Configure colors for "ls" command.
 #
 
 DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
-    _bool_reverse $(
+    _cast_bool_to_string $(
         _cfg_get_bool 'systems.oh_my_zsh.display.use_ls_color'
     )
 )")"
@@ -44,7 +48,7 @@ DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
 #
 
 DISABLE_AUTO_TITLE="$(_log_assignment DISABLE_AUTO_TITLE "$(
-    _bool_reverse $(
+    _cast_bool_to_string $(
         _cfg_get_bool 'systems.oh_my_zsh.display.window_title_assign'
     )
 )")"
@@ -75,7 +79,7 @@ CASE_SENSITIVE="$(_log_assignment CASE_SENSITIVE "$(
 #
 
 HYPHEN_INSENSITIVE="$(_log_assignment HYPHEN_INSENSITIVE "$(
-    _bool_reverse $(
+    _cast_bool_to_string $(
         _cfg_get_bool 'systems.oh_my_zsh.completions.use_hyph_sensitivity'
     )
 )")"
@@ -113,7 +117,7 @@ ZSH_DISABLE_COMPFIX="$(_log_assignment ZSH_DISABLE_COMPFIX "$(
 #
 
 DISABLE_AUTO_UPDATE="$(_log_assignment DISABLE_AUTO_UPDATE "$(
-    _bool_reverse $(
+    _cast_bool_to_string $(
         _cfg_get_bool 'systems.oh_my_zsh.updates.auto_check'
     )
 )")"
@@ -135,7 +139,7 @@ export UPDATE_ZSH_DAYS="$(_log_assignment UPDATE_ZSH_DAYS "$(
 #
 
 DISABLE_UNTRACKED_FILES_DIRTY="$(_log_assignment DISABLE_UNTRACKED_FILES_DIRTY "$(
-    _bool_reverse $(
+    _cast_bool_to_string $(
         _cfg_get_bool 'systems.oh_my_zsh.git.use_untracked_in_dirty_check'
     )
 )")"
@@ -167,9 +171,9 @@ _file_out_buffer
 
 plugins=()
 
-for p in $(_cfg_get_array_values 'systems.oh_my_zsh.plugins'); do
+for p in $(_cfg_get_array_keys 'systems.oh_my_zsh.plugins'); do
     plugins+=(${p}) \
-        && _log_action "Setting plugin '${p}' as active" 3
+        && _log_action "Activated plug-in: '${p}'" 3
 done
 
 

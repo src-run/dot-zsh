@@ -283,7 +283,26 @@ function _o_bg_white {
 #
 
 function _o_ansi_al_sequence_remove {
-    echo "${1}" | sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})*)?m//g"
+    _o_text '%s' "$(sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})*)?m//g" <<< "${1:-}")"
+}
+
+
+#
+# remove both leading and trailing whitespace
+#
+
+function _str_trim_edge {
+    local text="${1:-}"
+    local what="${2:- \\t\\n}"
+
+    _o_text '%s' "$(sed -E '{ N; s/^['${what}']*//;s/['${what}']*$//g }' <<< "${text}")"
+}
+
+function _str_runs_once {
+    local text="${1:-}"
+    local char="${2:- }"
+
+    _o_text '%s' "$(sed 's/[${char}]*$//g' <<< "${text}")"
 }
 
 
@@ -343,7 +362,7 @@ function _cfg_get_key {
 
     _cfg_get_json_contents \
         | ${jq_bin} -e -r "$(_cfg_nor_key "${jq_key}") | keys" \
-        | grep -o -E '[a-Z_]+'
+        | grep -o -E '[a-zA-Z0-9_-]+'
 
     return $?
 }
@@ -484,30 +503,51 @@ function _cfg_resolve_array {
 #
 
 function _cfg_nor_type {
-    case "${1:-}" in
+    local type="${1:-}"
+
+    case "${type}" in
         s|str|string)
-            _o_text 'string'
+            _o_text 'string' \
+                && return
             ;;
         n|num|number)
-            _o_text 'number'
+            _o_text 'number' \
+                && return
             ;;
         b|bool|boolean)
-            _o_text 'boolean'
+            _o_text 'boolean' \
+                && return
             ;;
         l|list)
-            _o_text 'list'
+            _o_text 'list' \
+                && return
             ;;
         a|array)
-            _o_text 'array'
+            _o_text 'array' \
+                && return
             ;;
         o|obj|object)
-            _o_text 'object'
+            _o_text 'object' \
+                && return
+            ;;
+        e|empty|null)
+            _o_text 'null' \
+                && return
+            ;;
+        d|def|default)
+            _o_text 'default' \
+                && return
             ;;
         *)
-            _o_text 'unresolvable'
-            return 1
+            _o_text "${type}" \
+                && return 1
     esac
 }
+
+
+#
+# Checks if provided configuration index is of an expected type
+#
 
 function _cfg_is_type {
     local expected="${1:-}"
@@ -538,6 +578,85 @@ function _cfg_is_type {
 
     [[ "${provided}" == "${expected}" ]] \
         || return 1
+}
+
+
+#
+# Checks if the provided configuration index is a null type
+#
+
+function _cfg_is_null {
+    local conf_key="${1:-}"
+
+    if ! _cfg_is_type null "${conf_key}" &> /dev/null; then
+        return 1
+    fi
+}
+
+
+#
+# Checks if the provided configuration index is any empty type
+#
+
+function _cfg_is_bool_false_like {
+    local conf_key="${1:-}"
+    local exact_on="${1:-0}"
+    local conf_ilk
+    local conf_val
+
+    conf_key="$(
+        _cfg_nor_key "${conf_key}"
+    )"
+
+    conf_ilk="$(
+        _cfg_nor_type "$(
+            _cfg_get_type "${conf_key}"
+        )"
+    )"
+
+    conf_val="$(
+        _cfg_get_val "$(
+            _cfg_nor_key "${conf_key}"
+        )"
+    )"
+
+    [[ -z ${conf_val} ]] \
+        && return
+
+    case "${type_val}" in
+        s|str|string)
+            [[ ${conf_val} == '""' ]] \
+                && return
+            ;;
+        n|num|number)
+            [[ ${conf_val} -gt 0 ]] \
+                && return
+            ;;
+        b|bool|boolean)
+            _cast_bool_to_ret "${conf_val}" \
+                && return
+            ;;
+        l|list)
+            [[ ${conf_val} == "[]" ]] \
+                && return
+            [[ ${conf_val} == "{}" ]] \
+                && return
+            ;;
+        a|array)
+            [[ ${conf_val} == "[]" ]] \
+                && return
+            ;;
+        o|obj|object)
+            [[ ${conf_val} == "{}" ]] \
+                && return
+            ;;
+        e|empty|null)
+            _cfg_is_null "${conf_key}" \
+                && return
+            ;;
+    esac
+
+    return 1
 }
 
 
@@ -622,7 +741,7 @@ function _cfg_ret_bool {
 
 
 #
-# Read configuration string
+# Read configuration array values
 #
 
 function _cfg_get_array_values {
@@ -633,16 +752,16 @@ function _cfg_get_array_values {
 
 
 #
-# Read configuration string
+# Read configuration array keys => values
 #
 
-function _config_read_array_assoc {
+function _cfg_get_array_assoc {
     local key="${1}"
     local set
 
     if _cfg_is_type object "${key}"; then
         for k in $(_cfg_get_key "${1}"); do
-            _o_text '%s=' "${k}" \
+            _o_text '%s===>' "${k}" \
                 && _try_cfg_get_val $(
                         _cfg_get_type "${key}[\"${k}\"]"
                     ) "${key}[\"${k}\"]" "${def}" \
@@ -650,6 +769,37 @@ function _config_read_array_assoc {
             _o_nl
         done
     fi
+}
+
+
+#
+# Read configuration array keys
+#
+
+function _cfg_get_array_keys {
+    local key="${1}"
+    local set
+
+    if _cfg_is_type object "${key}" || _cfg_is_type array "${key}"; then
+        for k in $(_cfg_get_key "${1}"); do
+            _o_line '%s' "${k}"
+        done
+    fi
+}
+
+
+#
+# Read configuration array size
+#
+
+function _cfg_get_array_size {
+    local key="${1}"
+
+    if ! _cfg_is_type object "${key}" && ! _cfg_is_type array "${key}"; then
+        _o_text '%d' 0
+    fi
+
+    _o_text '%d' "$(_try_cfg_get_val number "${key} | length" 0)"
 }
 
 
@@ -707,6 +857,10 @@ function _logger_file_path {
 #
 
 function _wrt_log {
+    _cfg_ret_bool 'systems.dot_zsh.show.loading' 'true' \
+        && _o_progress_write \
+        || _o_progress_close
+    return
     local d="${1}" ; shift
     local l="${1}" ; shift
     local c="${1}" ; shift
@@ -740,13 +894,13 @@ function _wrt_log {
 
 function _buf_flush_lines {
     _cfg_ret_bool 'systems.dot_zsh.show.loading' 'true' \
-        && _load_progress_display \
-        || _load_progress_disable
+        && _o_progress_write \
+        || _o_progress_close
 
     if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
         return
     fi
-    _load_progress_disable
+    _o_progress_close
 
     for line in ${_DZ_IO_BUFF_LINES[@]}; do
         _trim_line_width "$(_o_text '%s\n' "${line}")"
@@ -771,7 +925,7 @@ function _log_normal {
     fi
 
     d=$(_get_date %s)
-    m="$(echo ${1} | sed 's/[ ]*$//g')" ; shift
+    m="$(_str_runs_once "${1}")"; shift
 
     if [[ ! "${m}" ]]; then
         return
@@ -1294,9 +1448,9 @@ function _load_summary_display {
 # ready loading global vars
 #
 
-function _load_progress_setup {
-    if [[ -z ${_DZ_LOADER_OUT_LVL} ]]; then
-        typeset -g _DZ_LOADER_OUT_LVL=0
+function _load_progress_initialize {
+    if [[ -z ${_DZ_LOADER_STARTED} ]]; then
+        typeset -g _DZ_LOADER_STARTED=0
         typeset -g _DZ_LOADER_DISABLE=0
         typeset -g _DZ_LOADER_CLEARED=0
     fi
@@ -1307,15 +1461,16 @@ function _load_progress_setup {
 # Define fancy complete message display function.
 #
 
-function _load_progress_disable {
-    _load_progress_setup
+function _o_progress_close {
+    local reset="${1:-0}"
 
-    if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLE} -ne 1 ]]; then
-        _load_progress_display_step_close
-        sleep 0.5
+    _load_progress_initialize
+
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLE} -ne 1 ]]; then
+        _o_progress_write_step_char_term && sleep 0.75 && reset=1
     fi
 
-    _load_progress_clear
+    [[ ${reset} -eq 1 ]] && _o_progress_reset
     _DZ_LOADER_DISABLE=1
 }
 
@@ -1324,14 +1479,14 @@ function _load_progress_disable {
 # Define fancy complete message display function.
 #
 
-function _load_progress_clear {
-    _load_progress_setup
+function _o_progress_reset {
+    _load_progress_initialize
 
-    if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLED} -eq 0 ]] && [[ ${_DZ_LOADER_CLEARED} -eq 0 ]]; then
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLED} -eq 0 ]] && [[ ${_DZ_LOADER_CLEARED} -eq 0 ]]; then
         clear
     fi
 
-    _DZ_LOADER_OUT_LVL=0
+    _DZ_LOADER_STARTED=0
     _DZ_LOADER_CLEARED=1
 }
 
@@ -1340,7 +1495,7 @@ function _load_progress_clear {
 # Output load progress step indicator
 #
 
-function _load_progress_display_step_section {
+function _o_progress_write_step_section {
     local frmt="%s%s%s"
     local text="${1}"
 
@@ -1352,59 +1507,59 @@ function _load_progress_display_step_section {
 
 
 #
-# Output load progress step indicator
+# Write progress iteration step character: initializing (first) character
 #
 
-function _load_progress_display_step_open {
-    _load_progress_display_step_section "["
+function _o_progress_write_step_char_init {
+    _o_progress_write_step_section "["
 }
 
 
 #
-# Output load progress step indicator
+# Write progress iteration step character: terminating (last) character
 #
 
-function _load_progress_display_step_close {
-    _load_progress_display_step_section "] "
+function _o_progress_write_step_char_term {
+    _o_progress_write_step_section "] "
 }
 
 
 #
-# Output load progress step indicator
+# Write progress iteration step character
 #
 
-function _load_progress_display_step {
-    _load_progress_display_step_section "—"
+function _o_progress_write_step_char {
+    _o_progress_write_step_section "—"
 }
 
 
 #
-# Output load progress "loading" text
+# Write progress iteration step "loading" text
 #
 
-function _load_progress_display_text {
+function _o_progress_write_step_text {
     local frmt=" %s %s %s "
-    local text="LOADING"
+    local text="loading"
 
     _o_nl
     _o_text "${frmt}" \
         "$(_o_fg_dark_gray; _o_bg_black; _o_style_invert; _o_style_bold; _o_style_dim)" \
-        "${text}" \
+        "${text:u}" \
         "$(_o_ansi_clear)"
 
-    _load_progress_display_step_open
-    _load_progress_display_step
-    _load_progress_display_step
-    _load_progress_display_step
+    _o_progress_write_step_char_init
+    _o_progress_write_step_char
+    _o_progress_write_step_char
+    _o_progress_write_step_char
 }
 
 
 #
-# Define fancy complete message display function.
+# Write progress loading information
 #
 
-function _load_progress_display {
-    _load_progress_setup
+function _o_progress_write {
+    _load_progress_initialize
 
     if [[ ${_DZ_LOADER_DISABLE} -eq 1 ]]; then
         return
@@ -1412,11 +1567,11 @@ function _load_progress_display {
 
     _DZ_LOADER_CLEARED=0
 
-    if [[ ${_DZ_LOADER_OUT_LVL} -eq 1 ]]; then
-        _load_progress_display_step
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]]; then
+        _o_progress_write_step_char
     else
-        _load_progress_display_text
-        _DZ_LOADER_OUT_LVL=1
+        _o_progress_write_step_text
+        _DZ_LOADER_STARTED=1
     fi
 }
 
@@ -1481,6 +1636,7 @@ function _add_env_path_dir {
 #
 
 function _aliases_setup_ssh_connections {
+    local indented="${1:-3}"
     local prefixes=( "ssh-" "s-" "" )
     local opts_desc
     local host
@@ -1491,10 +1647,10 @@ function _aliases_setup_ssh_connections {
     local alias_k
     local alias_v
 
-    for name in $(_cfg_get_key 'configs.aliases.ssh_connections'); do
+    for name in $(_cfg_get_key 'configs.aliases.set_ssh_connections'); do
         host="$(
             _cfg_get_string \
-                "configs.aliases.ssh_connections[\"${name}\"].host" \
+                "configs.aliases.set_ssh_connections[\"${name}\"].host" \
                 'false'
         )"
 
@@ -1504,7 +1660,7 @@ function _aliases_setup_ssh_connections {
 
         port="$(
             _cfg_get_number \
-                "configs.aliases.ssh_connections[\"${name}\"].port" \
+                "configs.aliases.set_ssh_connections[\"${name}\"].port" \
                 'false'
         )"
 
@@ -1514,7 +1670,7 @@ function _aliases_setup_ssh_connections {
 
         user="$(
             _cfg_get_string \
-                "configs.aliases.ssh_connections[\"${name}\"].user" \
+                "configs.aliases.set_ssh_connections[\"${name}\"].user" \
                 'false'
         )"
 
@@ -1524,7 +1680,7 @@ function _aliases_setup_ssh_connections {
 
         opts="$(
             _cfg_get_string \
-                "configs.aliases.ssh_connections[\"${name}\"].opts" \
+                "configs.aliases.set_ssh_connections[\"${name}\"].opts" \
                 'false'
         )"
 
@@ -1534,7 +1690,7 @@ function _aliases_setup_ssh_connections {
 
         wait="$(
             _cfg_get_number \
-                "configs.aliases.ssh_connections[\"${name}\"].wait" \
+                "configs.aliases.set_ssh_connections[\"${name}\"].wait" \
                 'false'
         )"
 
@@ -1557,14 +1713,15 @@ function _aliases_setup_ssh_connections {
                     "${wait}"
             )"
 
-            if ( which "${alias_key}" &> /dev/null ); then
-                continue && \
-                    _log_action "Alias skipped (name exists) "\
-                        "'${alias_key}=\"${alias_val}\"'"
+            if _cfg_ret_bool 'configs.aliases.new_ssh_connections' 'true' && alias | grep -E "^${alias_key}=" &> /dev/null; then
+                unalias "${alias_key}" 2> /dev/null \
+                    && _log_action "Removed prior alias: '${alias_key}'" ${indented} \
+                    || _log_action "Failed alias remove: '${alias_key}'" ${indented}
             fi
 
-            alias $alias_key="${alias_val}" &> /dev/null && \
-                _log_action "Alias defined '${alias_key}' => '${alias_val}'"
+            alias "${alias_key}"="${alias_val}" &> /dev/null \
+                && _log_action "Defined alias value: '${alias_key}' => '${alias_val}'" ${indented} \
+                || _log_action "ailed alias assign: '${alias_key}' => '${alias_val}'" ${indented}
         done
     done
 }
@@ -1623,7 +1780,7 @@ function _aliases_build_ssh_command {
 #
 
 function _get_array_key {
-    echo "${1%%=*}"
+    echo "${1%%===>*}"
 }
 
 
@@ -1632,7 +1789,7 @@ function _get_array_key {
 #
 
 function _get_array_val {
-    echo "${1#*=}"
+    echo "${1#*===>}"
 }
 
 
@@ -1994,10 +2151,35 @@ function _log_definition_list {
 # reverse boolean value
 #
 
-function _bool_reverse {
+function _cast_bool_to_string {
     ([[ "${1}" == "true" ]] || [[ ${1} == 1 ]]) \
         && _o_text false \
         || _o_text true
+}
+
+
+#
+# reverse boolean value
+#
+
+function _cast_bool_to_int {
+    local bool="${1:-1}"
+
+    _cast_bool_to_ret "${1}"
+    _o_text '%d' $?
+}
+
+
+#
+# reverse boolean value
+#
+
+function _cast_bool_to_ret {
+    local bool="${1:-1}"
+
+    [[ $(_str_trim_edge ${bool}) =~ ^(true|TRUE|yes|YES|y|Y|0)$ ]] \
+        && return \
+        || return 1
 }
 
 

@@ -11,6 +11,13 @@
 
 
 #
+# Log ssh connection alias assignment section
+#
+
+_log_action "Setting up configured aliases (ssh connections)..."
+
+
+#
 # Assign ssh aliases
 #
 
@@ -18,14 +25,35 @@ _aliases_setup_ssh_connections
 
 
 #
+# Log basic command alias assignment section
+#
+
+_log_action "Setting up configured aliases (basic commands)..."
+
+
+#
 # Assign simple aliases
 #
 
+
+# set ifs variable to newlines
 _ifs_newlines
-for a in $(_config_read_array_assoc 'configs.aliases.set_simple_cmds'); do
+
+# loop over configured simple command aliases
+for a in $(_cfg_get_array_assoc 'configs.aliases.set_simple_commands'); do
     k="$(_get_array_key "${a}")"
     v="$(_get_array_val "${a}")"
-    alias ${k}="${v}" &&
-        _log_action "Alias defined '${k}' => '${v}'"
+
+    if _cfg_ret_bool 'configs.aliases.new_simple_commands' 'true' && alias | grep -E "^${k}=" &> /dev/null; then
+        unalias "${k}" 2> /dev/null \
+            && _log_action "Removed prior alias: '${k}'" 3 \
+            || _log_action "Failed alias remove: '${k}'" 3
+    fi
+
+    alias "${k}"="${v}" 2> /dev/null \
+        && _log_action "Defined alias value: '${k}' => '${v}'" 3 \
+        || _log_action "Failed alias assign: '${k}' => '${v}'" 3
 done
+
+# reset ifs variable to prior value
 _ifs_reset

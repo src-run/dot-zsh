@@ -14,7 +14,7 @@
 # Loop though exports array and export 'em.
 #
 
-for raw in $(_cfg_get_array_assoc 'configs.exports.final'); do
+for raw in $(_cfg_get_array_assoc 'configs.exports.first'); do
     key="$(_get_array_key "${raw}")"
     val="$(_get_array_val "${raw}")"
 

@@ -11,6 +11,26 @@
 
 
 #
+# Enable shell tracing if environment variable set
+#
+
+if [[ -n "${_DZ_TRACE}" ]] && [[ ${_DZ_TRACE} -gt 0 ]]; then
+    export PS4='date[$(date "+%s:%N")] '\
+        'locale[%x:%i|%I] '\
+        'status[%?] '\
+        'state[%_|%^] '\
+        'depth[%e] '\
+        'context[%N] '\
+
+    [[ ${_DZ_TRACE} -gt 1 ]] \
+        && exec 3>&2 2>"${HOME:-/tmp}/dot-zsh-trace-${$}.log"
+
+    setopt xtrace prompt_subst
+    set -x
+fi
+
+
+#
 # Use PCRE regular expressions
 #
 
@@ -157,7 +177,7 @@ done
 #
 
 _cfg_ret_bool 'systems.dot_zsh.show.loading' && \
-    _load_progress_disable
+    _o_progress_close
 
 
 #
@@ -197,3 +217,9 @@ if [[ ! -z "${_DZ_DONE_MESSAGE}" ]]; then
     echo -en "${_DZ_DONE_MESSAGE}"
     unset _DZ_DONE_MESSAGE
 fi
+
+# BEGIN SNIPPET: Platform.sh CLI configuration
+HOME=${HOME:-'/home/rmf'}
+export PATH="$HOME/"'.platformsh/bin':"$PATH"
+if [ -f "$HOME/"'.platformsh/shell-config.rc' ]; then . "$HOME/"'.platformsh/shell-config.rc'; fi # END SNIPPET
+

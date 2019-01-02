@@ -70,6 +70,7 @@ function _format_buffer {
 #
 
 function _log_buffer {
+    return
     local indent="${1}"; shift
     local string
 

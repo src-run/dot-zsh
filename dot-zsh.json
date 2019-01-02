@@ -44,7 +44,8 @@
             {
                 "verbose": false,
                 "quiet": true,
-                "debug": false
+                "debug": false,
+                "trace": false
             },
             "show":
             {
@@ -80,41 +81,538 @@
                 "auto_check": true,
                 "every_days": 7
             },
-            "plugins": [
-                "git",
-                "git-auto-fetch",
-                "git-extras",
-                "gitignore",
-                "github",
-                "sudo",
-                "colored-man-pages",
-                "colorize",
-                "composer",
-                "bower",
-                "command-not-found",
-                "composer",
-                "docker",
-                "ruby",
-                "bundler",
-                "gem",
-                "chruby",
-                "gulp",
-                "grunt",
-                "node",
-                "npm",
-                "rake",
-                "rsync",
-                "screen",
-                "sublime",
-                "symfony",
-                "systemd",
-                "zsh-syntax-highlighting",
-                "history-substring-search"
-            ]
+            "plugins": {
+                "nvm": {},
+                "git": {},
+                "git-auto-fetch": {},
+                "git-extras": {},
+                "gitignore": {},
+                "github": {},
+                "sudo": {},
+                "colored-man-pages": {},
+                "colorize": {},
+                "composer": {},
+                "bower": {},
+                "command-not-found": {},
+                "composer": {},
+                "docker": {},
+                "ruby": {},
+                "bundler": {},
+                "gem": {},
+                "chruby": {},
+                "gulp": {},
+                "grunt": {},
+                "node": {},
+                "npm": {},
+                "rake": {},
+                "rsync": {},
+                "screen": {},
+                "sublime": {},
+                "symfony": {},
+                "systemd": {},
+                "zsh-syntax-highlighting": {
+                    "main": {
+                        "_enabled": true,
+                        "contexts": [
+                            {
+                                "token": "default",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "unknown-token",
+                                "style": {
+                                    "foreground": "red,bold"
+                                }
+                            },
+                            {
+                                "token": "reserved-word",
+                                "style": {
+                                    "foreground": "yellow"
+                                }
+                            },
+                            {
+                                "token": "alias",
+                                "style": {
+                                    "foreground": "green,underline"
+                                }
+                            },
+                            {
+                                "token": "suffix-alias",
+                                "style": {
+                                    "foreground": "green,underline"
+                                }
+                            },
+                            {
+                                "token": "builtin",
+                                "style": {
+                                    "foreground": "black",
+                                    "background": "green"
+                                }
+                            },
+                            {
+                                "token": "function",
+                                "style": {
+                                    "foreground": "green,bold"
+                                }
+                            },
+                            {
+                                "token": "command",
+                                "style": {
+                                    "foreground": "green"
+                                }
+                            },
+                            {
+                                "token": "precommand",
+                                "style": {
+                                    "foreground": "green,underline"
+                                }
+                            },
+                            {
+                                "token": "commandseparator",
+                                "style": {
+                                    "foreground": "black",
+                                    "background": "white,bold"
+                                }
+                            },
+                            {
+                                "token": "path",
+                                "style": {
+                                    "foreground": "white,underline"
+                                }
+                            },
+                            {
+                                "token": "path_pathseparator",
+                                "style": {
+                                    "foreground": "black,underline,bold"
+                                }
+                            },
+                            {
+                                "token": "globbing",
+                                "style": {
+                                    "foreground": "blue"
+                                }
+                            },
+                            {
+                                "token": "history-expansion",
+                                "style": {
+                                    "foreground": "blue"
+                                }
+                            },
+                            {
+                                "token": "command-substitution",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "command-substitution-delimiter",
+                                "style": {
+                                    "foreground": "magenta"
+                                }
+                            },
+                            {
+                                "token": "process-substitution",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "process-substitution-delimiter",
+                                "style": {
+                                    "foreground": "magenta"
+                                }
+                            },
+                            {
+                                "token": "single-hyphen-option",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "double-hyphen-option",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "back-quoted-argument",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "back-quoted-argument-delimiter",
+                                "style": {
+                                    "foreground": "magenta"
+                                }
+                            },
+                            {
+                                "token": "single-quoted-argument",
+                                "style": {
+                                    "foreground": "yellow"
+                                }
+                            },
+                            {
+                                "token": "double-quoted-argument",
+                                "style": {
+                                    "foreground": "yellow"
+                                }
+                            },
+                            {
+                                "token": "dollar-quoted-argument",
+                                "style": {
+                                    "foreground": "yellow"
+                                }
+                            },
+                            {
+                                "token": "rc-quote",
+                                "style": {
+                                    "foreground": "cyan"
+                                }
+                            },
+                            {
+                                "token": "dollar-double-quoted-argument",
+                                "style": {
+                                    "foreground": "cyan"
+                                }
+                            },
+                            {
+                                "token": "back-double-quoted-argument",
+                                "style": {
+                                    "foreground": "cyan"
+                                }
+                            },
+                            {
+                                "token": "back-dollar-quoted-argument",
+                                "style": {
+                                    "foreground": "cyan"
+                                }
+                            },
+                            {
+                                "token": "assign",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "redirection",
+                                "style": {
+                                    "foreground": "none",
+                                    "background": "none"
+                                }
+                            },
+                            {
+                                "token": "comment",
+                                "style": {
+                                    "foreground": "black,bold"
+                                }
+                            },
+                            {
+                                "token": "arg0",
+                                "style": {
+                                    "foreground": "green"
+                                }
+                            }
+                        ]
+                    },
+                    "brackets": {
+                        "_enabled": true,
+                        "contexts": [
+                            {
+                                "token": "bracket-level-1",
+                                "style": {
+                                    "foreground": "fg=blue,bold"
+                                }
+                            },
+                            {
+                                "token": "bracket-level-2",
+                                "style": {
+                                    "foreground": "fg=red,bold"
+                                }
+                            },
+                            {
+                                "token": "bracket-level-3",
+                                "style": {
+                                    "foreground": "fg=yellow,bold"
+                                }
+                            },
+                            {
+                                "token": "bracket-level-4",
+                                "style": {
+                                    "foreground": "fg=magenta,bold"
+                                }
+                            }
+                        ]
+                    },
+                    "cursor": {
+                        "_enabled": true,
+                        "contexts": [
+                            {
+                                "token": "cursor",
+                                "style": {
+                                    "background": "blue"
+                                }
+                            }
+                        ]
+                    },
+                    "pattern": {
+                        "_enabled": false,
+                        "contexts": []
+                    },
+                    "line": {
+                        "_enabled": false,
+                        "contexts": [
+                            {
+                                "token": "line",
+                                "style": {
+                                    "foreground": "bold",
+                                    "background": "bold"
+                                }
+                            }
+                        ]
+                    },
+                    "regexp": {
+                        "_enabled": true,
+                        "contexts": [
+                            {
+                                "regex": "rm -rf *",
+                                "style": {
+                                    "foreground": "white,bold",
+                                    "background": "red"
+                                }
+                            },
+                            {
+                                "regex": "sudo",
+                                "style": {
+                                    "foreground": "white",
+                                    "background": "red"
+                                }
+                            }
+                        ]
+                    },
+                    "root": {
+                        "_enabled": false,
+                        "contexts": [
+                            {
+                                "token": "root",
+                                "style": {
+                                    "foreground": "red,bold"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "history-substring-search": {}
+            }
         }
     },
     "configs":
     {
+        "zsh":
+        {
+            "_enabled": true,
+            "internal_shell_opts": {
+                "aliases": null,
+                "all_export": null,
+                "always_last_prompt": null,
+                "always_to_end": null,
+                "append_history": null,
+                "auto_cd": null,
+                "auto_continue": null,
+                "auto_list": null,
+                "auto_menu": null,
+                "auto_name_dirs": null,
+                "auto_param_keys": null,
+                "auto_param_slash": null,
+                "auto_pushd": null,
+                "auto_remove_slash": null,
+                "auto_resume": null,
+                "bad_pattern": null,
+                "bang_hist": null,
+                "bare_glob_qual": null,
+                "bash_auto_list": null,
+                "bash_rematch": null,
+                "beep": null,
+                "bg_nice": null,
+                "brace_ccl": null,
+                "brace_expand": null,
+                "bsd_echo": null,
+                "c_bases": null,
+                "c_precedences": null,
+                "case_glob": null,
+                "case_match": null,
+                "cdable_vars": null,
+                "chase_dots": null,
+                "chase_links": null,
+                "check_jobs": null,
+                "clobber": null,
+                "combining_chars": null,
+                "complete_aliases": null,
+                "complete_in_word": null,
+                "correct": null,
+                "correct_all": null,
+                "csh_junkie_history": null,
+                "csh_junkie_loops": null,
+                "csh_junkie_quotes": null,
+                "csh_null_cmd": null,
+                "csh_null_glob": null,
+                "debug_before_cmd": null,
+                "dot_glob": null,
+                "dvorak": null,
+                "emacs": null,
+                "equals": null,
+                "err_exit": null,
+                "err_return": null,
+                "eval_lineno": null,
+                "exec": null,
+                "extended_glob": null,
+                "extended_history": null,
+                "flow_control": null,
+                "function_arg_zero": null,
+                "glob": null,
+                "glob_assign": null,
+                "glob_complete": null,
+                "glob_dots": null,
+                "glob_subst": null,
+                "global_export": null,
+                "global_rcs": null,
+                "hash_all": null,
+                "hash_cmds": null,
+                "hash_dirs": null,
+                "hash_list_all": null,
+                "hist_allow_clobber": null,
+                "hist_append": null,
+                "hist_beep": null,
+                "hist_expand": null,
+                "hist_expire_dups_first": null,
+                "hist_fcntl_lock": null,
+                "hist_find_no_dups": null,
+                "hist_ignore_all_dups": null,
+                "hist_ignore_dups": null,
+                "hist_ignore_space": null,
+                "hist_no_functions": null,
+                "hist_no_store": null,
+                "hist_reduce_blanks": null,
+                "hist_save_by_copy": null,
+                "hist_save_no_dups": null,
+                "hist_subst_pattern": null,
+                "hist_verify": null,
+                "hup": null,
+                "ignore_braces": null,
+                "ignore_eof": null,
+                "inc_append_history": null,
+                "interactive": null,
+                "interactive_comments": null,
+                "ksh_arrays": null,
+                "ksh_autoload": null,
+                "ksh_glob": null,
+                "ksh_option_print": null,
+                "ksh_typeset": null,
+                "ksh_zero_subscript": null,
+                "list_ambiguous": null,
+                "list_beep": null,
+                "list_packed": null,
+                "list_rows_first": null,
+                "list_types": null,
+                "local_options": null,
+                "local_traps": null,
+                "log": null,
+                "login": null,
+                "long_list_jobs": null,
+                "magic_equal_subst": null,
+                "mail_warn": null,
+                "mail_warning": null,
+                "mark_dirs": null,
+                "menu_complete": null,
+                "monitor": null,
+                "multi_func_def": null,
+                "multibyte": null,
+                "multios": null,
+                "no_bad_pattern": null,
+                "no_bang_hist": null,
+                "no_beep": null,
+                "no_clobber": null,
+                "no_exec": null,
+                "no_glob": null,
+                "no_hist_no_functions": null,
+                "no_ignore_braces": null,
+                "no_match": null,
+                "no_nomatch": null,
+                "no_prompt_cr": null,
+                "no_rcs": null,
+                "no_unset": null,
+                "notify": null,
+                "null_glob": null,
+                "numeric_glob_sort": null,
+                "octal_zeroes": null,
+                "one_cmd": null,
+                "overstrike": null,
+                "path_dirs": null,
+                "physical": null,
+                "posix_aliases": null,
+                "posix_builtins": null,
+                "posix_identifiers": null,
+                "print_eight_bit": null,
+                "print_exit_value": null,
+                "privileged": null,
+                "prompt_bang": null,
+                "prompt_cr": null,
+                "prompt_percent": null,
+                "prompt_sp": null,
+                "prompt_subst": null,
+                "prompt_vars": null,
+                "pushd_ignore_dups": null,
+                "pushd_minus": null,
+                "pushd_silent": null,
+                "pushd_to_home": null,
+                "rc_expand_param": null,
+                "rc_quotes": null,
+                "rcs": null,
+                "rec_exact": null,
+                "rematch_pcre": null,
+                "restricted": null,
+                "rm_star_silent": null,
+                "rm_star_wait": null,
+                "sh_file_expansion": null,
+                "sh_glob": null,
+                "sh_null_cmd": null,
+                "sh_option_letters": null,
+                "sh_word_split": null,
+                "share_history": null,
+                "shin_stdin": null,
+                "short_loops": null,
+                "single_command": null,
+                "single_line_zle": null,
+                "stdin": null,
+                "sun_keyboard_hack": null,
+                "track_all": null,
+                "transient_rprompt": null,
+                "traps_async": null,
+                "typeset_silent": null,
+                "unset": null,
+                "verbose": null,
+                "vi": null,
+                "warn_create_global": null,
+                "xtrace": null,
+                "zle": null
+            }
+        },
+        "setups":
+        {
+            "_enabled": true,
+            "internal_variables": {
+                "NVM_DIR": "${NVM_DIR:-/opt/nvm}"
+            }
+        },
         "editor":
         {
             "internal_session": "subl",
@@ -128,13 +626,22 @@
         "aliases":
         {
             "_enabled": true,
-            "set_simple_cmds":
+            "new_simple_commands": true,
+            "set_simple_commands":
             {
-                "ccat": "$(which pygmentize) -g",
-                "vcat": "$(which pygmentize) -g -O style=colorful,linenos=1",
-                "gpg": "$(which gpg2)"
+                "ccat": "pygmentize -g",
+                "vcat": "pygmentize -g -O style=colorful,linenos=1",
+                "grep": "grep --color=auto",
+                "fgrep": "fgrep --color=auto",
+                "egrep": "egrep --color=auto",
+                "ls": "ls --color=auto -I.gvfs",
+                "la": "ls --color=auto -I.gvfs -AlFhB",
+                "ll": "ls --color=auto -I.gvfs -Al",
+                "lf": "ls --color=auto -I.gvfs -AF",
+                "lc": "ls --color=auto -I.gvfs -FC"
             },
-            "ssh_connections":
+            "new_ssh_connections": true,
+            "set_ssh_connections":
             {
                 "obes":
                 {
@@ -189,8 +696,12 @@
         "completions":
         {
             "_enabled": true,
+            "bash_root_path": "/etc/bash_completion.d",
             "paths": [
-                "${_DZ_PATH}/resources/completions"
+                "${_DZ_PATH}/resources/completions",
+                "{{bash_root_path}}/apport_completion",
+                "{{bash_root_path}}/dkms",
+                "{{bash_root_path}}/grub"
             ]
         },
         "exports":
@@ -280,6 +791,55 @@
                 "${HOME}/node_modules/.bin/",
                 "{{mortal_root_path}}/bin"
             ]
+        },
+        "nvm":
+        {
+            "_enabled": true,
+            "mortal_root_path": "${NVM_DIR:-/opt/nvm}",
+            "assign_v_release": "default",
+            "completion_files": [
+                "/usr/share/zsh/functions/Completion/Debian/_apt-fast"
+            ],
+            "remove_v_aliases": false,
+            "define_v_aliases": {
+                "lts-4": "4",
+                "lts-6": "6",
+                "lts-8": "8",
+                "lts-10": "10",
+                "latest": "11",
+                "default": "6"
+            },
+            "define_v_install": [{
+                "install_vers_nvm": "4",
+                "install_opts_use": "",
+                "install_with_npm": true,
+                "install_reqs_lts": true,
+                "removes_existing": false
+            }, {
+                "install_vers_nvm": "6",
+                "install_opts_use": "",
+                "install_with_npm": true,
+                "install_reqs_lts": true,
+                "removes_existing": false
+            }, {
+                "install_vers_nvm": "8",
+                "install_opts_use": "",
+                "install_with_npm": true,
+                "install_reqs_lts": true,
+                "removes_existing": false
+            }, {
+                "install_vers_nvm": "10",
+                "install_opts_use": "",
+                "install_with_npm": true,
+                "install_reqs_lts": true,
+                "removes_existing": false
+            }, {
+                "install_vers_nvm": "11",
+                "install_opts_use": "",
+                "install_with_npm": true,
+                "install_reqs_lts": false,
+                "removes_existing": false
+            }]
         },
         "phpenv":
         {
