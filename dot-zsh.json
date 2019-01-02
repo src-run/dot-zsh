@@ -43,7 +43,7 @@
             "outs":
             {
                 "verbose": false,
-                "quiet": true,
+                "quiet": false,
                 "debug": false,
                 "trace": false
             },
@@ -57,6 +57,7 @@
         {
             "_enabled": true,
             "language": "en_US.UTF-8",
+            "def_user": "${USER}",
             "display":
             {
                 "prompt_theme": "agnoster",
@@ -82,6 +83,17 @@
                 "every_days": 7
             },
             "plugins": {
+                "adb": {},
+                "bgnotify": {
+                    "threshold": 4,
+                    "formating": {
+                        "[0]": {
+                            "heading": "",
+                            "message": ""
+                        },
+                        "[^0]": ""
+                    }
+                },
                 "nvm": {},
                 "git": {},
                 "git-auto-fetch": {},
@@ -676,7 +688,8 @@
                 "${HOME}/scripts/bin-enabled",
                 "${HOME}/.local/bin/",
                 "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin",
-                "/opt/nginx-lint/bin"
+                "/opt/nginx-lint/bin",
+                "/opt/bins-collection/bin"
             ]
         },
         "change_directory_paths":
@@ -707,13 +720,16 @@
         "exports":
         {
             "_enabled": true,
-            "variables": [
-                "ZSH",
-                "PATH",
-                "LANG",
-                "EDITOR",
-                "SSH_KEY_PATH"
-            ]
+            "first": {
+                "COMPOSER_HOME": "/opt/composer"
+            },
+            "final": {
+                "ZSH": null,
+                "PATH": null,
+                "LANG": null,
+                "EDITOR": null,
+                "SSH_KEY_PATH": null
+            }
         }
     },
     "plugins":
@@ -722,7 +738,7 @@
         "android_sdk":
         {
             "_enabled": true,
-            "mortal_root_path": "${HOME}/Android/Sdk",
+            "mortal_root_path": "/opt/android-sdk",
             "executable_paths": [
                 "{{mortal_root_path}}/platform-tools"
             ]
@@ -738,7 +754,7 @@
         {
             "_enabled": true,
             "system_root_path": "/usr/local/share/chruby",
-            "auto_set_version": "2.4.4",
+            "auto_set_version": "2.4.5",
             "env_source_files": [
                 "{{system_root_path}}/chruby.sh",
                 "{{system_root_path}}/auto.sh"
@@ -766,9 +782,9 @@
         "golang":
         {
             "_enabled": true,
-            "system_root_path": "/usr/lib/go-1.10",
+            "system_root_path": "/usr/lib/go-1.11",
             "system_exec_path": "{{system_root_path}}/bin",
-            "mortal_root_path": "${HOME}/golang/1.10",
+            "mortal_root_path": "${HOME}/golang/1.11",
             "mortal_exec_path": "{{mortal_root_path}}/bin"
         },
         "google_cloud_sdk":

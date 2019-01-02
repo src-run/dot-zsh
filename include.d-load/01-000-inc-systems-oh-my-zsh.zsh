@@ -23,13 +23,16 @@ _log_action "Loading configured plugins"
 # the name "random" to have a random theme each time the shell is loaded).
 #
 
-ZSH_THEME="$(_log_assignment ZSH_THEME "$(
-    _cfg_get_string 'systems.oh_my_zsh.display.prompt_theme'
-)")"
-
-if [[ "${TERM}" != "xterm-256color" ]] && [[ "${TERM}" != "xterm-color" ]]; then
-    ZSH_THEME="$(_log_assignment ZSH_THEME "af-magic")"
-fi
+case "${TERM}" in
+    xterm-color|xterm-256color|screen-color|screen-256color )
+            ZSH_THEME="$(_log_assignment ZSH_THEME "$(
+                _cfg_get_string 'systems.oh_my_zsh.display.prompt_theme' 'agnoster'
+            )")"
+        ;;
+    *)
+        ZSH_THEME="$(_log_assignment ZSH_THEME "af-magic")"
+        ;;
+esac
 
 
 #
@@ -60,7 +63,7 @@ DISABLE_AUTO_TITLE="$(_log_assignment DISABLE_AUTO_TITLE "$(
 #
 
 HIST_STAMPS="$(_log_assignment HIST_STAMPS "$(
-    _cfg_get_string 'systems.oh_my_zsh.display.history_date_format'
+    _cfg_get_string 'systems.oh_my_zsh.display.history_date_format' 'yyyy-mm-dd'
 )")"
 
 
@@ -128,7 +131,16 @@ DISABLE_AUTO_UPDATE="$(_log_assignment DISABLE_AUTO_UPDATE "$(
 #
 
 export UPDATE_ZSH_DAYS="$(_log_assignment UPDATE_ZSH_DAYS "$(
-    _cfg_get_number 'systems.oh_my_zsh.updates.every_days'
+    _cfg_get_number 'systems.oh_my_zsh.updates.every_days' 7
+)")"
+
+
+#
+# Set default user.
+#
+
+export DEFAULT_USER="$(_log_assignment DEFAULT_USER "$(
+    _cfg_get_string 'systems.oh_my_zsh.def_user' "${USER}"
 )")"
 
 
@@ -166,7 +178,7 @@ _file_out_buffer
 
 
 #
-# setup plugins
+# setup plug-ins
 #
 
 plugins=()
