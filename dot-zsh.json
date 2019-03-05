@@ -43,7 +43,7 @@
             "outs":
             {
                 "verbose": false,
-                "quiet": false,
+                "quiet": true,
                 "debug": false,
                 "trace": false
             },
@@ -82,6 +82,7 @@
                 "auto_check": true,
                 "every_days": 7
             },
+            "customs": "{%%}",
             "plugins": {
                 "adb": {},
                 "bgnotify": {
@@ -122,6 +123,7 @@
                 "sublime": {},
                 "symfony": {},
                 "systemd": {},
+                "wakatime": {},
                 "zsh-syntax-highlighting": {
                     "main": {
                         "_enabled": true,
@@ -675,6 +677,12 @@
                 {
                     "user": "rmf",
                     "host": "silverpapillon.com"
+                },
+                "pi":
+                {
+                    "user": "rmf",
+                    "host": "10.0.0.150",
+                    "port": 22555
                 }
             }
         },
@@ -682,14 +690,14 @@
         {
             "_enabled": true,
             "paths": [
+                "/opt/nginx-lint/bin",
+                "/opt/bin-collection/bin",
                 "/opt/scripts/bin",
                 "${HOME}/bin",
                 "${HOME}/scripts",
                 "${HOME}/scripts/bin-enabled",
                 "${HOME}/.local/bin/",
-                "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin",
-                "/opt/nginx-lint/bin",
-                "/opt/bins-collection/bin"
+                "${HOME}/.local/rtorrent/0.9.6-PS-1.1-dev/bin"
             ]
         },
         "change_directory_paths":
@@ -880,6 +888,12 @@
             ],
             "env_source_files": [
                 "{{mortal_root_path}}/shell-config.rc"
+            ]
+        },
+        "python_pip": {
+            "_enabled": true,
+            "initialize_evals": [
+                "pip completion --zsh"
             ]
         },
         "travis":

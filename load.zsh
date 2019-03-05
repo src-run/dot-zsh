@@ -9,21 +9,23 @@
 # file distributed with this source code.
 #
 
+#
+# Define script path.
+#
+
+_DZ_NAME="${(%):-%N}"
+
 
 #
 # Enable shell tracing if environment variable set
 #
 
 if [[ -n "${_DZ_TRACE}" ]] && [[ ${_DZ_TRACE} -gt 0 ]]; then
-    export PS4='date[$(date "+%s:%N")] '\
-        'locale[%x:%i|%I] '\
-        'status[%?] '\
-        'state[%_|%^] '\
-        'depth[%e] '\
-        'context[%N] '\
+    export PS4='${_DZ_TRACE_PS4:-date[$(date "+%s:%N")] locale[%x:%i|%I] status[%?] state[%_|%^] depth[%e] context[%N] }'
 
-    [[ ${_DZ_TRACE} -gt 1 ]] \
-        && exec 3>&2 2>"${HOME:-/tmp}/dot-zsh-trace-${$}.log"
+    if [[ ${_DZ_TRACE} -gt 1 ]]; then
+        exec 3>&2 2>"${HOME:-/tmp}/.dot-zsh-${$}-trace.log"
+    fi
 
     setopt xtrace prompt_subst
     set -x
@@ -50,8 +52,20 @@ _DZ_IO_BUFF_LINES=()
 #
 
 function _failed_required_file_source {
-    printf 'Failed to locate a required file: "%s" (%s)...' "${1}" "${2}"
-    sleep 30
+    printf -- \
+' !! [FAIL] Unable to locate or source an integral file that is required for'\
+' this script to function: "%s" (%s)...\n !! [FAIL] Halting any further'\
+' execution of this script due to the unavailability of the aforementioned'\
+' dependency requirement!\n'\
+' ++ [NOTE] To immediately stop this script, press the CONTROL-C key combo'\
+' (this may inadvertently close your terminal/console window in addition to'\
+' terminating the script itself, depending on the script invocation method'\
+' used when calling this executable)...\n'\
+' -- [WAIT] Entered a 5 minute sleep state to preserve any on-screen warnings'\
+' or errors; take this time to reference any prior output or logged data to'\
+' aid in the diagnosis of this unexpected failure state.\n' "${1}" "${2}"
+
+    sleep 300
     exit 255
 }
 
@@ -106,10 +120,10 @@ done
 # Validate config scheme version.
 #
 
-_log_normal 1 "--> Validating configuration scheme version ..."
+_log_norm 1 "--> Validating configuration scheme version ..."
 
 if [[ "$(_cfg_get_string 'package.version.schemes')" == "0.2.1" ]]; then
-    _log_normal 1 "    --> Validated as '0.2.1' in file '${_DZ_INC_JSON_PATH}' ..."
+    _log_norm 1 "    --> Validated as '0.2.1' in file '${_DZ_INC_JSON_PATH}' ..."
 else
     _log_crit "Failed to validate scheme (using '${_DZ_DEF_JSON_PATH}' instead)!"
     _DZ_INC_JSON_PATH="${_DZ_DEF_JSON_PATH}"
@@ -131,7 +145,7 @@ _buf_definition_list 1 "LOADER SCRIPT PATH" "$(_self_repo_load)"
 _buf_definition_list 1 "PREVIOUS SHELL BIN PATH" "$(_parse_shell_path)"
 _buf_definition_list 1 "FOUND ZSH BIN PATH" "$(_parse_zsh_path)"
 _buf_definition_list 1 "FOUND ZSH VERSION" "$(_parse_zsh_version)"
-_log_normal 3 '--> Loader script environment variables ...'
+_log_norm 3 '--> Loader script environment variables ...'
 _log_definition_list
 
 
@@ -146,17 +160,17 @@ _buf_flush_lines
 # Load our configuration files.
 #
 
-_log_normal 1 \
+_log_norm 1 \
     "--> Loading configuration file(s) from '${_DZ_INC_CONF_PATH}' ..."
 
 for f in ${_DZ_INC_CONF_PATH}/??-???-*.zsh; do
-    [[ ! -f "${f}" ]] && \
-        _log_normal 1 \
-            "    --> Failed to source config file '$(basename ${f})'" && \
+    if [[ ! -f "${f}" ]]; then
+        _log_norm 1 "    --> Failed to source config file '$(basename ${f})'"
         continue
-
-    _log_normal 1 "    --> Sourcing config file '$(basename ${f})'" && \
+    else
+        _log_norm 1 "    --> Sourcing config file '$(basename ${f})'"
         source "${f}"
+    fi
 done
 
 
@@ -164,7 +178,7 @@ done
 # Source all enabled includes by int-prefix order.
 #
 
-_log_normal 1 \
+_log_norm 1 \
     "--> Loading enabled include files(s) from '${_DZ_INC_LOAD_PATH}' ..."
 
 for f in ${_DZ_INC_LOAD_PATH}/??-???-*.zsh; do
@@ -185,17 +199,17 @@ _cfg_ret_bool 'systems.dot_zsh.show.loading' && \
 #
 
 _cfg_ret_bool 'systems.dot_zsh.show.summary' && \
-    _DZ_DONE_MESSAGE="$(_load_summary_display)"
+    _DZ_DONE_MESSAGE="$(_load_summary_display)\n"
 
 
 #
 # Cleanup all internal variables and functions (unset them).
 #
 
-_log_normal 1 "--> Performing final cleanup pass ..."
+_log_norm 1 "--> Performing final cleanup pass ..."
 _log_action "Unsetting ${#_DZ_UNSET_VS[@]} internal variables ..." 1
 _log_action "Unsetting ${#_DZ_UNSET_FS[@]} internal functions ..." 1
-_log_normal 1 "--> Completed all operations ..."
+_log_norm 1 "--> Completed all operations ..."
 
 for v in ${_DZ_UNSET_VS[@]}; do
     eval "unset ${v}" 2> /dev/null

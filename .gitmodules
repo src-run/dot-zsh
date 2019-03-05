@@ -4,3 +4,18 @@
 [submodule "bright"]
 	path = include.d-libs/bright
 	url = https://github.com/src-run/bright-library.git
+[submodule "include.d-libs/oh-my-zsh"]
+	path = include.d-libs/oh-my-zsh
+	url = https://github.com/robbyrussell/oh-my-zsh.git
+[submodule "include.d-omzc/zsh-autosuggestions"]
+	path = include.d-libs/oh-my-zsh-plugins/auto-suggestions
+	url = git://github.com/zsh-users/zsh-autosuggestions
+[submodule "include.d-omzc/zsh-syntax-highlighting"]
+	path = include.d-libs/oh-my-zsh-plugins/syntax-highlighting
+	url = git://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "include.d-libs/oh-my-zsh-plugins/wakatime"]
+	path = include.d-libs/oh-my-zsh-plugins/wakatime
+	url = https://github.com/sobolevn/wakatime-zsh-plugin.git
+[submodule "include.d-libs/oh-my-zsh-plugins/history-substring-search"]
+	path = include.d-libs/oh-my-zsh-plugins/history-substring-search
+	url = https://github.com/zsh-users/zsh-history-substring-search.git

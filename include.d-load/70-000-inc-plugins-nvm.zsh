@@ -24,7 +24,7 @@ _log_action "Assigning nvm variables"
 if [[ -z "${NVM_DIR}" ]]; then
     NVM_DIR="$(_log_assignment NVM_DIR "$(
         _cfg_get_string 'plugins.nvm.mortal_root_path'
-    )")" && _file_out_buffer
+    )")"
 fi
 
 
@@ -134,13 +134,13 @@ _ifs_reset
 
 for f in $(_cfg_get_array_values 'plugins.nvm.completion_files'); do
     if [[ ! -f "${f}" ]] || [[ ! -r "${f}" ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${f}' completion file (does not exist)"
         return
     fi
 
     if [[ ! -r "${f}" ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${f}' completion file (is not readable)"
         return
     fi

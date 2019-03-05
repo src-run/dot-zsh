@@ -40,7 +40,7 @@ esac
 #
 
 DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
-    _cast_bool_to_string $(
+    _cast_bool_to_inverse_string $(
         _cfg_get_bool 'systems.oh_my_zsh.display.use_ls_color'
     )
 )")"
@@ -51,7 +51,7 @@ DISABLE_LS_COLORS="$(_log_assignment DISABLE_LS_COLORS "$(
 #
 
 DISABLE_AUTO_TITLE="$(_log_assignment DISABLE_AUTO_TITLE "$(
-    _cast_bool_to_string $(
+    _cast_bool_to_inverse_string $(
         _cfg_get_bool 'systems.oh_my_zsh.display.window_title_assign'
     )
 )")"
@@ -120,7 +120,7 @@ ZSH_DISABLE_COMPFIX="$(_log_assignment ZSH_DISABLE_COMPFIX "$(
 #
 
 DISABLE_AUTO_UPDATE="$(_log_assignment DISABLE_AUTO_UPDATE "$(
-    _cast_bool_to_string $(
+    _cast_bool_to_inverse_string $(
         _cfg_get_bool 'systems.oh_my_zsh.updates.auto_check'
     )
 )")"
@@ -151,7 +151,7 @@ export DEFAULT_USER="$(_log_assignment DEFAULT_USER "$(
 #
 
 DISABLE_UNTRACKED_FILES_DIRTY="$(_log_assignment DISABLE_UNTRACKED_FILES_DIRTY "$(
-    _cast_bool_to_string $(
+    _cast_bool_to_inverse_string $(
         _cfg_get_bool 'systems.oh_my_zsh.git.use_untracked_in_dirty_check'
     )
 )")"
@@ -168,13 +168,6 @@ export LANG="$(_log_assignment LANG "$(
 ZSH_LANG_TYPE="$(_log_assignment ZSH_LANG_TYPE "$(
     _cfg_get_string 'systems.oh_my_zsh.language' 'en_US.UTF-8'
 )")"
-
-
-#
-# flush buffered assignment log lines
-#
-
-_file_out_buffer
 
 
 #

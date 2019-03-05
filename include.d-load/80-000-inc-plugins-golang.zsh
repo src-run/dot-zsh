@@ -21,7 +21,7 @@ if [[ -d "${v}" ]]; then
         _log_action "Assigning 'GOPATH' to '${v}'" || \
         _log_warn "Failed assigning 'GOPATH' to '${v}'"
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipping 'GOPATH' assignment '${v}' (does not exist)"
 fi
 
@@ -32,7 +32,7 @@ if [[ -d "${v}" ]]; then
         _log_action "Assigning 'GOROOT' to '${v}'" || \
         _log_warn "Failed assigning 'GOROOT' to '${v}'"
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipping 'GOROOT' assignment '${v}' (does not exist)"
 fi
 

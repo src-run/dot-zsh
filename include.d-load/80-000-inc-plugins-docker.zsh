@@ -22,6 +22,6 @@ if [[ $? -eq 0 ]]; then
         _log_action "Docker machine environment '${v}' setup" || \
         _log_warn "Failed to setup docker machine '${v}' environment"
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipping docker machine configuration (missing 'docker-machine' cmd)"
 fi

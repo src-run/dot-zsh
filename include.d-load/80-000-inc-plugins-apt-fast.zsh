@@ -16,13 +16,13 @@
 
 for f in $(_cfg_get_array_values 'plugins.apt_fast.completion_files'); do
     if [[ ! -f "${f}" ]] || [[ ! -r "${f}" ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${f}' completion file (does not exist)"
         return
     fi
 
     if [[ ! -r "${f}" ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${f}' completion file (is not readable)"
         return
     fi

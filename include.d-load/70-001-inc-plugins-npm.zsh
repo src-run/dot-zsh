@@ -61,6 +61,6 @@ if [[ -d "${_DZ_NPM_MANPAGES_PATH}" ]]; then
     unset _DZ_MAN_PATH_DEFAULTS
     unset _DZ_MAN_PATH_TO_APPLY
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipped registering '${_DZ_NPM_MANPAGES_PATH}' to 'MANPATH' (does not exist)"
 fi

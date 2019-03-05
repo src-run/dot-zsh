@@ -73,6 +73,38 @@ function _get_unix_time_diff {
     _o_text '%.4f' $((${time_ended} - ${time_start}))
 }
 
+#
+# get the width of terminal (number of columns)
+#
+
+function _terminal_info_cols {
+    _o_text '%s' "$(tput cols 2> /dev/null)"
+}
+
+#
+# alias for _terminal_info_cols
+#
+
+function _terminal_dims_w {
+    _terminal_info_cols
+}
+
+#
+# get the height of terminal (number of rows/lines)
+#
+
+function _terminal_info_rows {
+    _o_text '%s' "$(tput lines 2> /dev/null)"
+}
+
+#
+# alias for _terminal_info_rows
+#
+
+function _terminal_dims_h {
+    _terminal_info_rows
+}
+
 
 #
 # create ANSI color sequence with optional style
@@ -288,21 +320,148 @@ function _o_ansi_al_sequence_remove {
 
 
 #
+# calculate size of string
+#
+
+function _str_length {
+    local text="${1}"
+    local ansi="${2:-false}"
+
+    if [[ ${ansi} == "false" ]]; then
+        text="$(_o_ansi_al_sequence_remove "${text}")"
+    fi
+
+    printf "${text}" 2> /dev/null | wc --chars 2> /dev/null
+}
+
+
+#
 # remove both leading and trailing whitespace
+#
+
+function _str_regexp_escape_chars {
+    local text="${1}"
+
+    _o_text '%s' "$(
+        sed 's/[^^]/[&]/g; s/\^/\\^/g' 2> /dev/null <<< "${text}"
+    )"
+}
+
+
+#
+# trim edge of string from passed items
 #
 
 function _str_trim_edge {
     local text="${1:-}"
     local what="${2:- \\t\\n}"
 
-    _o_text '%s' "$(sed -E '{ N; s/^['${what}']*//;s/['${what}']*$//g }' <<< "${text}")"
+    _o_text '%s' "$(
+        sed -E '{ N; s/^['${what}']*//;s/['${what}']*$//g }' 2> /dev/null <<< "${text}"
+    )"
 }
 
-function _str_runs_once {
+
+#
+# trim right of string from passed items
+#
+
+function _str_trim_right_chars {
     local text="${1:-}"
     local char="${2:- }"
 
     _o_text '%s' "$(sed 's/[${char}]*$//g' <<< "${text}")"
+    return
+    local text="${1:-}"
+    local char="${2:- }"
+    local regx='s/[%s]*$//g'
+
+    _o_text '%s' "$(
+        sed "$(
+            _o_text "${regx}" "$(
+                _str_regexp_escape_chars "${char[0]}"
+            )"
+        )" 2> /dev/null <<< "${text}"
+    )"
+}
+
+
+#
+# trim left of string from passed items
+#
+
+function _str_same_from_start {
+    local string="${1}"
+    local search="${2}"
+
+    if [[ -n ${search} ]]; then
+        if [[ ${string:0:${#search}} != ${search} ]]; then
+            return 1
+        fi
+    fi
+}
+
+
+#
+# to-do: figure out what this does
+#
+
+function _str_same_from_right {
+    local string="${1}"
+    local search="${2}"
+
+    if [[ -n ${search} ]]; then
+        if [[ ${string:$((${#string} - ${#search}))} != ${search} ]]; then
+            return 1
+        fi
+    fi
+}
+
+function _str_tr_one_group {
+    local opt="${1:--d}"
+    local set="${2}"
+    local val="${@:3}"
+
+    _str_same_from_start "${set}" '[' \
+        || set="[${set}"
+    _str_same_from_right "${set}" ']' \
+        || set+=']'
+    _str_same_from_start "${set}" '[:' \
+        || set="[:${set:1}"
+    _str_same_from_right "${set}" ':]' \
+        || set="${set:0:$((${#set} - 1))}:]"
+
+    tr ${opt} "${set}" 2> /dev/null <<< "$(
+        _o_text "${val}"
+    )"
+}
+
+function _str_drop_space_chars {
+    local text="${1}"
+
+    sed 's/ //' 2> /dev/null <<< "$(
+        _o_text "${1}"
+    )"
+}
+
+function _str_only_graphed_chars {
+    _str_tr_one_group '-cd' 'graph' "${@}"
+}
+
+function _str_only_printed_chars {
+    _str_tr_one_group '-cd' 'print' "${@}"
+}
+
+function _str_drop_control_chars {
+    _str_tr_one_group '-d' 'cntrl' "${@}"
+}
+
+function _str_find_matches_only {
+    local search="${1}"
+    local string="${2}"
+    local option="${3:--P}"
+
+    grep -o ${option} "${search}" 2> /dev/null <<< "${string}"
 }
 
 
@@ -442,6 +601,126 @@ function _cfg_req_array_values {
     fi
 
     _cfg_get_val "${1}[] | @text"
+}
+
+function _cfg_val_sequence_interpret {
+    local inputs="${@}"
+    local result
+
+    if ! result="$(eval "echo -ne "${inputs}"" 2> /dev/null)"; then
+        if ! result="$(echo -ne "${inputs}" 2> /dev/null)"; then
+            return 1
+        fi
+    fi
+
+    if [[ -n "${result}" ]]; then
+        _o_text "${result}"
+    else
+        _o_text "${inputs}"
+    fi
+}
+
+function _cfg_resolve_anchor_replacement {
+    local anchor_tag_init="${1}"
+    local anchor_tag_term="${2}"
+    local anchor_val_text="${3}"
+    local anchor_ret_text
+    local anchor_key_pref="${4}"
+    local anchor_key_find="${anchor_val_text}"
+    local value_provided="${@:4}"
+    local value_answered
+
+    if [[ -n ${anchor_key_pref} ]]; then
+        anchor_key_find="${anchor_key_pref}.${anchor_val_text}"
+    fi
+
+    anchor_ret_text="$(
+        _cfg_req_string "$(
+            _cfg_nor_key "${anchor_key_find}"
+        )" 2> /dev/null
+    )"
+
+    if [[ $? -ne 0 ]] || [[ -z ${anchor_ret_text} ]]; then
+        return 1
+    fi
+
+    value_answered="$(
+        _cfg_val_sequence_interpret \
+            "${value_provided/\{\{$anchor_val_text\}\}/$anchor_ret_text}"
+    )"
+
+    [[ $? -ne 0 ]] && return 1 || return 0
+}
+
+function _cfg_val_intern_anchor_matches {
+    local anchor_init="${1}"
+    local anchor_term="${2}"
+    local search_text="${3}"
+    local anchor_regx
+    local anchor_item
+
+    anchor_init="$(
+        _str_only_graphed_chars "${anchor_init}"
+    )"
+    anchor_term="$(
+        _str_only_graphed_chars "${anchor_term}"
+    )"
+    anchor_regx="$(
+        printf '%s((?!%s|%s).)+%s' \
+            "$(_str_regexp_escape_chars "${anchor_init}")" \
+            "${anchor_init}" \
+            "${anchor_term}" \
+            "$(_str_regexp_escape_chars "${anchor_term}")"
+    )"
+
+    _ifs_newlines
+
+    for match in $(_str_find_matches_only "${anchor_regx}" "${search_text}" | _str_drop_space_chars); do
+        [[ -z "${match}" ]] && continue
+
+        if tmp="$(_cfg_resolve_anchor_replacement '{{' '}}' "${matched}" "${key}" "${val}")"; then
+            val="${tmp}" && continue
+        fi
+
+        if tmp="$(_cfg_resolve_anchor_replacement '{{' '}}' "${matched}" '' "${val}")"; then
+            val="${tmp}" && continue
+        fi
+    done
+
+    _ifs_reset
+}
+
+
+
+#
+# Replace inner paths from JSON string
+#
+
+function _cfg_val_intern_anchor_ref_resolver {
+    local key="${1%.*}"; shift
+    local val="${@}"
+    local tmp
+    local matched
+    local product
+
+    _ifs_newlines
+
+    for matched in $(grep -o -E '\{\{[^{]+\}\}' <<< "${val}" | grep -o -E '[^{}]+'); do
+        if [[ -z "${matched}" ]]; then
+            continue
+        fi
+
+        if tmp="$(_cfg_resolve_anchor_replacement '{{' '}}' "${matched}" "${key}" "${val}")"; then
+            val="${tmp}" && continue
+        fi
+
+        if tmp="$(_cfg_resolve_anchor_replacement '{{' '}}' "${matched}" '' "${val}")"; then
+            val="${tmp}" && continue
+        fi
+    done
+
+    _ifs_reset
+    _o_text "${val}"
 }
 
 
@@ -734,9 +1013,9 @@ function _cfg_get_bool {
 #
 
 function _cfg_ret_bool {
-    [[ "$(_cfg_get_bool "${1}" "${2}")" == "true" ]] \
-        && return 0 \
-        || return 1
+    if [[ "$(_cfg_get_bool "${1}" "${2}")" != "true" ]]; then
+        return 1
+    fi
 }
 
 
@@ -811,7 +1090,7 @@ function _trim_line_width {
     local cols
     local line="${1}"
 
-    cols=$(tput cols)
+    cols=$(_terminal_dims_w)
 
     if [[ ${#line} -gt ${cols} ]]; then
         cols=$((${cols} - 3))
@@ -827,10 +1106,13 @@ function _trim_line_width {
 #
 
 function _logger_enabled {
-    return $(
-         _cfg_ret_bool \
-            'systems.dot_zsh.logs.enabled'
-    )
+    if [[ -z ${_DZ_LOG_ENABLED} ]]; then
+        typeset -g _DZ_LOG_ENABLED
+        _cfg_ret_bool 'systems.dot_zsh.logs.enabled'
+        _DZ_LOG_ENABLED=$?
+    fi
+
+    return ${_DZ_LOG_ENABLED}
 }
 
 
@@ -839,16 +1121,29 @@ function _logger_enabled {
 #
 
 function _logger_file_path {
-    local default="${HOME}/.dot-zsh.log"
+    if [[ -z ${_DZ_INC_JSON_PATH} ]]; then
+        typeset -g _DZ_INC_JSON_PATH
+        _DZ_INC_JSON_PATH=$(
+             _cfg_get_string \
+            'systems.dot_zsh.logs.path' \
+            "${HOME}/.dot-zsh.log"
+        )
+    fi
+}
 
-    if [[ -z "${_DZ_INC_JSON_PATH}" ]]; then
-        echo "${default}"
-        return
+
+#
+# Return 0 if logging enabled, -255 otherwise.
+#
+
+function _load_enabled {
+    if [[ -z ${_DZ_LOAD_ENABLED} ]]; then
+        typeset -g _DZ_LOAD_ENABLED
+        _cfg_ret_bool 'systems.dot_zsh.show.loading'
+        _DZ_LOAD_ENABLED=$?
     fi
 
-    _cfg_get_string \
-        'systems.dot_zsh.logs.path' \
-        "${default}"
+    return ${_DZ_LOAD_ENABLED}
 }
 
 
@@ -857,10 +1152,10 @@ function _logger_file_path {
 #
 
 function _wrt_log {
-    _cfg_ret_bool 'systems.dot_zsh.show.loading' 'true' \
+    _load_enabled \
         && _o_progress_write \
         || _o_progress_close
-    return
+
     local d="${1}" ; shift
     local l="${1}" ; shift
     local c="${1}" ; shift
@@ -871,19 +1166,23 @@ function _wrt_log {
         typeset -g _DZ_LOG_BUFFER_LINES
     fi
 
+    if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
+        return
+    fi
+
     p="$(_o_text '%s:%s' ${c} ${d})"
     _DZ_LOG_BUFFER_LINES+=("${p} $(_o_text ${m} "$@")")
 
     if [[ ! -z ${_DZ_LOGS_PATH} ]] && [[ "${#_DZ_LOG_BUFFER_LINES}" -gt 0 ]]; then
         for b in "${_DZ_LOG_BUFFER_LINES[@]}"; do
             _logger_enabled && \
-                echo "${b}" | \
-                tee -a "${_DZ_LOGS_PATH}" &> /dev/null
+                echo "${b}" | tee -a "${_DZ_LOGS_PATH}" &> /dev/null
         done
 
         _DZ_LOG_BUFFER_LINES=()
     fi
 
+    _file_out_buffer
     _buf_flush_lines
 }
 
@@ -893,10 +1192,6 @@ function _wrt_log {
 #
 
 function _buf_flush_lines {
-    _cfg_ret_bool 'systems.dot_zsh.show.loading' 'true' \
-        && _o_progress_write \
-        || _o_progress_close
-
     if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
         return
     fi
@@ -914,18 +1209,17 @@ function _buf_flush_lines {
 # Define simple top-level std out logger function.
 #
 
-function _log_normal {
-    local d
-    local m
-    local c="$USER/dot-zsh"
-    local l="${1}" ; shift
+function _log_norm {
+    local d=$(_get_date %s)
+    local c="${USER}/${_DZ_NAME}"
+    local l="${1}"
+    shift
+    local m="$(_str_trim_right_chars "${1}")"
+    shift
 
     if [[ -z ${_DZ_IO_BUFF_NORM} ]]; then
         typeset -g _DZ_IO_BUFF_NORM
     fi
-
-    d=$(_get_date %s)
-    m="$(_str_runs_once "${1}")"; shift
 
     if [[ ! "${m}" ]]; then
         return
@@ -935,21 +1229,56 @@ function _log_normal {
     _log_buffer 0 "$(_o_text ${m} "$@")"
 }
 
+function _get_log_control_action {
+    local name="${1}"
+    local default="${2}"
 
-#
-# Define simple log notice.
-#
+    for a in "${@:3}"; do
+        if [[ ${a:0:$((${#name} + 1))} == "${name}:" ]] && [[ $((${#a} - $((${#name} + 1)))) -gt 0 ]]; then
+            _o_text '%s' "${a:$((${#name} + 1))}"
+            return 0
+        fi
+    done
 
-function _log_warn_old {
-    local d
-    local c="$USER/dot-zsh"
-    local m="!!! WARNING: $(echo ${1} | sed 's/[ ]*$//g')" ; shift
-    local l="${1:-2}"
+    _o_text '%s' "${default}"
+}
 
-    d=$(_get_date %s)
+function _filter_control_actions {
+    for s in "${@}"; do
+        if [[ ${s} =~ ^[a-z]+:.+$ ]]; then
+            continue
+        fi
 
-    _wrt_log "${d}" "${l}" "${c}" "$(_out_indent ${l})${m}" "$@"
-    _log_buffer 0 "$(_o_text ${m} "$@")"
+        printf '%s\n' "${s}"
+    done
+}
+
+function _log_message_compile {
+    local format="${1}"
+    local interp=()
+    local indent=$(_get_log_control_action indent 2 "${@:2}")
+    local marker="$(_get_log_control_action marker '-->' "${@:2}")"
+    local header="$(_get_log_control_action header '' "${@:2}")"
+    local a_temp
+
+    _ifs_newlines
+    for a in $(_filter_control_actions "${@:2}"); do
+        if ! [[ ${a} =~ ^[a-z]+:.*$ ]]; then
+            interp+="${a}"
+        fi
+    done
+    _ifs_reset
+
+    if [[ ${#header} -gt 0 ]]; then
+        header="$(tr '[:lower:]' '[:upper:]' <<< "${header}: ")"
+    fi
+
+    _o_text "%s%s %s${format}" "$(_out_indent ${indent})" "${marker}" "${header}" "${interp[@]}"
+}
+
+function _log_info {
+    _wrt_log "$(_get_date %s)" 0 "${USER}/${_DZ_NAME}" "$(_log_message_compile "${@}")"
+    _log_buffer 0 "$(_log_message_compile "${@}")"
 }
 
 
@@ -958,22 +1287,8 @@ function _log_warn_old {
 #
 
 function _log_warn {
-    typeset -g _DZ_IO_BUFF_WARN
-
-
-    local c="!!WARNING!!"
-    local l=2
-    local m="$1"
-    local d
-    local w
-
-    shift
-
-    d=$(_get_date %s)
-    w="$(_o_text ${m} "$@")"
-
-    _wrt_log "${d}" "${l}" "${c}" "$(_out_indent ${l})--> ${m}"
-    _log_buffer 0 "$(_o_text "---> ${m}" "$@")"
+    _wrt_log "$(_get_date %s)" 0 "${USER}/${_DZ_NAME}" "$(_log_message_compile "${@}" 'marker:###' 'header:warn')"
+    _log_buffer 0 "$(_log_message_compile "${@}" 'marker:###' 'header:warn')"
 }
 
 
@@ -982,15 +1297,170 @@ function _log_warn {
 #
 
 function _log_crit {
-    local d
-    local c="$USER/dot-zsh"
-    local m="!!! CRITICAL: $(echo ${1} | sed 's/[ ]*$//g')" ; shift
-    local l="${1:-2}"
+    _wrt_log "$(_get_date %s)" 0 "${USER}/${_DZ_NAME}" "$(_log_message_compile "${@}" 'indent:0' 'marker:!!!' 'header:crit')"
+    _log_buffer 0 "$(_log_message_compile "${@}" 'indent:0' 'marker:!!!' 'header:crit')"
+}
 
-    d=$(_get_date %s)
 
-    _wrt_log "${d}" "${l}" "${c}" "$(_out_indent ${l})${m}" "$@"
-    _log_buffer 0 "$(_o_text ${m} "$@")"
+#
+# Simple info-level logger that interpolates the first format string argument
+# with other passed replacement arguments, exposing the same signature as used
+# with "_o_text" and other interpolating output functions.
+#
+# For example, take the following call, where the first argument defines the
+# intended output string, and the remaining three arguments are all used as
+# values for interpolation into the format string:
+#
+#  > _logf_info 'Encountered %d info errors with input value of %s: "%s"' \
+#  >   ${errorCounter} \
+#  >   ${usersInValue} \
+#  >   ${errorMessage}
+#
+
+function _logf_info {
+    _log_info "${@}"
+}
+
+
+#
+# Simple warning-level logger that interpolates the first format string argument
+# with other passed replacement arguments, exposing the same signature as used
+# with "_o_text" and other interpolating output functions.
+#
+# For example, take the following call, where the first argument defines the
+# intended output string, and the remaining three arguments are all used as
+# values for interpolation into the format string:
+#
+#  > _logf_warn 'Encountered %d warning errors with input value of %s: "%s"' \
+#  >   ${errorCounter} \
+#  >   ${usersInValue} \
+#  >   ${errorMessage}
+#
+
+function _logf_warn {
+    _log_warn "${@}"
+}
+
+
+#
+# Simple critical-level logger that interpolates the first format string argument
+# with other passed replacement arguments, exposing the same signature as used
+# with "_o_text" and other interpolating output functions.
+#
+# For example, take the following call, where the first argument defines the
+# intended output string, and the remaining three arguments are all used as
+# values for interpolation into the format string:
+#
+#  > _logf_crit 'Encountered %d critical errors with input value of %s: "%s"' \
+#  >   ${errorCounter} \
+#  >   ${usersInValue} \
+#  >   ${errorMessage}
+#
+
+function _logf_crit {
+    _log_crit "${@}"
+}
+
+
+#
+# Simple info-level logger that handles interpolation of the format string
+# just as "_logf_info" would (starting with the second argument and past), but
+# adds a first argument to define the return value expected, allowing for
+# "return" statements to be on the same line as the "_rlogf_info" call.
+#
+# For example, take the following call, where a info log entry is called and
+# its return is then directly used to return from the shell context, as well:
+#
+#  > if is_func_return_true; do
+#  >   return $(
+#  >     _logrf_info 255 'Disabling selective feature: %s' "${featDescription}"
+#  >   );
+#  > fi
+#
+
+function _logrf_info {
+    _logf_info "${@:2}"
+
+    return $(
+        _get_sanitized_return_code "${1}" 0
+    )
+}
+
+
+#
+# Simple warning-level logger that handles interpolation of the format string
+# just as "_logf_warn" would (starting with the second argument and past), but
+# adds a first argument to define the return value expected, allowing for
+# "return" statements to be on the same line as the "_rlogf_warn" call.
+#
+# For example, take the following call, where a warning log entry is called and
+# its return is then directly used to return from the shell context, as well:
+#
+#  > if is_failure; do
+#  >   return $(
+#  >     _logrf_warn 255 'We hit a snag: %s' "${errorDescription}"
+#  >   );
+#  > fi
+#
+
+function _logrf_warn {
+    _logf_warn "${@:2}"
+
+    return $(
+        _get_sanitized_return_code "${1}" 0
+    )
+}
+
+
+#
+# Simple critical-level logger that handles interpolation of the format string
+# just as "_logf_crit" would (starting with the second argument and past), but
+# adds a first argument to define the return value expected, allowing for
+# "return" statements to be on the same line as the "_rlogf_crit" call.
+#
+# For example, take the following call, where a critical log entry is called and
+# its return is then directly used to return from the shell context, as well:
+#
+#  > if is_failure; do
+#  >   return $(
+#  >     _logrf_crit 255 'We hit a snag: %s' "${errorDescription}"
+#  >   );
+#  > fi
+#
+
+function _logrf_crit {
+    _logf_crit "${@:2}"
+
+    return $(
+        _get_sanitized_return_code "${1}" 0
+    )
+}
+
+
+#
+# Sanitize a return status code, primarily by ensuring it is a number and not
+# a string, boolean, or other type.
+#
+
+function _get_sanitized_return_code {
+    local status="${1}"
+    local useDef="${2:-0}"
+
+    if ! [[ ${status} =~ ^-?[0-9]+$ ]]; then
+        if [[ ${useDef} =~ ^-?[0-9]+$ ]]; then
+            _logf_warn \
+                'Passed return "%s" not an integer; using default: "%s".' \
+                "${status}" "${useDef}"
+            status=${useDef}
+        else
+            _logf_warn \
+                'Passed return "%s" and passed default "%s" are not integers; '\
+                'using hard-coded default: 0.' "${status}" "${useDef}"
+            status=0
+        fi
+    fi
+
+    _o_text "%d" "${status}"
 }
 
 
@@ -1354,236 +1824,13 @@ function _flatten_lines {
 
 
 #
-# Output padding of the specified length
-#
-
-function _o_padding {
-    local padding_len="${1:-0}"
-    local padding_str="${2:- }"
-
-    if [[ ${padding_len} -gt 0 ]]; then
-        for i in $(seq 1 ${padding_len}); do
-            _o_text "${padding_str}"
-        done
-    fi
-}
-
-
-#
-# Define fancy complete message display function.
-#
-
-function _load_summary_display {
-    local padding_len=0
-    local format_stat="%s - %s - %s"
-    local format_info="%sInitialized %s%s@%s%s shell configuration%s"
-    local format_used="%s(%sloaded in %s seconds and mapped %s%s memory%s)%s"
-    local format_comp="%s %s %s...%s %s"
-    local string_stat="${1:-OK}"
-    local string_ansi
-    local string_none
-    local memory_used
-    local memory_size
-    local memory_type
-
-    memory_used="$(
-        pmap -d ${$} 2> /dev/null \
-            | tail -n 1 2> /dev/null \
-            | sed -E 's/^mapped: ([0-9]+[A-Z]{0,2}).+/\1/g' 2> /dev/null
-    )"
-    memory_size="$(
-        grep -o -E '[0-9]+' <<< "${memory_used}"
-    )"
-    memory_type="$(
-        grep -o -E '[A-Z]{0,3}' <<< "${memory_used}"
-    )"
-    string_ansi="$(
-        _o_text "${format_comp}" \
-            "$(
-                _o_text "${format_info}" \
-                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
-                    "$(_o_style_bold)" \
-                    "${USER}" \
-                    "$(hostname -s)" \
-                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
-                    "$(_o_ansi_clear)"
-            )" \
-            "$(
-                _o_text "${format_used}" \
-                    "$(_o_fg_dark_gray; _o_style_dim)" \
-                    "$(_o_fg_dark_gray)" \
-                    "$(
-                        _get_unix_time_diff \
-                            "${_DZ_LOAD_TIME}" \
-                            "$(_get_microtime)"
-                    )" \
-                    "$(
-                        LC_NUMERIC=en_US printf "%'.f\n" "${memory_size}"
-                    )" \
-                    "${memory_type}" \
-                    "$(_o_fg_dark_gray; _o_style_dim)" \
-                    "$(_o_ansi_clear)"
-            )" \
-            "$(_o_fg_light_gray; _o_style_dim)" \
-            "$(_o_ansi_clear)" \
-            "$(
-                _o_text "${format_stat}" \
-                    "$(_o_fg_green; _o_bg_black; _o_style_invert; _o_style_bold)" \
-                    "${string_stat}" \
-                    "$(_o_ansi_clear)"
-            )"
-    )"
-
-    string_none=$(_o_ansi_al_sequence_remove "${string_ansi}")
-    padding_len=$(($(tput cols) - ${#string_none} - 1))
-
-    _o_nl
-    _o_padding ${padding_len}
-    _o_line "${string_ansi}"
-    _o_ansi_clear
-}
-
-
-#
-# ready loading global vars
-#
-
-function _load_progress_initialize {
-    if [[ -z ${_DZ_LOADER_STARTED} ]]; then
-        typeset -g _DZ_LOADER_STARTED=0
-        typeset -g _DZ_LOADER_DISABLE=0
-        typeset -g _DZ_LOADER_CLEARED=0
-    fi
-}
-
-
-#
-# Define fancy complete message display function.
-#
-
-function _o_progress_close {
-    local reset="${1:-0}"
-
-    _load_progress_initialize
-
-    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLE} -ne 1 ]]; then
-        _o_progress_write_step_char_term && sleep 0.75 && reset=1
-    fi
-
-    [[ ${reset} -eq 1 ]] && _o_progress_reset
-    _DZ_LOADER_DISABLE=1
-}
-
-
-#
-# Define fancy complete message display function.
-#
-
-function _o_progress_reset {
-    _load_progress_initialize
-
-    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLED} -eq 0 ]] && [[ ${_DZ_LOADER_CLEARED} -eq 0 ]]; then
-        clear
-    fi
-
-    _DZ_LOADER_STARTED=0
-    _DZ_LOADER_CLEARED=1
-}
-
-
-#
-# Output load progress step indicator
-#
-
-function _o_progress_write_step_section {
-    local frmt="%s%s%s"
-    local text="${1}"
-
-    _o_text "${frmt}" \
-        "$(_o_ansi_clear; _o_fg_dark_gray; _o_style_dim)" \
-        "${text}" \
-        "$(_o_ansi_clear)"
-}
-
-
-#
-# Write progress iteration step character: initializing (first) character
-#
-
-function _o_progress_write_step_char_init {
-    _o_progress_write_step_section "["
-}
-
-
-#
-# Write progress iteration step character: terminating (last) character
-#
-
-function _o_progress_write_step_char_term {
-    _o_progress_write_step_section "] "
-}
-
-
-#
-# Write progress iteration step character
-#
-
-function _o_progress_write_step_char {
-    _o_progress_write_step_section "—"
-}
-
-
-#
-# Write progress iteration step "loading" text
-#
-
-function _o_progress_write_step_text {
-    local frmt=" %s %s %s "
-    local text="loading"
-
-    _o_nl
-    _o_text "${frmt}" \
-        "$(_o_fg_dark_gray; _o_bg_black; _o_style_invert; _o_style_bold; _o_style_dim)" \
-        "${text:u}" \
-        "$(_o_ansi_clear)"
-
-    _o_progress_write_step_char_init
-    _o_progress_write_step_char
-    _o_progress_write_step_char
-    _o_progress_write_step_char
-}
-
-
-#
-# Write progress loading information
-#
-
-function _o_progress_write {
-    _load_progress_initialize
-
-    if [[ ${_DZ_LOADER_DISABLE} -eq 1 ]]; then
-        return
-    fi
-
-    _DZ_LOADER_CLEARED=0
-
-    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]]; then
-        _o_progress_write_step_char
-    else
-        _o_progress_write_step_text
-        _DZ_LOADER_STARTED=1
-    fi
-}
-
-
-#
 # Define simple logger for include files.
 #
 
 function _log_source {
     local i="$1" ; shift ; local l="$1" ; shift ; local m="$1" ; shift
 
-    _log_normal "${l}" "$(_out_indent ${i})--> ${m}" "$@"
+    _log_norm "${l}" "$(_out_indent ${i})--> ${m}" "$@"
 }
 
 
@@ -1598,7 +1845,7 @@ function _log_action {
         shift
     fi
 
-    _log_normal 4 "$(_out_indent ${i})--- ${m}" "$@"
+    _log_norm 4 "$(_out_indent ${i})--- ${m}" "$@"
 }
 
 
@@ -1614,13 +1861,13 @@ function _add_env_path_dir {
     t="${2:-default}"
 
     if [[ ! -d "${p}" ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${p}' addition to 'PATH' environment variable (does not exist)"
         return
     fi
 
     if [[ ":$PATH:" == *":${p}:"* ]]; then
-        _log_normal 2 \
+        _log_norm 2 \
             "        --- Skipping '${p}' addition to 'PATH' environment variable (already added)"
         return
     fi
@@ -1847,7 +2094,7 @@ function _log_src_fail {
     local levl=${3:-1}
     local what=${4:-}
 
-    _log_normal ${levl} "$(
+    _log_norm ${levl} "$(
         _printf_log_src 'Failures for' "${file}" "${desc}" ${levl} "${what}"
     )"
 }
@@ -1863,7 +2110,7 @@ function _log_src_skip {
     local levl=${3:-1}
     local what=${4:-}
 
-    _log_normal ${levl} "$(
+    _log_norm ${levl} "$(
         _printf_log_src 'Skipping the' "${file}" "${desc}" ${levl} "${what}"
     )"
 }
@@ -1879,7 +2126,7 @@ function _log_src_done {
     local levl=${3:-1}
     local what=${4:-}
 
-    _log_normal ${levl} "$(
+    _log_norm ${levl} "$(
         _printf_log_src 'Sourcing the' "${file}" "${desc}" ${levl} "${what}"
     )"
 }
@@ -2137,7 +2384,7 @@ function _log_definition_list {
     _DZ_IO_BUFF_DEFINITION_VALUES=()
 
     for k v in ${(@kv)lines}; do
-        _log_normal \
+        _log_norm \
             ${_DZ_IO_BUFF_DEFINITION_INDENT[$k]} \
             "$(_out_indent ${_DZ_IO_BUFF_DEFINITION_INDENT[$k]})${_DZ_IO_BUFF_DEFINITION_PREFIX[$k]} ${v}"
     done
@@ -2151,10 +2398,44 @@ function _log_definition_list {
 # reverse boolean value
 #
 
+function _cast_bool_to_inverse_string {
+    local bool="${1:-1}"
+
+    if _cast_bool_to_ret "${bool}"; then
+        _o_text false
+    else
+        _o_text true
+    fi
+}
+
+
+#
+# reverse boolean value
+#
+
 function _cast_bool_to_string {
-    ([[ "${1}" == "true" ]] || [[ ${1} == 1 ]]) \
-        && _o_text false \
-        || _o_text true
+    local bool="${1:-1}"
+
+    if _cast_bool_to_ret "${bool}"; then
+        _o_text true
+    else
+        _o_text false
+    fi
+}
+
+
+#
+# reverse boolean value
+#
+
+function _cast_bool_to_ret {
+    local bool="${1:-1}"
+
+    if [[ $(_str_trim_edge ${bool}) =~ ^(true|TRUE|yes|YES|y|Y|0)$ ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 
@@ -2167,19 +2448,6 @@ function _cast_bool_to_int {
 
     _cast_bool_to_ret "${1}"
     _o_text '%d' $?
-}
-
-
-#
-# reverse boolean value
-#
-
-function _cast_bool_to_ret {
-    local bool="${1:-1}"
-
-    [[ $(_str_trim_edge ${bool}) =~ ^(true|TRUE|yes|YES|y|Y|0)$ ]] \
-        && return \
-        || return 1
 }
 
 
@@ -2201,22 +2469,22 @@ function _file_log_buffer {
 #
 
 function _file_out_buffer {
-    if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
-        if [[ -f "${_DZ_PATH_OUT_BUFFERING}" ]]; then
-            rm -f "${_DZ_PATH_OUT_BUFFERING}"
-        fi
-
+    if [[ ! -f "${_DZ_PATH_OUT_BUFFERING}" ]]; then
         return
     fi
 
-    _ifs_newlines
-    for l in $(cat "${_DZ_PATH_OUT_BUFFERING}"); do
-        _trim_line_width "$(_o_text '%s\n' "${l}")"
-    done
-    _ifs_reset
-
-    if [[ -f "${_DZ_PATH_OUT_BUFFERING}" ]]; then
+    if [[ ${_DZ_IO_VERBOSITY} -lt 0 ]]; then
         rm -f "${_DZ_PATH_OUT_BUFFERING}"
+    else
+        _ifs_newlines
+        for l in $(cat "${_DZ_PATH_OUT_BUFFERING}"); do
+            _trim_line_width "$(_o_text '%s\n' "${l}")"
+        done
+        _ifs_reset
+
+        if [[ -f "${_DZ_PATH_OUT_BUFFERING}" ]]; then
+            rm -f "${_DZ_PATH_OUT_BUFFERING}"
+        fi
     fi
 }
 
@@ -2237,4 +2505,347 @@ function _log_assignment {
     fi
 
     _o_text "${val}"
+}
+
+
+
+
+#
+# Output padding of the specified length
+#
+
+function _o_padding {
+    local padding_len="${1:-0}"
+    local padding_str="${2:- }"
+
+    if [[ ${padding_len} -gt 0 ]]; then
+        for i in $(seq 1 ${padding_len}); do
+            _o_text "${padding_str}"
+        done
+    fi
+}
+
+
+#
+# Define fancy complete message display function.
+#
+
+function _load_summary_display {
+    local padding_len=0
+    local format_stat="%s - %s - %s"
+    local format_info="%sInitialized %s%s@%s%s shell configuration%s"
+    local format_used="%s(%sloaded in %s seconds and mapped %s%s memory%s)%s"
+    local format_comp="%s %s %s...%s %s"
+    local string_stat="${1:-OK}"
+    local string_ansi
+    local string_none
+    local memory_used
+    local memory_size
+    local memory_type
+
+    memory_used="$(
+        pmap -d ${$} 2> /dev/null \
+            | tail -n 1 2> /dev/null \
+            | sed -E 's/^mapped: ([0-9]+[A-Z]{0,2}).+/\1/g' 2> /dev/null
+    )"
+    memory_size="$(
+        grep -o -E '[0-9]+' <<< "${memory_used}"
+    )"
+    memory_type="$(
+        grep -o -E '[A-Z]{0,3}' <<< "${memory_used}"
+    )"
+    string_ansi="$(
+        _o_text "${format_comp}" \
+            "$(
+                _o_text "${format_info}" \
+                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
+                    "$(_o_style_bold)" \
+                    "${USER}" \
+                    "$(hostname -s)" \
+                    "$(_o_ansi_clear; _o_fg_light_gray; _o_style_dim)" \
+                    "$(_o_ansi_clear)"
+            )" \
+            "$(
+                _o_text "${format_used}" \
+                    "$(_o_fg_dark_gray; _o_style_dim)" \
+                    "$(_o_fg_dark_gray)" \
+                    "$(
+                        _get_unix_time_diff \
+                            "${_DZ_LOAD_TIME}" \
+                            "$(_get_microtime)"
+                    )" \
+                    "$(
+                        LC_NUMERIC=en_US printf "%'.f\n" "${memory_size}"
+                    )" \
+                    "${memory_type}" \
+                    "$(_o_fg_dark_gray; _o_style_dim)" \
+                    "$(_o_ansi_clear)"
+            )" \
+            "$(_o_fg_light_gray; _o_style_dim)" \
+            "$(_o_ansi_clear)" \
+            "$(
+                _o_text "${format_stat}" \
+                    "$(_o_fg_green; _o_bg_black; _o_style_invert; _o_style_bold)" \
+                    "${string_stat}" \
+                    "$(_o_ansi_clear)"
+            )"
+    )"
+
+    string_none=$(_o_ansi_al_sequence_remove "${string_ansi}")
+    padding_len=$(($(_terminal_dims_w) - ${#string_none} - 2))
+
+    _o_nl
+    _o_padding ${padding_len}
+    _o_line "${string_ansi}"
+    _o_ansi_clear
+}
+
+
+#
+# manage progress loader state configuration for terminal info
+#
+
+function _o_progress_cfg_state_setup_terminal_info {
+    typeset -g _DZ_LOADER_COL_MAX=$(_terminal_dims_w)
+    typeset -g _DZ_LOADER_COL_POS=${_DZ_LOADER_COL_POS:-0}
+}
+
+
+#
+# manage progress loader state configuration for loader action type
+#
+
+function _o_progress_cfg_state_setup_loader_action {
+    typeset -g _DZ_LOADER_STARTED=${_DZ_LOADER_STARTED:-0}
+    typeset -g _DZ_LOADER_DISABLE=${_DZ_LOADER_DISABLE:-0}
+    typeset -g _DZ_LOADER_CLEARED=${_DZ_LOADER_CLEARED:-0}
+}
+
+
+#
+# manage progress loader state configuration
+#
+
+function _o_progress_cfg_state_setup {
+    _o_progress_cfg_state_setup_terminal_info
+    _o_progress_cfg_state_setup_loader_action
+}
+
+
+#
+# manage progress loader state configuration for terminal info
+#
+
+function _o_progress_cfg_state_reset_terminal_info {
+    typeset -g _DZ_LOADER_COL_MAX=$(_terminal_dims_w)
+    typeset -g _DZ_LOADER_COL_POS=0
+}
+
+
+#
+# manage progress loader state configuration for loader action type
+#
+
+function _o_progress_cfg_state_reset_loader_action {
+    typeset -g _DZ_LOADER_STARTED=0
+    typeset -g _DZ_LOADER_DISABLE=0
+    typeset -g _DZ_LOADER_CLEARED=1
+}
+
+
+#
+# manage progress loader state configuration
+#
+
+function _o_progress_cfg_state_reset {
+    _o_progress_cfg_state_reset_terminal_info
+    _o_progress_cfg_state_reset_loader_action
+}
+
+
+#
+# manage progress loader state configuration
+#
+
+function _o_progress_cfg_state_close {
+    _o_progress_cfg_state_setup
+    _DZ_LOADER_DISABLE=1
+}
+
+
+#
+# manage progress loader state configuration
+#
+
+function _o_progress_cfg_state_clear {
+    _o_progress_cfg_state_setup
+    _DZ_LOADER_CLEARED=0
+}
+
+
+#
+# manage progress loader state configuration
+#
+
+function _o_progress_cfg_state_start {
+    _o_progress_cfg_state_clear
+    _DZ_LOADER_STARTED=1
+}
+
+
+#
+# Define fancy complete message display function.
+#
+
+function _o_progress_close {
+    local reset="${1:-0}"
+
+    _o_progress_cfg_state_setup
+
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLE} -ne 1 ]]; then
+        _o_progress_write_step_char_term && sleep 0.75 && reset=1
+    fi
+
+    [[ ${reset} -eq 1 ]] && _o_progress_reset
+
+    _o_progress_cfg_state_close
+}
+
+
+#
+# Define fancy complete message display function.
+#
+
+function _o_progress_reset {
+    _o_progress_cfg_state_setup
+
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]] && [[ ${_DZ_LOADER_DISABLED} -eq 0 ]] && [[ ${_DZ_LOADER_CLEARED} -eq 0 ]]; then
+        clear
+    fi
+
+    _o_progress_cfg_state_reset
+}
+
+
+function _o_progress_tracked_write_step_section {
+    local frmt="%s%s%s"
+    local text="${1}"
+
+    _o_progress_tracked_write_text \
+        "${frmt}" \
+        "$(_o_ansi_clear; _o_fg_dark_gray; _o_style_dim)" \
+        "${text}" \
+        "$(_o_ansi_clear)"
+}
+
+
+function _o_progress_tracked_write_nl {
+    _o_progress_cfg_state_reset_terminal_info
+    _o_nl
+}
+
+
+function _o_progress_tracked_write_text {
+    local text
+
+    text="$(_o_text "${@}")"
+    _DZ_LOADER_COL_POS=$(( ${_DZ_LOADER_COL_POS} + $(_str_length "${text}" "false") ))
+
+    _o_text "${text}"
+}
+
+
+function _o_progress_tracked_write_pads {
+    local size="${1}"
+
+    _o_padding ${size}
+    _DZ_LOADER_COL_POS=$(( ${_DZ_LOADER_COL_POS} + ${size} ))
+}
+
+
+#
+# Output load progress step indicator
+#
+
+function _o_progress_write_step_section {
+    local text="${1}"
+    local incs="${2:-true}"
+
+    if [[ ${incs} == "true" ]] && [[ ${_DZ_LOADER_COL_POS} -ge $(( ${_DZ_LOADER_COL_MAX} - 3 )) ]]; then
+        _o_progress_write_step_char_term "false"
+        _o_progress_write_step_text
+    fi
+
+    _o_progress_tracked_write_step_section "${text}"
+}
+
+
+#
+# Write progress iteration step character: initializing (first) character
+#
+
+function _o_progress_write_step_char_init {
+    _o_progress_write_step_section "["
+}
+
+
+#
+# Write progress iteration step character: terminating (last) character
+#
+
+function _o_progress_write_step_char_term {
+    _o_progress_write_step_section "] " "${1:-true}"
+}
+
+
+#
+# Write progress iteration step character
+#
+
+function _o_progress_write_step_char {
+    _o_progress_write_step_section "—"
+}
+
+
+#
+# Write progress iteration step "loading" text
+#
+
+function _o_progress_write_step_text {
+    local cont="${1:-false}"
+    local frmt="  %s %' 7s %s  "
+    local text="loading"
+
+    _o_progress_tracked_write_nl
+    _o_progress_tracked_write_text \
+        "${frmt}" \
+        "$(_o_fg_dark_gray; _o_bg_black; _o_style_invert; _o_style_bold; _o_style_dim)" \
+        "${text:u}" \
+        "$(_o_ansi_clear)"
+    _o_progress_write_step_char_init
+    _o_progress_write_step_char
+    _o_progress_write_step_char
+    _o_progress_write_step_char
+}
+
+
+#
+# Write progress loading information
+#
+
+function _o_progress_write {
+    _o_progress_cfg_state_setup
+
+    if [[ ${_DZ_LOADER_DISABLE} -eq 1 ]]; then
+        return
+    fi
+
+    _o_progress_cfg_state_clear
+
+    if [[ ${_DZ_LOADER_STARTED} -eq 1 ]]; then
+        _o_progress_write_step_char
+    else
+        _o_progress_write_step_text
+        _o_progress_cfg_state_start
+    fi
 }

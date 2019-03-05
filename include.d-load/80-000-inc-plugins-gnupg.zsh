@@ -21,7 +21,7 @@ if [[ ! -z "${v}" ]]; then
         _log_action "Assigned gpg key to '${v}'" || \
         _log_warn "Failed to assign gpg key to '${v}'"
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipping gpg key assignment (missing configuration)"
 fi
 
@@ -32,6 +32,6 @@ if [[ ! -z "${v}" ]]; then
         _log_action "Assigned gpg tty to '${v}'" || \
         _log_warn "Failed to assign gpg tty to '${v}'"
 else
-    _log_normal 1 \
+    _log_norm 1 \
         "        --- Skipping gpg tty assignment (missing configuration)"
 fi

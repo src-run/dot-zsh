@@ -21,8 +21,8 @@ _DZ_LOAD_TIME=$(_get_microtime)
 # Define full-name, base-name, and path.
 #
 
-_DZ_NAME="${(%):-%x}"
-_DZ_BASE="$(basename ${_DZ_NAME})"
+_DZ_NAME="$(dirname  "${_DZ_NAME}")"
+_DZ_BASE="$(sed -E 's/^[^a-z]//g' <<< "$(basename "${_DZ_NAME}")")"
 
 
 #
