@@ -28,12 +28,17 @@ _DZ_LOGS_PATH=$(
         sed -E 's/\{unixtime\}/single/'
     ) 2> /dev/null
 ) && _log_buffer 2 "--- Setting log file to '${_DZ_LOGS_PATH}'"
-
+printf 'LOG[%s]' "${_DZ_LOGS_PATH}"
+exit
 
 #
-# Make directory if required
+# Remove prior log file and start fresh if over 1000 lines.
 #
-mkdir -p "$(dirname "${_DZ_LOGS_PATH}")" 2> /dev/null
+
+[[ -f "${_DZ_LOGS_PATH}" ]] && \
+    [[ $(cat "${_DZ_LOGS_PATH}" | wc -l) -gt 1000 ]] && \
+    rm "${_DZ_LOGS_PATH}" && \
+    _log_buffer 2 "--- Purging previous log file contents (over 1000 lines)"
 
 
 #

@@ -38,18 +38,19 @@
             "logs":
             {
                 "path": "${HOME}/.dot-zsh.log",
-                "enabled": false
+                "fformat": "${HOME}/.dot-zsh-log/dot-zsh-init_{unixtime}.log",
+                "enabled": true
             },
             "outs":
             {
-                "verbose": false,
-                "quiet": true,
+                "verbose": true,
+                "quiet": false,
                 "debug": false,
                 "trace": false
             },
             "show":
             {
-                "loading": true,
+                "loading": false,
                 "summary": true
             }
         },
@@ -60,7 +61,7 @@
             "def_user": "${USER}",
             "display":
             {
-                "prompt_theme": "agnoster",
+                "prompt_theme": "powerlevel10k/powerlevel10k",
                 "use_ls_color": true,
                 "window_title_assign": true,
                 "history_date_format": "yyyy-mm-dd"
@@ -80,10 +81,11 @@
             "updates":
             {
                 "auto_check": true,
-                "every_days": 7
+                "every_days": 4
             },
             "customs": "{%%}",
             "plugins": {
+                "gpg-agent": {},
                 "adb": {},
                 "bgnotify": {
                     "threshold": 4,
@@ -123,7 +125,6 @@
                 "sublime": {},
                 "symfony": {},
                 "systemd": {},
-                "wakatime": {},
                 "zsh-syntax-highlighting": {
                     "main": {
                         "_enabled": true,
@@ -632,6 +633,18 @@
             "internal_session": "subl",
             "external_session": "nano"
         },
+        "terminals": {
+            "_enabled": true,
+            "definitions": {
+                "mobaxterm-color": {
+                    "term": "xterm-color",
+                    "keys": {
+                        "beginning-of-line": "^[[H",
+                        "end-of-line": "^[[F"
+                    }
+                }
+            }
+        },
         "key_bindings":
         {
             "history_substring_search_up": "kcuu1",
@@ -652,7 +665,8 @@
                 "la": "ls --color=auto -I.gvfs -AlFhB",
                 "ll": "ls --color=auto -I.gvfs -Al",
                 "lf": "ls --color=auto -I.gvfs -AF",
-                "lc": "ls --color=auto -I.gvfs -FC"
+                "lc": "ls --color=auto -I.gvfs -FC",
+                "c": "clear"
             },
             "new_ssh_connections": true,
             "set_ssh_connections":
@@ -690,9 +704,12 @@
         {
             "_enabled": true,
             "paths": [
+                "/scripts/bin-enabled",
                 "/opt/nginx-lint/bin",
                 "/opt/bin-collection/bin",
                 "/opt/scripts/bin",
+                "/opt/backblaze/bin",
+                "${HOME}/.cargo/bin",
                 "${HOME}/bin",
                 "${HOME}/scripts",
                 "${HOME}/scripts/bin-enabled",
@@ -705,14 +722,59 @@
             "_enabled": true,
             "paths": [
                 "${HOME}",
-                "${HOME}/projects"
+                "/pool/repositories"
             ]
         },
         "ssh":
         {
             "_enabled": true,
             "root_path": "${HOME}/.ssh",
-            "cert_file": "{{keys_path}}/id_rsa"
+            "load_keys": {
+                "id_ed25519": {
+                    "key_used": true,
+                    "err_skip": false,
+                    "alt_name": null,
+                    "key_path": "{{root_path}}/"
+                },
+                "id_ecdsa": {
+                    "key_used": false,
+                    "err_skip": true,
+                    "alt_name": null,
+                    "key_path": "{{root_path}}/"
+                },
+                "id_dsa": {
+                    "key_used": false,
+                    "err_skip": true,
+                    "alt_name": null,
+                    "key_path": "{{root_path}}/"
+                },
+                "id_rsa": {
+                    "key_used": true,
+                    "err_skip": true,
+                    "alt_name": null,
+                    "key_path": "{{root_path}}/"
+                }
+            },
+            "load_opts": [
+                "-q",
+                "-c",
+                "-t",
+                "96h"
+            ],
+            "use_agent": true,
+            "exe_agent": "ssh-agent"
+        },
+        "gpg":
+        {
+            "_enabled": false,
+            "root_path": "$(gpgconf --list-dirs homedir)",
+            "sock_path": "$(gpgconf --list-dirs agent-ssh-socket)",
+            "asker_tty": "$(tty)",
+            "agent": {
+                "ssh_feats": true,
+                "use_agent": true,
+                "exe_agent": "gpg-agent"
+            }
         },
         "completions":
         {
@@ -745,7 +807,7 @@
 
         "android_sdk":
         {
-            "_enabled": true,
+            "_enabled": false,
             "mortal_root_path": "/opt/android-sdk",
             "executable_paths": [
                 "{{mortal_root_path}}/platform-tools"
@@ -762,7 +824,7 @@
         {
             "_enabled": true,
             "system_root_path": "/usr/local/share/chruby",
-            "auto_set_version": "2.4.5",
+            "auto_set_version": "2.4",
             "env_source_files": [
                 "{{system_root_path}}/chruby.sh",
                 "{{system_root_path}}/auto.sh"
@@ -770,7 +832,7 @@
         },
         "composer":
         {
-            "_enabled": true,
+            "_enabled": false,
             "executable_paths": [
                 "${HOME}/.composer/vendor/bin",
                 "${HOME}/.config/composer/vendor/bin"
@@ -778,18 +840,18 @@
         },
         "docker":
         {
-            "_enabled": true,
+            "_enabled": false,
             "machine_env_type": "default"
         },
         "gnupg":
         {
-            "_enabled": true,
+            "_enabled": false,
             "secret_key": "466839F8117362D877E438BE02B8697CE6AA381A",
-            "export_tty": "${TTY}"
+            "export_tty": "$(tty)"
         },
         "golang":
         {
-            "_enabled": true,
+            "_enabled": false,
             "system_root_path": "/usr/lib/go-1.11",
             "system_exec_path": "{{system_root_path}}/bin",
             "mortal_root_path": "${HOME}/golang/1.11",
@@ -797,7 +859,7 @@
         },
         "google_cloud_sdk":
         {
-            "_enabled": true,
+            "_enabled": false,
             "system_root_path": "/opt/google-cloud-sdk",
             "env_source_files": [
                 "{{system_root_path}}/path.zsh.inc"
@@ -808,7 +870,7 @@
         },
         "npm":
         {
-            "_enabled": true,
+            "_enabled": false,
             "mortal_root_path": "${HOME}/.npm-packages",
             "manset_load_path": "{{mortal_root_path}}/share/man",
             "executable_paths": [
@@ -818,7 +880,7 @@
         },
         "nvm":
         {
-            "_enabled": true,
+            "_enabled": false,
             "mortal_root_path": "${NVM_DIR:-/opt/nvm}",
             "assign_v_release": "default",
             "completion_files": [
@@ -867,7 +929,7 @@
         },
         "phpenv":
         {
-            "_enabled": true,
+            "_enabled": false,
             "mortal_root_path": "${HOME}/.phpenv",
             "initialize_evals": [
                 "phpenv init -"
@@ -879,9 +941,28 @@
                 "{{mortal_root_path}}/completions/rbenv.zsh"
             ]
         },
-        "platform_sh":
+        "pyenv":
         {
             "_enabled": true,
+            "mortal_root_path": "/opt/pyenv",
+            "env_exports_list": {
+                "PYENV_ROOT": "{{mortal_root_path}}"
+            },
+            "executable_paths": [
+                "{{mortal_root_path}}/bin"
+            ],
+            "completion_files": [
+                "{{mortal_root_path}}/completions/pyenv.zsh"
+            ],
+            "exec_global_vers": "3.10.4",
+            "initialize_evals": {
+                "init-main": "pyenv init -",
+                "init-venv": "pyenv virtualenv-init -"
+            }
+        },
+        "platform_sh":
+        {
+            "_enabled": false,
             "mortal_root_path": "${HOME}/.platformsh",
             "executable_paths": [
                 "{{mortal_root_path}}/bin"
@@ -890,15 +971,21 @@
                 "{{mortal_root_path}}/shell-config.rc"
             ]
         },
-        "python_pip": {
+        "python": {
             "_enabled": true,
+            "executable_paths": [
+              "$(python -m site --user-base)/bin"
+            ]
+        },
+        "python_pip": {
+            "_enabled": false,
             "initialize_evals": [
                 "pip completion --zsh"
             ]
         },
         "travis":
         {
-            "_enabled": true,
+            "_enabled": false,
             "mortal_root_path": "${HOME}/.travis",
             "completion_files": [
                 "{{mortal_root_path}}/travis.sh"
@@ -906,7 +993,7 @@
         },
         "wine_hq":
         {
-            "_enabled": true,
+            "_enabled": false,
             "system_root_path": "/opt",
             "executable_paths": [
                 "{{system_root_path}}/wine-stable/bin",

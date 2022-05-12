@@ -2040,7 +2040,7 @@ function _add_env_path_dir {
 
 function _aliases_setup_ssh_connections {
     local indented="${1:-3}"
-    local prefixes=( "ssh-" )
+    local prefixes=( "ssh-" "s-" "" )
     local opts_desc
     local host
     local port
