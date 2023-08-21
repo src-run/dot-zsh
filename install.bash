@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 
 #
@@ -556,23 +556,39 @@ function main {
         git submodule update --init &> /dev/null
     out_state_close $?
 
-    #out_state_start "Installing fonts"
-    #${_DZ_INSTALL_TO}/fonts/install.sh &> /dev/null
-    #out_state_close $?
+    out_state_start "Installing fonts"
+    sudo printf ''
+    INSTALL_FONT_ROOT_PATH="${HOME}/.local/share/fonts" ${_DZ_INSTALL_TO}/include.d-libs/fonts/install.bash &> /dev/null
+    out_state_close $?
 
-    #out_state_start "Installing fonts"
-    #wget -O chruby-0.3.9.tar.gz https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz &> /dev/null
-    #tar -xzvf chruby-0.3.9.tar.gz &> /dev/null
-    #cd chruby-0.3.9/ &> /dev/null
-    #sudo make install
-    #out_state_close $?
+    out_state_start "Installing fonts"
+    (
+        wget -O chruby-0.3.9.tar.gz https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz &> /dev/null && \
+            tar -xzvf chruby-0.3.9.tar.gz &> /dev/null && \
+            cd chruby-0.3.9/ &> /dev/null && \
+            sudo make install && \
+            cd .. && \
+            sudo rm -r chruby-0.3.9.tar.gz chruby-0.3.9/
+    ) &> /dev/null
+    out_state_close $?
 
-    #cd ..
-
-    #out_state_start "Installing phpenv"
-    #git clone https://github.com/src-run/phpenv.git &> /dev/null
-    #phpenv/bin/phpenv-install.sh
-    #out_state_close $?
+    APT_SRC_BK="/etc/apt/sources.list.backup-${RANDOM}"
+    out_state_start "Installing phpenv"
+    (
+        git clone https://github.com/src-run/phpenv.git &> /dev/null && \
+            cd phpenv && \
+            git submodule update --init && \
+            sudo cp /etc/apt/sources.list "${APT_SRC_BK}" && \
+            sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list && \
+            sudo add-apt-repository ppa:ondrej/php --yes && \
+            sudo apt upgrade --yes && \
+            sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list && \
+            sudo apt update --quiet && \
+            NON_INTERFACTIVE=1 bin/phpenv-installer.bash && \
+            cd ../ && \
+            sudo rm -r ./phpenv/
+    ) &> /dev/null
+    out_state_close $?
 
     # Start config components state and force newline
     out_state_start "Configuring components"

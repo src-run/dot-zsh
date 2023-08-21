@@ -1,6 +1,6 @@
 [submodule "fonts"]
 	path = include.d-libs/fonts
-	url = https://github.com/powerline/fonts.git
+	url = https://github.com/robfrawley/fonts-powerline.git
 [submodule "bright"]
 	path = include.d-libs/bright
 	url = https://github.com/src-run/bright-library.git
@@ -9,10 +9,10 @@
 	url = https://github.com/robbyrussell/oh-my-zsh.git
 [submodule "include.d-omzc/zsh-autosuggestions"]
 	path = include.d-libs/oh-my-zsh-plugins/auto-suggestions
-	url = git://github.com/zsh-users/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions.git
 [submodule "include.d-omzc/zsh-syntax-highlighting"]
 	path = include.d-libs/oh-my-zsh-plugins/syntax-highlighting
-	url = git://github.com/zsh-users/zsh-syntax-highlighting.git
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
 [submodule "include.d-libs/oh-my-zsh-plugins/wakatime"]
 	path = include.d-libs/oh-my-zsh-plugins/wakatime
 	url = https://github.com/sobolevn/wakatime-zsh-plugin.git
